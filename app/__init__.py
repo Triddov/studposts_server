@@ -1,18 +1,17 @@
 from flask import Flask
-from .config import config
-from .extensions import jwt, redis_store
+from flask_jwt_extended import JWTManager  # Либа для управления JWT-токенами (для аутентификации и авторизации)
 from .database import init_db
 from dotenv import load_dotenv
 import os
 
 load_dotenv()  # Загрузка переменных окружения из .env файла
 
+jwt = JWTManager()
 
-def create_app(config_name):
+
+def create_app():
     app = Flask(__name__)
 
-    app.config.from_object(config[config_name])
-    # Настройки приложения
     app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
     app.config['DATABASE_URL'] = os.getenv('DATABASE_URL')
 
