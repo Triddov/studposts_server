@@ -13,7 +13,7 @@ def create_app(config_name):
 
     app.config.from_object(config[config_name])
     # Настройки приложения
-    app.config['JWT_SECRET_KEY'] = os.getenv('SECRET_KEY')  # Замените на ваш секретный ключ
+    app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
     app.config['DATABASE_URL'] = os.getenv('DATABASE_URL')
 
     # Инициализация расширений
@@ -23,7 +23,7 @@ def create_app(config_name):
     with app.app_context():
         init_db()
 
-    # Регистрация блюпринтов
+    # Регистрация блюпринтов (в раутах будет префикс api)
     from .routes import api
     app.register_blueprint(api, url_prefix='/api')
 

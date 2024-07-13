@@ -1,5 +1,5 @@
 import psycopg2
-from psycopg2.extras import RealDictCursor
+from psycopg2.extras import RealDictCursor  # метод возвращения запросов как dict (а не tuple)
 from flask import current_app
 
 
@@ -8,20 +8,25 @@ def get_db_connection():
     return conn
 
 
+#  генерировать названия картинок и ключей
+#  User.createSessionKey() + сделать массив текущих сессий (ключей)
+
+
 class User:
     @staticmethod
-    def create_user(username, password, first_name, last_name, session_key, email, phone_number, pers_photo_data):
+    def create_user(username, password, first_name, last_name, email, phone_number, pers_photo_data):
         conn = get_db_connection()
         cur = conn.cursor()
         cur.execute("""
-            INSERT INTO users (username, password, firstName, lastName, sessionKey, privileged, email, phoneNumber, persPhotoData)
-            VALUES (%s, %s, %s, %s, %s, FALSE, %s, %s, %s)
+            INSERT INTO users (username, password, firstName, lastName, privileged, email, phoneNumber, persPhotoData)
+            VALUES (%s, %s, %s, %s, FALSE, %s, %s, %s)
             RETURNING id;
-        """, (username, password, first_name, last_name, session_key, email, phone_number, pers_photo_data))
+        """, (username, password, first_name, last_name, email, phone_number, pers_photo_data))
         user_id = cur.fetchone()['id']
         conn.commit()
         cur.close()
         conn.close()
+
         return user_id
 
     @staticmethod

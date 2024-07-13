@@ -6,27 +6,25 @@ api = Blueprint('api', __name__)
 
 
 @api.route('/auth/register/', methods=['POST'])
-def register():
+def register():  # тут нужна блять проверка валидности данных
     data = request.get_json()
-    username = data.get('username')
+    username = data.get('username')  #
     password = data.get('password')
     first_name = data.get('first_name')
     last_name = data.get('last_name')
-    session_key = data.get('session_key')
-    email = data.get('email')
-    phone_number = data.get('phone_number')
+    email = data.get('email')  #
+    phone_number = data.get('phone_number')  #
     pers_photo_data = data.get('pers_photo_data')
 
     if User.find_by_email(email):
         return jsonify({"msg": "User already exists"}), 400
 
-    user_id = User.create_user(username, password, first_name, last_name, session_key, email, phone_number,
-                               pers_photo_data)
+    user_id = User.create_user(username, password, first_name, last_name, email, phone_number, pers_photo_data)
     return jsonify({"msg": "User registered successfully", "user_id": user_id}), 201
 
 
 @api.route('/auth/login/', methods=['POST'])
-def login():
+def login():  # тут надо брать все данные с которыми вход + проверять блять тоже
     data = request.get_json()
     email = data.get('email')
     password = data.get('password')
@@ -58,7 +56,7 @@ def handle_posts():
         return jsonify({"msg": "Post created successfully", "post_id": post_id}), 201
 
 
-@api.route('/posts/<int:id>/', methods=['GET', 'PUT', 'DELETE'])
+@api.route('/posts/<int:id>/', methods=['GET', 'PUT', 'DELETE'])  #удалить (такие методы будут по-разному реализованы)
 @jwt_required()
 def handle_post(id):
     post = Post.get_post_by_id(id)

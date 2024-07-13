@@ -1,9 +1,13 @@
+import os
 from psycopg2 import connect
 from flask import current_app
+from dotenv import load_dotenv
+
+load_dotenv()  # Загрузка переменных окружения из .env файла
 
 
 def init_db():
-    conn = connect(current_app.config['DATABASE_URL'])
+    conn = connect(current_app.config["DATABASE_URL"])  # Подклчение к базе, используя URL из конфигурации приложения
     cur = conn.cursor()
 
     cur.execute("""
@@ -13,12 +17,10 @@ def init_db():
         password VARCHAR(128) NOT NULL,
         firstName VARCHAR(50),
         lastName VARCHAR(50),
-        sessionKey VARCHAR(128) NOT NULL,
         privileged BOOLEAN DEFAULT FALSE,
         email VARCHAR(36) NOT NULL,
         phoneNumber VARCHAR(20),
         persPhotoData VARCHAR(255)
-    
     );
     
     CREATE TABLE IF NOT EXISTS posts (
@@ -47,6 +49,7 @@ def init_db():
         FOREIGN KEY (post_id) REFERENCES posts (id)
     );
     """)
-    conn.commit()
+    conn.commit()  # сохранение изменений в базу
+
     cur.close()
     conn.close()
