@@ -1,6 +1,5 @@
 from flask import Flask
 from flask_jwt_extended import JWTManager  # Либа для управления JWT-токенами (для аутентификации и авторизации)
-from .database import init_db
 from dotenv import load_dotenv
 import os
 
@@ -17,10 +16,6 @@ def create_app():
 
     # Инициализация расширений
     jwt.init_app(app)
-
-    # Инициализация базы данных
-    with app.app_context():
-        init_db()
 
     # Регистрация блюпринтов (в раутах будет префикс api)
     from .routes import api

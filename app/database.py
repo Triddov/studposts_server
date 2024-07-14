@@ -8,98 +8,49 @@ def get_db_connection():
     return conn
 
 
-def init_db():
-    conn = get_db_connection()
-    cur = conn.cursor()
-
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS users (
-        id SERIAL PRIMARY KEY,
-        username VARCHAR(120) NOT NULL,
-        password VARCHAR(128) NOT NULL,
-        firstName VARCHAR(50),
-        lastName VARCHAR(50),
-        privileged BOOLEAN DEFAULT FALSE,
-        email VARCHAR(36) NOT NULL,
-        phoneNumber VARCHAR(20),
-        persPhotoData VARCHAR(255)
-    );
-
-    CREATE TABLE IF NOT EXISTS posts (
-        id SERIAL PRIMARY KEY,
-        user_id INTEGER NOT NULL,
-        title VARCHAR(200) NOT NULL,
-        content TEXT NOT NULL,
-        tags VARCHAR(200),
-        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        imageData VARCHAR(255),
-        viewCount INTEGER DEFAULT 0,
-        likesCount INTEGER DEFAULT 0,
-        dislikesCount INTEGER DEFAULT 0,
-        FOREIGN KEY (user_id) REFERENCES users (id)
-    );
-
-    CREATE TABLE IF NOT EXISTS comments (
-        id SERIAL PRIMARY KEY,
-        user_id INTEGER NOT NULL,
-        post_id INTEGER NOT NULL,
-        content TEXT NOT NULL,
-        imageData VARCHAR(255),
-        tags VARCHAR(200),
-        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (user_id) REFERENCES users (id),
-        FOREIGN KEY (post_id) REFERENCES posts (id)
-    );
-    """)
-    conn.commit()  # сохранение изменений в базу
-    cur.close()
-    conn.close()
-
-
 class User:
     @staticmethod
-    def create_user(username, password, first_name, last_name, email, phone_number, pers_photo_data):
+    def create_user(login, username, password, first_name, last_name, email, phone_number, pers_photo_data):
         conn = get_db_connection()
         cur = conn.cursor()
         cur.execute("""
-            INSERT INTO users (username, password, firstName, lastName, privileged, email, phoneNumber, persPhotoData)
-            VALUES (%s, %s, %s, %s, FALSE, %s, %s, %s)
-            RETURNING id;
-        """, (username, password, first_name, last_name, email, phone_number, pers_photo_data))
-        user_id = cur.fetchone()['id']
+            INSERT INTO users (login, username, password, firstName, lastName, privileged, email, phoneNumber, persPhotoData)
+            VALUES (%s, %s, %s, %s, %s, FALSE, %s, %s, %s)
+            RETURNING login;
+        """, (login, username, password, first_name, last_name, email, phone_number, pers_photo_data))
+        user_login = cur.fetchone()['login']
         conn.commit()
         cur.close()
         conn.close()
 
-        return user_id
+        return user_login
 
     @staticmethod
-    def find_by_email(email):
+    def find_by_login(login):
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute("SELECT email, password FROM users WHERE email = %s;", (email,))
+        cur.execute("SELECT login, password FROM users WHERE login = %s;", (login,))
         user = cur.fetchone()
         cur.close()
         conn.close()
         if user:
             return {
-                'id': user[0],
-                'email': user[1],
-                'password': user[2]
+                'login': user[0],
+                'password': user[1]
             }
         return None
 
 
 class Post:
     @staticmethod
-    def create_post(user_id, title, content, tags, image_data):
+    def create_post(user_login, title, content, tags, image_data):
         conn = get_db_connection()
         cur = conn.cursor()
         cur.execute("""
-            INSERT INTO posts (user_id, title, content, tags, createdAt, imageData, viewCount, likesCount, dislikesCount)
+            INSERT INTO posts (user_login, title, content, tags, createdAt, imageData, viewCount, likesCount, dislikesCount)
             VALUES (%s, %s, %s, %s, NOW(), %s, 0, 0, 0)
             RETURNING id;
-        """, (user_id, title, content, tags, image_data))
+        """, (user_login, title, content, tags, image_data))
         post_id = cur.fetchone()['id']
         conn.commit()
         cur.close()
@@ -110,7 +61,7 @@ class Post:
     def get_all_posts(sort='date', order='desc', page=1, limit=10):
         offset = (page - 1) * limit  # смещение пагинации
 
-        valid_sort_fields = {'date', 'author', 'title', 'content'}
+        valid_sort_fields = {'date', 'title'}
         if sort not in valid_sort_fields:
             sort = 'date'  # сортировка по умолчанию, если поле неверное
 
@@ -140,7 +91,20 @@ class Post:
         post = cur.fetchone()
         cur.close()
         conn.close()
-        return post
+        if post:
+            return {
+                'id': post[0],
+                'user_login': post[1],
+                'title': post[2],
+                'content': post[3],
+                'tags': post[4],
+                'createdAt': post[5],
+                'imageData': post[6],
+                'viewCount': post[7],
+                'likesCount': post[8],
+                'dislikesCount': post[9]
+            }
+        return None
 
     @staticmethod
     def update_post(post_id, title, content, tags, image_data):
@@ -164,17 +128,44 @@ class Post:
         cur.close()
         conn.close()
 
+    @staticmethod
+    def increment_view(post_id):
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("UPDATE posts SET view_count = view_count + 1 WHERE id = %s", (post_id,))
+        conn.commit()
+        cur.close()
+        conn.close()
+
+    @staticmethod
+    def like_post(post_id):
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("UPDATE posts SET likes_count = likes_count + 1 WHERE id = %s", (post_id,))
+        conn.commit()
+        cur.close()
+        conn.close()
+
+    @staticmethod
+    def dislike_post(post_id):
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("UPDATE posts SET dislikes_count = dislikes_count + 1 WHERE id = %s", (post_id,))
+        conn.commit()
+        cur.close()
+        conn.close()
+
 
 class Comment:
     @staticmethod
-    def create_comment(user_id, post_id, content, image_data, tags):
+    def create_comment(user_login, post_id, content, image_data, tags):
         conn = get_db_connection()
         cur = conn.cursor()
         cur.execute("""
-            INSERT INTO comments (user_id, post_id, content, imageData, tags, createdAt)
+            INSERT INTO comments (user_login, post_id, content, imageData, tags, createdAt)
             VALUES (%s, %s, %s, %s, %s, NOW())
             RETURNING id;
-        """, (user_id, post_id, content, image_data, tags))
+        """, (user_login, post_id, content, image_data, tags))
         comment_id = cur.fetchone()['id']
         conn.commit()
         cur.close()
@@ -207,6 +198,26 @@ class Comment:
         cur.close()
         conn.close()
         return comments
+
+    @staticmethod
+    def get_comment_by_id(comment_id):
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM comments WHERE id = %s;", (comment_id,))
+        comment = cur.fetchone()
+        cur.close()
+        conn.close()
+        if comment:
+            return {
+                'id': comment[0],
+                'user_login': comment[1],
+                'post_id': comment[2],
+                'content': comment[3],
+                'imageData': comment[4],
+                'tags': comment[5],
+                'createdAt': comment[6]
+            }
+        return None
 
     @staticmethod
     def update_comment(comment_id, content, image_data, tags):
