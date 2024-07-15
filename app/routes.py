@@ -1,220 +1,202 @@
-from flask import Blueprint, request, jsonify
-from flask_jwt_extended import create_access_token, get_jwt_identity, JWTManager, jwt_required
+from flask import Blueprint, request
+from flask_jwt_extended import create_access_token, get_jwt_identity, JWTManager, jwt_required, decode_token
 from functools import wraps
 from .database import User, Post, Comment
 from .generate_captcha import generate_captcha, generate_captcha_image
+from .generate_token import encrypt_decrypt, generate_unique_token
+from .check_data import check_user_data, check_post_data, check_comment_data, is_image_square
+from .server_exception import Response
+from dotenv import load_dotenv
+import time
+import os
 
+load_dotenv()
+
+SECRET_KEY = os.getenv('JWT_SECRET_KEY')
+TIME_CAPTCHA_LIMIT = int(os.getenv('JWT_EXPIRATION_MINUTES'))
 
 api = Blueprint('api', __name__)
 jwt = JWTManager()  # объект генерации токенов
 
+
 # Первоочередное:
-# сделать отдельный get эндпоинт (/capcha/) для капчи
 
-# генерировать названия постов, картинок и ключей (использовать sha256 для ключей)
 # проверять данные юзера, постов, комментов и (главное блять) фоток (это фото, размер, квадратное)
-# волюм для sourses и json названий
+# генерировать названия постов, картинок и ключей
+# процедура проверки названий иконок
 
+# Потом:
 
-@api.route('/captcha', methods=['GET'])
-def get_captcha():
-    captcha_text = generate_captcha()
-    base64_image = generate_captcha_image(captcha_text)
-    token = create_access_token(identity={'captcha': captcha_text})
-    return jsonify({
-        'captcha_image': base64_image,  # изображение капчи, закодированное в base64
-        'token': token  # решение капчи, закодированное как jwt-токен
-    })
+# волюм для sourses
 
 
 def token_required(f):
     @wraps(f)
     def decorator(*args, **kwargs):
+        response = Response()
+
         token = None
         if 'Authorization' in request.headers:
             token = request.headers['Authorization'].split()[1]
         if not token:
-            return jsonify({"msg": "Token is missing"}), 401  # ошибка авторизации
+            response.status(405)
+            return response.send()
 
         try:
             get_jwt_identity()  # будет ошибка, если токен недействителен
         except:
-            return jsonify({"msg": "Token is invalid"}), 401  # ошибка авторизации
+            response.set_status(406)
+            return response.send()
         return f(*args, **kwargs)
     return decorator
 
 
-@api.route('/auth/', methods=['POST'])
+@api.route('/captcha', methods=['GET'])
+def get_captcha():
+    response = Response()
+
+    captcha_text = generate_captcha()
+    encoded_captcha_solution = encrypt_decrypt(captcha_text, SECRET_KEY)
+    base64_image = generate_captcha_image(captcha_text)
+    print("Текст капчи: " + captcha_text)
+    token = create_access_token(identity={'captcha_solution': encoded_captcha_solution})
+    time_generate_captcha = int(time.time()*1000)  # в миллисекундах
+
+    response.set_header("Time-Generate-Captcha", time_generate_captcha)
+    response.set_data({
+        'captcha_image': base64_image,  # изображение капчи, закодированное в base64
+        'captcha_solution_token': token  # закодированное решение капчи в виде jwt-токен
+    })
+
+    return response.send()
+
+
+@api.route('/auth', methods=['POST'])
 def auth():
-    action = request.headers.get('Target-Action')
+    response = Response()
+    try:
+        action = request.headers.get('Target-Action')
+        captcha_time = int(request.headers.get('Time-Generate-Captcha'))
+        data = request.get_json()
 
-    data = request.get_json()
+        captcha_token = data.get("captcha_token")
+        input_captcha = data.get("input_captcha")
 
-    if action == 'REGISTER': # чекнуть форму
-        login = data.get('login')
-        username = data.get('username')
-        password = data.get('password')
-        first_name = data.get('first_name')
-        last_name = data.get('last_name')
-        email = data.get('email')
-        phone_number = data.get('phone_number')
-        pers_photo_data = data.get('pers_photo_data')
+        if not captcha_token or not input_captcha:
+            response.set_data({"msg": "Captcha required"})
+            response.set_status(411)
+            return response.send()
 
-        if User.find_by_login(login):
-            return jsonify({"msg": "User already exists"}), 400  # некорректный запрос
+        current_time = int(time.time()*1000)  # в миллисекундах
 
-        user_login = User.create_user(login, username, password, first_name, last_name, email, phone_number, pers_photo_data)
-        return jsonify({"msg": "User registered successfully", "user_login": user_login}), 201  # успешное создание
+        if (current_time-captcha_time) > TIME_CAPTCHA_LIMIT:
+            response.set_data({"msg": "Exceeded time captcha limit"})
+            response.set_status(416)
+            return response.send()
 
-    elif action == 'LOGIN':
-        login = data.get('login')
-        password = data.get('password')
-        user = User.find_by_login(login)
+        try:
+            decoded_token = decode_token(captcha_token)
+            captcha_solution = encrypt_decrypt(decoded_token['sub']['captcha_solution'], SECRET_KEY)
 
-        if user and user['password'] == password:
-            access_token = create_access_token(identity=user['login'])
-            return jsonify(access_token=access_token), 200  # успешно
+        except:
+            response.set_status(413)
+            response.set_data({"msg": "Invalid captcha token"})
+            return response.send()
+
+        if input_captcha != captcha_solution:  # проверка решения капчи
+            response.set_data({"msg": "Invalid captcha solution"})
+            response.set_status(414)
+            return response.send()
+
+        if action == 'REGISTER':
+            login = data.get('login')
+            password = data.get('password')
+            first_name = data.get('first_name')
+            middle_name = data.get('middle_name')
+            sur_name = data.get('sur_name')
+            email = data.get('email')
+            phone_number = data.get('phone_number')
+            pers_photo_data = data.get('pers_photo_data')
+
+            if User.find_by_login(login):
+                response.set_data({"msg": "Already exist"})
+                response.set_status(409)
+                return response.send()
+
+            user_login = User.create_user(login, password, first_name, middle_name, sur_name, email, phone_number, pers_photo_data)
+            unique_token = generate_unique_token()
+            access_token = create_access_token(identity=unique_token)
+
+            response.set_data({
+                "msg": "User registered successfully",
+                "user_login": user_login,
+                "session_key": access_token
+            })
+
+            return response.send()
+
+        elif action == 'LOGIN':
+            login = data.get('login')
+            password = data.get('password')
+            user = User.find_by_login(login)
+
+            if user and user['password'] == password:
+                unique_token = generate_unique_token()
+                access_token = create_access_token(identity=unique_token)
+
+                response.set_data({
+                    "msg": "User registered successfully",
+                    "session_key": access_token
+                })
+                return response.send()
 
         else:
-            return jsonify({"msg": "Invalid credentials"}), 401  # ошибка авторизации
-    else:
-        return jsonify({"msg": "No action specified"}), 400  # некорректный запрос
+            response.set_status(415)
+            response.set_data({"msg": "Incorrect action"})
+            return response.send()
 
+    except Exception as err:
+        response.set_message(err)
+        response.set_status(400)
+        return response.send()
 
-@api.route('/posts/', methods=['GET'])
-@token_required
-def handle_posts():
-    sort = request.args.get('sort', 'date')
-    order = request.args.get('order', 'desc')
-    page = int(request.args.get('page', 1))
-    limit = int(request.args.get('limit', 10))
+    @api.route('/posts/', methods=['GET'])
+    def handle_posts():
+        pass
 
-    posts = Post.get_all_posts(sort, order, page, limit)
-    return jsonify(posts), 200  # успешно
+    @api.route('/post/create/', methods=['POST'])
+    @jwt_required()
+    def new_post():
+        pass
 
+    @api.route('/post/<int:id>/', methods=['GET', 'PUT', 'DELETE'])
+    @jwt_required()
+    def handle_post(id):
+        pass
 
-@api.route('/post/create/', methods=['POST'])
-@token_required
-def new_post():
-    user_login = get_jwt_identity()
+    @api.route('/post/<int:post_id>/comments/', methods=['GET'])
+    def handle_comments(post_id):
+        pass
 
-    data = request.get_json()
-    title = data.get('title')
-    content = data.get('content')
-    tags = data.get('tags')
-    image_data = data.get('image_data')
+    @api.route('/post/<int:post_id>/comment/create/', methods=['POST'])
+    @jwt_required()
+    def new_comment():
+        pass
 
-    post_id = Post.create_post(user_login, title, content, tags, image_data)
-    return jsonify({"msg": "Post created successfully", "post_id": post_id}), 201  # успешное создание
+    @api.route('/post/<int:post_id>/comment/<int:id>/', methods=['PUT', 'DELETE'])
+    @jwt_required()
+    def handle_comment(id):
+        pass
 
+    @api.route('/posts/<int:post_id>/view', methods=['PUT'])
+    def update_view_count(post_id):
+        pass
 
-@api.route('/post/<int:id>/', methods=['GET', 'PUT', 'DELETE'])
-@token_required
-def handle_post(id):
-    post = Post.get_post_by_id(id)
-    user_login = get_jwt_identity()
+    @api.route('/posts/<int:post_id>/like', methods=['PUT'])
+    def update_likes_count(post_id):
+        pass
 
-    if not post:
-        return jsonify({"msg": "Post not found"}), 404  # не найдено
+    @api.route('/posts/<int:post_id>/dislike', methods=['PUT'])
+    def update_dislikes_count(post_id):
+        pass
 
-    if request.method == 'GET':
-        return jsonify(post), 200  # успешно
-
-    if post['user_login'] != user_login:
-        return jsonify({"msg": "Permission denied"}), 403  # нет прав доступа
-
-    if request.method == 'PUT':
-        data = request.get_json()
-        title = data.get('title', post['title'])
-        content = data.get('content', post['content'])
-        tags = data.get('tags', post['tags'])
-        image_data = data.get('image_data', post['imageData'])
-        Post.update_post(id, title, content, tags, image_data)
-        return jsonify({"msg": "Post updated successfully"}), 200  # успешно
-
-    if request.method == 'DELETE':
-        Post.delete_post(id)
-        return jsonify({"msg": "Post deleted successfully"}), 204  # успешно
-
-
-@api.route('/post/<int:post_id>/comments/', methods=['GET'])
-@token_required
-def handle_comments(post_id):
-    if request.method == 'GET':
-        sort = request.args.get('sort', 'date')
-        order = request.args.get('order', 'desc')
-        page = int(request.args.get('page', 1))
-        limit = int(request.args.get('limit', 10))
-
-        comments = Comment.get_comments_by_post(post_id, sort, order, page, limit)
-        return jsonify(comments), 200  # успешно
-
-
-@api.route('/post/<int:post_id>/comment/create/', methods=['POST'])
-@token_required
-def new_comment():
-    data = request.get_json()
-    content = data.get('content')
-    image_data = data.get('image_data')
-    tags = data.get('tags')
-    post_id = data.get('post_id')
-    user_login = get_jwt_identity()
-
-    comment_id = Comment.create_comment(user_login, post_id, content, image_data, tags)
-    return jsonify({"msg": "Comment created successfully", "comment_id": comment_id}), 201  # успешное создание
-
-
-@api.route('/post/<int:post_id>/comment/<int:id>/', methods=['PUT', 'DELETE'])
-@token_required
-def handle_comment(id):
-    user_login = get_jwt_identity()
-    comment = Comment.get_comment_by_id(id)
-
-    if not comment:
-        return jsonify({"msg": "Comment not found"}), 404  # не найдено
-
-    if comment['user_login'] != user_login:
-        return jsonify(
-            {"msg": "Permission denied"}), 403  # нет прав доступа
-
-    if request.method == 'PUT':
-        data = request.get_json()
-        content = data.get('content')
-        image_data = data.get('image_data')
-        tags = data.get('tags')
-        Comment.update_comment(id, content, image_data, tags)
-        return jsonify({"msg": "Comment updated successfully"}), 200  # успешно
-
-    if request.method == 'DELETE':
-        Comment.delete_comment(id)
-        return jsonify({"msg": "Comment deleted successfully"}), 204  # успешное удаление
-
-
-@api.route('/posts/<int:post_id>/view', methods=['PUT'])
-@token_required
-def update_view_count(post_id):
-    try:
-        Post.increment_view(post_id)
-        return jsonify({'message': 'View count incremented successfully'})
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500  # ошибка сервера
-
-
-@api.route('/posts/<int:post_id>/like', methods=['PUT'])
-@token_required
-def update_likes_count(post_id):
-    try:
-        Post.like_post(post_id)
-        return jsonify({'message': 'Likes count incremented successfully'})
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500  # ошибка сервера
-
-
-@api.route('/posts/<int:post_id>/dislike', methods=['PUT'])
-@token_required
-def update_dislikes_count(post_id):
-    try:
-        Post.dislike_post(post_id)
-        return jsonify({'message': 'Dislikes count incremented successfully'})
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500  # ошибка сервера

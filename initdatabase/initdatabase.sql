@@ -1,19 +1,26 @@
-from database import get_db_connection
+-- Database: STUDPOSTS
 
+-- DROP DATABASE IF EXISTS "STUDPOSTS";
 
-def init_db():
-    conn = get_db_connection()
-    cur = conn.cursor()
+    CREATE DATABASE "STUDPOSTS"
+        WITH
+        OWNER = postgres
+        ENCODING = 'UTF8'
+        LC_COLLATE = 'Russian_Russia.1251'
+        LC_CTYPE = 'Russian_Russia.1251'
+        LOCALE_PROVIDER = 'libc'
+        TABLESPACE = pg_default
+        CONNECTION LIMIT = -1
+        IS_TEMPLATE = False;
 
-    cur.execute("""
     CREATE TABLE IF NOT EXISTS users (
         login VARCHAR(255) PRIMARY KEY,
-        username VARCHAR(120) NOT NULL,
         password VARCHAR(128) NOT NULL,
-        firstName VARCHAR(50),
-        lastName VARCHAR(50),
+        firstName VARCHAR(50) NOT NULL,
+        surName VARCHAR(50) NOT NULL,
+        middleName VARCHAR(50),
         privileged BOOLEAN DEFAULT FALSE,
-        email VARCHAR(36) NOT NULL,
+        email VARCHAR(36),
         phoneNumber VARCHAR(20),
         persPhotoData VARCHAR(255)
     );
@@ -31,7 +38,7 @@ def init_db():
         dislikesCount INTEGER DEFAULT 0,
         FOREIGN KEY (user_login) REFERENCES users (login)
     );
-    
+
     CREATE TABLE IF NOT EXISTS comments (
         id SERIAL PRIMARY KEY,
         user_login VARCHAR(255) NOT NULL,
@@ -41,7 +48,4 @@ def init_db():
         createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_login) REFERENCES users (login),
         FOREIGN KEY (post_id) REFERENCES posts (id)
-    );""")
-    conn.commit()  # сохранение изменений в базу
-    cur.close()
-    conn.close()
+    );
