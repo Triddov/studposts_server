@@ -22,7 +22,12 @@ class Response:  # класс ответов, ошибок и сообщений
         self.message = message
 
     def send(self):
+        # данные и сообщение
         response_body = self.data
+        self.headers["Message"] = self.message
+        self.data["message"] = self.message
+        self.data["status"] = self.status
+        # выполнение запроса
         response = make_response(jsonify(response_body), self.status)
         for key, value in self.headers.items():
             response.headers[key] = value
@@ -30,10 +35,12 @@ class Response:  # класс ответов, ошибок и сообщений
 
     def _get_default_message(self, status):  # список кодов ошибок (в том числе кастомных)
         status_messages = {
-            200: "OK",
+            # статусы клиета успешно
+            200: "Successfully",
             201: "Created",
             202: "Accepted",
             204: "No Content",
+            # статусы клиента
             400: "Bad Request",
             401: "Unauthorized",
             403: "Forbidden",
@@ -47,8 +54,11 @@ class Response:  # класс ответов, ошибок и сообщений
             414: "Invalid captcha solution",
             415: "Incorrect action",
             416: "Exceeded time captcha limit",
+            417: "Invalid user data",
+            # статусы сервера
             500: "Internal Server Error",
             502: "Bad Gateway",
             503: "Service Unavailable",
+            504: "Database error"
         }
         return status_messages.get(status, "Unknown Status")
