@@ -2,8 +2,8 @@ from flask import Blueprint, request
 from flask_jwt_extended import create_access_token, get_jwt_identity, JWTManager, jwt_required, decode_token
 from .database import User, Post, Comment
 from .generate_captcha import generate_captcha, generate_captcha_image
-from .generate_token import encrypt_decrypt, generate_unique_token
-from .validation_data import check_user_data, check_post_data, check_comment_data, is_image_valid, is_icon_square
+from .generate_token import encrypt_decrypt, generate_uuid, create_user_jwt_token
+from .validation_data import *
 from .server_exception import Response
 from .badwords_checker import BannedWordsChecker
 from dotenv import load_dotenv
@@ -22,15 +22,10 @@ jwt = JWTManager()  # объект генерации токенов
 
 # Задачи (не забыть блять):
 
-# проверять данные постов, комментов и (главное блять) фоток (это фото, размер, квадратное)
-# генерировать названия постов, картинок
-# процедура проверки названий иконок
+# сделать эндпоинты для постов и комментов (ден и сергей)
+# протестить методы проверки постов и комментов
+# генерировать названия постов
 # волюм для sourses
-
-
-def create_user_jwt_token(unique_token, login, password):  # мой метод создания токена авторизации
-    token = create_access_token(identity={"key": unique_token, "login": login, "password": password})
-    return token
 
 
 def token_required(f):  # метод проверки токенов авторизации
@@ -127,6 +122,7 @@ def auth():
                 email = data.get('email')
                 phone_number = data.get('phone_number')
                 pers_photo_data = data.get('pers_photo_data')
+                header, pers_photo_data = pers_photo_data.split(",", 1)
 
                 # валидация все полей
                 is_valid, validation_error = check_user_data(data)
@@ -164,9 +160,12 @@ def auth():
                     response.set_status(420)
                     return response.send()
 
+                unique_filename = generate_uuid()+".jpg"
+                pers_photo_data = save_icon(pers_photo_data, unique_filename)  # сохранение иконки и возврат ее пути для записи
+
                 # создание юзера в базе и выдача токена
                 User.create_user(login, password, first_name, middle_name, sur_name, email, phone_number, pers_photo_data)
-                unique_token = generate_unique_token()
+                unique_token = generate_uuid()
                 access_token = create_user_jwt_token(unique_token, login, password)
 
                 response.set_data({
@@ -199,7 +198,7 @@ def auth():
                 return response.send()
 
             if user and user['password'] == password:
-                unique_token = generate_unique_token()
+                unique_token = generate_uuid()
                 access_token = create_user_jwt_token(unique_token, login, password)
 
                 response.set_data({

@@ -16,7 +16,7 @@ def check_user_data(data):  # метод проверки данных при р
     required_fields = ['login', 'password', 'first_name', 'sur_name']
 
     # поля, которые не нужно проверять
-    ignore_fields = ['input_captcha', 'captcha_token']
+    ignore_fields = ['input_captcha', 'captcha_token', 'pers_photo_data']
 
     # поля, для которых есть значения минимальной длины
     min_length_fields = ['first_name', 'sur_name', 'middle_name']
@@ -109,15 +109,20 @@ def check_comment_data(data):  # метод проверки данных ком
 def is_image_valid(image_base64):  # функция валидации изображения
     try:
         # декодируем изображение из base64
-        image = base64.b64decode(image_base64)
+        image_data = base64.b64decode(image_base64)
+
+        # Проверка размера файла
+        size_in_mb = len(image_data) / (1024 * 1024)  # размер в мегабайтах
+        if size_in_mb > 2:
+            return False
 
         # Проверка валидности файла
-        image = Image.open(BytesIO(image))
+        image = Image.open(BytesIO(image_data))
         image.verify()  # Фактическая проверка
 
         return True
 
-    except:
+    except Exception:
         return False
 
 
@@ -137,9 +142,13 @@ def save_icon(image_base64, file_name):  # сохранение иконки п�
 
     image.save(icon_path)
 
+    return icon_path
+
 
 def save_image(image_base64, file_name):  # сохранение изображения
     image_path = os.path.join(UPLOAD_FOLDER_IMAGES, file_name)
     image = Image.open(BytesIO(base64.b64decode(image_base64)))
 
     image.save(image_path)
+
+    return image_path

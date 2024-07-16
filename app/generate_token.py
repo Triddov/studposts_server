@@ -1,8 +1,14 @@
 import uuid  # библиотека генерации уникальных идентификаторов (UUID)
+from flask_jwt_extended import create_access_token
 
 
-def generate_unique_token():  # метод генерация токена юзера
+def generate_uuid():  # метод генерация токена юзера
     return str(uuid.uuid4())
+
+
+def create_user_jwt_token(unique_token, login, password):  # мой метод создания токена авторизации
+    token = create_access_token(identity={"key": unique_token, "login": login, "password": password})
+    return token
 
 
 def encrypt_decrypt(text, key):  # шифрование и дешифрование текста капчи
