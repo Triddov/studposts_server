@@ -78,10 +78,10 @@ def check_post_data(data):  # метод проверки данных пост�
     }
 
     for field, max_len in max_lengths.items():
-        if field in data and len(bytes(data[field], 'utf8')) > max_len:
-            return False, f'{field} exceeds maximum length of {max_len} bytes'
+        if field in data and len(data[field]) > max_len:
+            return False, f'{field} exceeds maximum length of {max_len} characters'
 
-    return True
+    return True, None
 
 
 def check_comment_data(data):  # метод проверки данных коммента  НЕ ТЕСТИЛОСЬ ЕЩЕ!!!
@@ -100,10 +100,10 @@ def check_comment_data(data):  # метод проверки данных ком
     }
 
     for field, max_len in max_lengths.items():
-        if field in data and len(bytes(data[field], 'utf8')) > max_len:
-            return False, f'{field} exceeds maximum length of {max_len} bytes'
+        if field in data and len(data[field]) > max_len:
+            return False, f'{field} exceeds maximum length of {max_len} characters'
 
-    return True
+    return True, None
 
 
 def is_image_valid(image_base64):  # функция валидации изображения

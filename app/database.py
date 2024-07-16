@@ -45,25 +45,21 @@ class Post:  # методы работы с таблицей posts
         return post_id
 
     @staticmethod
-    def get_all_posts(sort='date', order='desc', page=1, limit=10):
+    def get_all_posts(order='desc', page=1, limit=0, search=''):
         offset = (page - 1) * limit  # смещение пагинации
 
-        valid_sort_fields = {'date', 'title'}
-        if sort not in valid_sort_fields:
-            sort = 'date'  # сортировка по умолчанию, если поле неверное
+        query = f'SELECT * FROM posts '
 
-        valid_order_values = {'asc', 'desc'}
-        if order not in valid_order_values:
-            order = 'desc'  # сортировка по умолчанию, если поле неверное
-
-        query = f"""
-            SELECT * FROM posts
-            ORDER BY {sort} {order}
-            LIMIT %s OFFSET %s;
-        """
+        if search != '':
+            query += f"WHERE content LIKE '%{search}%' or title LIKE '%{search}%' or tags LIKE '%{search}%' "
+        
+        query += f'ORDER BY createdAt {order} '
+        
+        if limit != 0:
+            query += f'LIMIT {limit} OFFSET {offset};'
 
         cur = conn.cursor()
-        cur.execute(query, (limit, offset))
+        cur.execute(query)
         posts = cur.fetchall()
         return posts
 
@@ -184,3 +180,4 @@ class Comment:  # методы работы с таблицей comments
     def delete_comment(comment_id):
         cur = conn.cursor()
         cur.execute("DELETE FROM comments WHERE id = %s;", (comment_id,))
+

@@ -222,10 +222,90 @@ def auth():
 
 
 
+# стандартные значения 
+# могут быть не указаны limit = 5 page = 1 orderByDate=desc, search=''
+# body = {
+#     'filters': {
+#         'orderByDate': 'desc',
+#         'search' : '',
+#     },
+#     'limit': 5,
+#     'page': 1,
+#     'totalPosts': 100,
+#     'posts': [],
+# }
 
-@api.route('/posts/', methods=['GET'])
+
+@api.route('/home', methods=['GET'])
 def handle_posts():
-    pass
+    response = Response()
+    
+    # основной блок кода
+    try:
+        
+        # получаем query string параметры для того, чтобы задать фильтры
+        limit = request.args.get('limit')
+        page = request.args.get('page')
+        order = request.args.get('orderByDate')
+        search = request.args.get('search')
+        
+        # получаем число постов в базе по заданному фильтру search
+        posts_count = len(Post.get_all_posts(search=search))
+
+        # если остальные параметры заданы кринжово, устанавливаем на дефолтные 
+        # а может, эти проверки нужно вынести в Post.get_all_posts()?
+        try:
+            limit = int(limit)
+            if limit > posts_count or limit < 1:
+                if posts_count < 5:
+                    limit = posts_count
+                else:
+                    limit = 5
+        
+        except:
+            if posts_count < 5:
+                limit = posts_count
+            else:
+                limit = 5
+        
+
+        try:
+            page = int(page)
+            if posts_count == limit or page > int(posts_count/limit) + 1 or page < 1:
+                page = 1
+        
+        except:
+            page = 1
+        
+
+        if order not in ['asc', 'desc']:
+            order = 'desc'
+
+        
+        # пробуем получить и отправить посты
+        try:
+            posts = Post.get_all_posts(order, page, limit, search)
+            response.set_data({
+                'filters': {
+                    'orderByDate': order,
+                    'search' : search,
+                },
+                'limit': limit,
+                'page': page,
+                'totalPosts': posts_count,
+                'posts': posts,
+            })
+            return response.send()
+        
+        except:
+            response.set_status(504) # Database error
+            return response.send()
+            
+
+    except:
+        response.set_status(400) # Bad Request
+        return response.send()
+
 
 @api.route('/post/create/', methods=['POST'])
 @jwt_required()
