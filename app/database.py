@@ -45,12 +45,12 @@ class Post:  # методы работы с таблицей posts
         return post_id
 
     @staticmethod
-    def get_all_posts(order='desc', page=1, limit=0, search=''):
+    def get_all_posts(order='desc', page=1, limit=0, search=None):
         offset = (page - 1) * limit  # смещение пагинации
 
         query = f'SELECT * FROM posts '
 
-        if search != '':
+        if search != None:
             query += f"WHERE content LIKE '%{search}%' or title LIKE '%{search}%' or tags LIKE '%{search}%' "
         
         query += f'ORDER BY createdAt {order} '
