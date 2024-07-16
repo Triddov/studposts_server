@@ -1,12 +1,13 @@
 from flask import Blueprint, request
 from flask_jwt_extended import create_access_token, get_jwt_identity, JWTManager, jwt_required, decode_token
-from functools import wraps
 from .database import User, Post, Comment
 from .generate_captcha import generate_captcha, generate_captcha_image
 from .generate_token import encrypt_decrypt, generate_unique_token
-from .check_data import check_user_data, check_post_data, check_comment_data, is_image_square
+from .validation_data import check_user_data, check_post_data, check_comment_data, is_image_valid, is_icon_square
 from .server_exception import Response
+from .badwords_checker import BannedWordsChecker
 from dotenv import load_dotenv
+from functools import wraps
 import time
 import os
 
@@ -21,12 +22,18 @@ jwt = JWTManager()  # объект генерации токенов
 
 # Задачи (не забыть блять):
 
-# проверять данные юзера, постов, комментов и (главное блять) фоток (это фото, размер, квадратное)
-# генерировать названия постов, картинок и ключей
+# проверять данные постов, комментов и (главное блять) фоток (это фото, размер, квадратное)
+# генерировать названия постов, картинок
 # процедура проверки названий иконок
 # волюм для sourses
 
-def token_required(f):  # метод проверки токенов авторизации пользователя
+
+def create_user_jwt_token(unique_token, login, password):  # мой метод создания токена авторизации
+    token = create_access_token(identity={"key": unique_token, "login": login, "password": password})
+    return token
+
+
+def token_required(f):  # метод проверки токенов авторизации
     @wraps(f)
     def decorator(*args, **kwargs):  # декоратор для проверки токена на каждом рауте
         response = Response()
@@ -43,7 +50,9 @@ def token_required(f):  # метод проверки токенов автор�
         except:
             response.set_status(406)
             return response.send()
+
         return f(*args, **kwargs)
+
     return decorator
 
 
@@ -70,16 +79,19 @@ def get_captcha():
 def auth():
     response = Response()
     try:
-        action = request.headers.get('Target-Action')  # значение Target-Action заголовка запроса
+        # получаем значение Target-Action в заголовке запроса
+        action = request.headers.get('Target-Action')
 
         data = request.get_json()
         input_captcha = data.get("input_captcha")
         captcha_solution_token = data.get("captcha_token")
 
+        # проверка наличия полей решения капчи
         if not captcha_solution_token or not input_captcha:
             response.set_status(411)
             return response.send()
 
+        # декодируем капчу и время, до которого она валидна
         try:
             decoded_captcha_token = decode_token(captcha_solution_token)
             captcha_solution = encrypt_decrypt(decoded_captcha_token['sub']['solution'], SECRET_KEY)
@@ -91,70 +103,94 @@ def auth():
 
         current_time = int(time.time() * 1000)  # в миллисекундах
 
+        # проверка актуального времени капчи
         if captcha_actual_time < current_time:
             response.set_status(416)
             return response.send()
 
-        if input_captcha != captcha_solution:  # проверка решения капчи
+        # проверка пользовательского решения капчи
+        if input_captcha != captcha_solution:
             response.set_status(414)
             return response.send()
 
+        # логика регистрации
         if action == 'REGISTER':
             try:
-                login = data.get('login')
-                password = data.get('password')
+                # публичные поля (требуют проверки на badwords)
                 first_name = data.get('first_name')
                 middle_name = data.get('middle_name')
                 sur_name = data.get('sur_name')
+
+                # непубличные поля (не требуют проверки на badwords)
+                login = data.get('login')
+                password = data.get('password')
                 email = data.get('email')
                 phone_number = data.get('phone_number')
                 pers_photo_data = data.get('pers_photo_data')
 
+                # валидация все полей
                 is_valid, validation_error = check_user_data(data)
-
-            except Exception:
-                response.set_status(417)
-                return response.send()
-
-            try:
-                if is_valid:
-                    if User.find_by_login(login):
-                        response.set_status(409)
-                        return response.send()
-
-                    user_login = User.create_user(login, password, first_name, middle_name, sur_name, email, phone_number, pers_photo_data)
-                    unique_token = generate_unique_token()
-                    access_token = create_access_token(identity=unique_token)
-
-                    if validation_error is not None:
-                        response.set_status(417)
-                        response.set_message(validation_error)
-                        return response.send()
-
-                    response.set_data({
-                        "user_login": user_login,
-                        "session_key": access_token
-                    })
-
-                    return response.send()
-
-                else:
+                if not is_valid:
                     response.set_status(417)
                     response.set_message(validation_error)
                     return response.send()
 
+                # проверка на плохие слова
+                first_name = BannedWordsChecker.bad_words(first_name)
+                middle_name = BannedWordsChecker.bad_words(middle_name)
+                sur_name = BannedWordsChecker.bad_words(sur_name)
+
+                # если false - проверка не пройдена
+                if not first_name or not middle_name or not sur_name:
+                    raise Exception("Inappropriate content")
+
+            except Exception as err:
+
+                if err == "Inappropriate content":
+                    response.set_status(418)
+                else:
+                    response.set_status(417)
+
+                return response.send()
+
+            # проверка и запись пользователя
+            try:
+                if User.find_by_login(login):
+                    response.set_status(409)
+                    return response.send()
+
+                # проверка иконки на наличие, валидность и "квадратность"
+                if (pers_photo_data is not None) and (not is_image_valid(pers_photo_data) or not is_icon_square(pers_photo_data)):
+                    response.set_status(420)
+                    return response.send()
+
+                # создание юзера в базе и выдача токена
+                User.create_user(login, password, first_name, middle_name, sur_name, email, phone_number, pers_photo_data)
+                unique_token = generate_unique_token()
+                access_token = create_user_jwt_token(unique_token, login, password)
+
+                response.set_data({
+                    "session_token": access_token
+                })
+
+                return response.send()
+
+            # если ошибка в логике сервера
             except Exception:
                 response.set_status(504)
                 return response.send()
 
+        # логика авторизации
         elif action == 'LOGIN':
             try:
                 login = data.get('login')
                 password = data.get('password')
+
             except:
                 response.set_status(417)
                 return response.send()
 
+            # проверка пользователя
             try:
                 user = User.find_by_login(login)
 
@@ -164,12 +200,12 @@ def auth():
 
             if user and user['password'] == password:
                 unique_token = generate_unique_token()
-                access_token = create_access_token(identity=unique_token)
+                access_token = create_user_jwt_token(unique_token, login, password)
 
                 response.set_data({
-                    "msg": "User registered successfully",
                     "session_key": access_token
                 })
+
                 return response.send()
 
             else:
@@ -180,7 +216,8 @@ def auth():
             response.set_status(415)
             return response.send()
 
-    except Exception as err:
+    # общая ошибка
+    except Exception:
         response.set_status(400)
         return response.send()
 

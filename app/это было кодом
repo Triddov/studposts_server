@@ -1,4 +1,6 @@
 # забракованный код
+# тут все рауты, которые были для постов и комментов
+# на них можно смотреть, пользоваться наверное смысла нет
 
 @api.route('/posts/', methods=['GET'])
 def handle_posts():
@@ -136,36 +138,3 @@ def update_dislikes_count(post_id):
         return jsonify({'message': 'Dislikes count incremented successfully'})
     except Exception as e:
         return jsonify({'error': str(e)}), 500  # ошибка сервера
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

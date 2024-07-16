@@ -4,25 +4,19 @@ import os
 
 load_dotenv()
 
-DB_CONNECT = os.getenv('DATABASE_URL')
+conn = psycopg2.connect(os.getenv('DATABASE_URL'))  # подключение к базе
 
-conn = psycopg2.connect(DB_CONNECT)
-
-conn.autocommit = True
+conn.autocommit = True  # не требует каждый раз вызывать метод записи данных
 
 
-class User:
+class User:  # методы работы с таблицей users
     @staticmethod
     def create_user(login, password, first_name, middle_name, sur_name, email, phone_number, pers_photo_data):
         cur = conn.cursor()
         cur.execute("""
             INSERT INTO users (login, password, firstName, middleName, surName, privileged, email, phoneNumber, persPhotoData)
             VALUES (%s, %s, %s, %s, %s, FALSE, %s, %s, %s)
-            RETURNING login;
         """, (login, password, first_name, middle_name, sur_name, email, phone_number, pers_photo_data))
-        user_login = cur.fetchone()[0]
-
-        return user_login
 
     @staticmethod
     def find_by_login(login):
@@ -36,9 +30,8 @@ class User:
             }
         return None
 
-# дальше хз вообще норм или нет (надеюсь норм)
 
-class Post:
+class Post:  # методы работы с таблицей posts
     @staticmethod
     def create_post(user_login, title, content, tags, image_data):
         cur = conn.cursor()
@@ -124,7 +117,7 @@ class Post:
         cur.execute("UPDATE posts SET dislikes_count = dislikes_count + 1 WHERE id = %s", (post_id,))
 
 
-class Comment:
+class Comment:  # методы работы с таблицей comments
     @staticmethod
     def create_comment(user_login, post_id, content, image_data, tags):
         cur = conn.cursor()

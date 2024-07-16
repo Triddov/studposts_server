@@ -35,7 +35,7 @@ class Response:  # класс ответов, ошибок и сообщений
 
     def _get_default_message(self, status):  # список кодов ошибок (в том числе кастомных)
         status_messages = {
-            # статусы клиета успешно
+            # статусы клиета - успешно
             200: "Successfully",
             201: "Created",
             202: "Accepted",
@@ -45,20 +45,22 @@ class Response:  # класс ответов, ошибок и сообщений
             401: "Unauthorized",
             403: "Forbidden",
             404: "Not Found",
-            405: "Token is missing",
-            406: "Token is invalid",
+            405: "Token is missing",  # custom
+            406: "Token is invalid",  # custom
             409: "Already exist",
-            411: "Captcha required",
-            412: "Undefined action",
-            413: "Invalid captcha token",
-            414: "Invalid captcha solution",
-            415: "Incorrect action",
-            416: "Exceeded time captcha limit",
-            417: "Invalid user data",
+            411: "Captcha required",  # custom
+            412: "Undefined action",  # custom
+            413: "Invalid captcha token",  # custom
+            414: "Invalid captcha solution",  # custom
+            415: "Incorrect action",  # custom
+            416: "Exceeded time captcha limit",  # custom
+            417: "Invalid user data",  # custom
+            418: "Inappropriate content",  # custom
+            420: "Incorrect image",
             # статусы сервера
             500: "Internal Server Error",
             502: "Bad Gateway",
             503: "Service Unavailable",
-            504: "Database error"
+            504: "Database error"  # custom
         }
         return status_messages.get(status, "Unknown Status")

@@ -1,13 +1,14 @@
-import uuid
+import uuid  # библиотека генерации уникальных идентификаторов (UUID)
 
 
-def generate_unique_token():  # генерация токена юзера
+def generate_unique_token():  # метод генерация токена юзера
     return str(uuid.uuid4())
 
 
 def encrypt_decrypt(text, key):  # шифрование и дешифрование текста капчи
 
-    text_bytes = bytearray(text, 'utf-8')  # Преобразуем строку в байтовый массив, чтобы работать с кодами символов (ASCII)
+    # Преобразуем строку в байтовый массив, чтобы работать с кодами символов (ASCII)
+    text_bytes = bytearray(text, 'utf-8')
     key_bytes = bytearray(key, 'utf-8')
 
     encrypted_bytes = bytearray()  # Создаем пустой байтовый массив для хранения зашифрованного текста
