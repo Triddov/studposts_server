@@ -4,20 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="313496f0-9e1b-4b22-820e-d983be4c79e6" name="Changes" comment="8th commit">
-      <change beforePath="$PROJECT_DIR$/.env" beforeDir="false" afterPath="$PROJECT_DIR$/.env" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/badwords_checker.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/database.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/generate_token.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/generate_token.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/routes.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/server_exception.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/server_exception.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/unitTests" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/validation_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/validation_data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/это было кодом" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/initdatabase/initdatabase.sql" beforeDir="false" afterPath="$PROJECT_DIR$/initdatabase/initdatabase.sql" afterDir="false" />
-    </list>
+    <list default="true" id="313496f0-9e1b-4b22-820e-d983be4c79e6" name="Changes" comment="second stable version" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -160,7 +147,15 @@
       <option name="project" value="LOCAL" />
       <updated>1721128031725</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="second stable version">
+      <option name="closed" value="true" />
+      <created>1721173785347</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1721173785347</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -183,6 +178,7 @@
     <MESSAGE value="7th commit" />
     <MESSAGE value="first stable version" />
     <MESSAGE value="8th commit" />
-    <option name="LAST_COMMIT_MESSAGE" value="8th commit" />
+    <MESSAGE value="second stable version" />
+    <option name="LAST_COMMIT_MESSAGE" value="second stable version" />
   </component>
 </project>
