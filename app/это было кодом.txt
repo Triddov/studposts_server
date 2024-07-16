@@ -2,31 +2,6 @@
 # тут все рауты, которые были для постов и комментов
 # на них можно смотреть, пользоваться наверное смысла нет
 
-@api.route('/posts/', methods=['GET'])
-def handle_posts():
-    sort = request.args.get('sort', 'date')
-    order = request.args.get('order', 'desc')
-    page = int(request.args.get('page', 1))
-    limit = int(request.args.get('limit', 10))
-
-    posts = Post.get_all_posts(sort, order, page, limit)
-    return jsonify(posts), 200  # успешно
-
-
-@api.route('/post/create/', methods=['POST'])
-@jwt_required()
-def new_post():
-
-    data = request.get_json()
-    user_login = data.get('user_login')
-    title = data.get('title')
-    content = data.get('content')
-    tags = data.get('tags')
-    image_data = data.get('image_data')
-
-    post_id = Post.create_post(user_login, title, content, tags, image_data)
-    return jsonify({"msg": "Post created successfully", "post_id": post_id}), 201  # успешное создание
-
 
 @api.route('/post/<int:id>/', methods=['GET', 'PUT', 'DELETE'])
 @jwt_required()

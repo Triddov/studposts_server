@@ -1,17 +1,25 @@
-import uuid  # библиотека генерации уникальных идентификаторов (UUID)
 from flask_jwt_extended import create_access_token
+from dotenv import load_dotenv
+import uuid  # библиотека генерации уникальных идентификаторов (UUID)
+import time
+import os
+
+load_dotenv()
+
+AUTHORIZATION_LIMIT = os.getenv("AUTHORIZATION_LIMIT")
 
 
-def generate_uuid():  # метод генерация токена юзера
+def generate_uuid():  # метод генерация уникального идентификатора
     return str(uuid.uuid4())
 
 
-def create_user_jwt_token(unique_token, login, password):  # мой метод создания токена авторизации
-    token = create_access_token(identity={"key": unique_token, "login": login, "password": password})
+def create_user_jwt_token(login: str, password: str) -> str:  # мой метод создания токена авторизации
+    authorization_limit = int(time.time())
+    token = create_access_token(identity={"created_time": authorization_limit, "login": login, "password": password})
     return token
 
 
-def encrypt_decrypt(text, key):  # шифрование и дешифрование текста капчи
+def encrypt_decrypt(text: str, key: str) -> str:  # шифрование и дешифрование текста капчи
 
     # Преобразуем строку в байтовый массив, чтобы работать с кодами символов (ASCII)
     text_bytes = bytearray(text, 'utf-8')

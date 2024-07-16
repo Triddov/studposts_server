@@ -4,8 +4,19 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="313496f0-9e1b-4b22-820e-d983be4c79e6" name="Changes" comment="6th commit">
+    <list default="true" id="313496f0-9e1b-4b22-820e-d983be4c79e6" name="Changes" comment="8th commit">
+      <change beforePath="$PROJECT_DIR$/.env" beforeDir="false" afterPath="$PROJECT_DIR$/.env" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/badwords_checker.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/database.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/generate_token.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/generate_token.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/routes.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/server_exception.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/server_exception.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/unitTests" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/validation_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/validation_data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/это было кодом" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/initdatabase/initdatabase.sql" beforeDir="false" afterPath="$PROJECT_DIR$/initdatabase/initdatabase.sql" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -23,6 +34,9 @@
     <option name="PUSH_AUTO_UPDATE" value="true" />
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
   <component name="ProjectColorInfo">{
   &quot;customColor&quot;: &quot;&quot;,
   &quot;associatedIndex&quot;: 0
@@ -33,27 +47,36 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Python.__init__.executor&quot;: &quot;Run&quot;,
-    &quot;Python.captcha.executor&quot;: &quot;Run&quot;,
-    &quot;Python.check_data.executor&quot;: &quot;Run&quot;,
-    &quot;Python.generate_captcha.executor&quot;: &quot;Run&quot;,
-    &quot;Python.generate_token.executor&quot;: &quot;Run&quot;,
-    &quot;Python.run.executor&quot;: &quot;Run&quot;,
-    &quot;Python.server_exception.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;stepan&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/akini/PycharmProjects/studposts_server&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python.__init__.executor": "Run",
+    "Python.badwords_checker.executor": "Run",
+    "Python.banned_words_checker.executor": "Run",
+    "Python.captcha.executor": "Run",
+    "Python.check_data.executor": "Run",
+    "Python.generate_captcha.executor": "Run",
+    "Python.generate_token.executor": "Run",
+    "Python.run.executor": "Run",
+    "Python.server_exception.executor": "Run",
+    "Python.validation_data.executor": "Run",
+    "Python.хуй.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "stepan",
+    "ignore.virus.scanning.warn.message": "true",
+    "last_opened_file_path": "C:/Users/akini/PycharmProjects/studposts_server/unitTests"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\akini\PycharmProjects\studposts_server\unitTests" />
       <recent name="C:\Users\akini\PycharmProjects\studposts_server" />
       <recent name="C:\Users\akini\PycharmProjects\studposts_server\.venv" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\akini\PycharmProjects\studposts_server\unitTests" />
+      <recent name="C:\Users\akini\PycharmProjects\studposts_server\Tests" />
+      <recent name="C:\Users\akini\PycharmProjects\studposts_server\app" />
+      <recent name="C:\Users\akini\PycharmProjects\studposts_server" />
       <recent name="C:\Users\akini\PycharmProjects\studposts_server\backup" />
     </key>
   </component>
@@ -121,7 +144,23 @@
       <option name="project" value="LOCAL" />
       <updated>1721066641333</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="first stable version">
+      <option name="closed" value="true" />
+      <created>1721088178388</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1721088178388</updated>
+    </task>
+    <task id="LOCAL-00008" summary="8th commit">
+      <option name="closed" value="true" />
+      <created>1721128031725</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1721128031725</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -141,6 +180,9 @@
     <MESSAGE value="4th commit" />
     <MESSAGE value="5th commit" />
     <MESSAGE value="6th commit" />
-    <option name="LAST_COMMIT_MESSAGE" value="6th commit" />
+    <MESSAGE value="7th commit" />
+    <MESSAGE value="first stable version" />
+    <MESSAGE value="8th commit" />
+    <option name="LAST_COMMIT_MESSAGE" value="8th commit" />
   </component>
 </project>

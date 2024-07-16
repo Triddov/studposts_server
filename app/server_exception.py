@@ -48,15 +48,16 @@ class Response:  # класс ответов, ошибок и сообщений
             405: "Token is missing",  # custom
             406: "Token is invalid",  # custom
             409: "Already exist",
+            410: "Invalid login or password in token",  # custom
             411: "Captcha required",  # custom
             412: "Undefined action",  # custom
             413: "Invalid captcha token",  # custom
             414: "Invalid captcha solution",  # custom
             415: "Incorrect action",  # custom
             416: "Exceeded time captcha limit",  # custom
-            417: "Invalid user data",  # custom
+            417: "Invalid data",  # custom
             418: "Inappropriate content",  # custom
-            420: "Incorrect image",
+            420: "Incorrect image",  # custom
             # статусы сервера
             500: "Internal Server Error",
             502: "Bad Gateway",

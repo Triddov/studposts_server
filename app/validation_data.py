@@ -10,6 +10,42 @@ load_dotenv()
 UPLOAD_FOLDER_ICONS = os.getenv('UPLOAD_FOLDER_ICONS')
 UPLOAD_FOLDER_IMAGES = os.getenv('UPLOAD_FOLDER_IMAGES')
 
+max_lengths = {  # список ограничений полей в базе
+    'login': 255,
+    'password': 128,
+    'first_name': 50,
+    'sur_name': 50,
+    'middle_name': 50,
+    'email': 36,
+    'phone_number': 20,
+    'pers_photo_data': 255,
+    'title': 200,
+    'tags': 200,
+    'image_data': 255,
+}
+
+
+def check_bad_words(*fields_to_check):
+    file_path = 'badwords.txt'
+
+    if not os.path.isfile(file_path):
+        raise FileNotFoundError(f"No such file: '{file_path}'")
+
+    with open(file_path, 'r', encoding='utf-8') as file:
+        bad_words = {line.strip().lower() for line in file}
+
+    required_fields = list(fields_to_check)
+
+    for field in required_fields:
+        if field is None:
+            continue
+
+        words = field.lower().split()
+        if any(word in bad_words for word in words):
+            return False
+
+    return True
+
 
 def check_user_data(data):  # метод проверки данных при регистрации
     # обязательные поля
@@ -27,19 +63,8 @@ def check_user_data(data):  # метод проверки данных при р
         if field not in data:
             return False, f"Missing required field: {field}"
 
-        if not data[field] or ' ' in data[field]:
+        if not data[field] or " " in data[field]:
             return False, f"{field} should not be empty or contain spaces"
-
-    max_lengths = {  # список ограничений полей в базе
-        'login': 255,
-        'password': 128,
-        'first_name': 50,
-        'sur_name': 50,
-        'middle_name': 50,
-        'email': 36,
-        'phone_number': 20,
-        'pers_photo_data': 255
-    }
 
     # проверка длины полей
     for field, max_length in max_lengths.items():
@@ -47,12 +72,10 @@ def check_user_data(data):  # метод проверки данных при р
             return False, f"{field} exceeds maximum length of {max_length} characters"
 
     # проверка минимальной длины полей
-    if 'middle_name' not in data or not data['middle_name']:
-        min_length_fields.remove('middle_name')
-
     for field in min_length_fields:
-        if (field in data) and (field not in ignore_fields) and (len(data[field]) < min_length):
-            return False, f"{field} should be at least 2 characters long"
+        if field in data and data[field]:  # только если поле существует и не пустое
+            if len(data[field]) < min_length:
+                return False, f"{field} should be at least 2 characters long"
 
     # проверка email на валидность
     if ('email' in data) and ('email' not in ignore_fields) and ('@' not in data['email']):
@@ -61,60 +84,46 @@ def check_user_data(data):  # метод проверки данных при р
     return True, None  # возвращаем валидны ли данные и описание ошибки
 
 
-def check_post_data(data):  # метод проверки данных поста  НЕ ТЕСТИЛОСЬ ЕЩЕ!!!
-    required_fields = ['user_login', 'title', 'content']
+def check_post_data(data):  # метод проверки данных поста
+    # обязательные поля
+    required_fields = ['title', 'content']
+
+    # проверка обязательных полей
+    for field in required_fields:
+        if field not in data:
+            return False, f'Missing required field: {field}'
+        if data[field] == " ":
+            return False, f'{field} should not be empty'
+
+    # проверка длины полей
+    for field, max_len in max_lengths.items():
+        if field in data and len(data[field]) > max_len:
+            return False, f'{field} exceeds maximum length of {max_len} characters'
+
+    return True, None
+
+
+def check_comment_data(data):  # метод проверки данных коммента
+    required_fields = ['content']
 
     for field in required_fields:
         if field not in data:
             return False, f'Missing required field: {field}'
-        if data[field] == '' or data[field].isspace() == True:
-            return False, f'{field} should not be empty or consist of spaces'
+        if data[field] == " ":
+            return False, f'{field} should not be empty'
 
-    # проверка на длину полей
-    max_lengths = {
-        'title': 200,
-        'tags': 200,
-        'image_data': 255,
-    }
-
+    # проверка длины полей
     for field, max_len in max_lengths.items():
-        if field in data and len(bytes(data[field], 'utf8')) > max_len:
-            return False, f'{field} exceeds maximum length of {max_len} bytes'
+        if field in data and len(data[field]) > max_len:
+            return False, f'{field} exceeds maximum length of {max_len} characters'
 
-    return True
-
-
-def check_comment_data(data):  # метод проверки данных коммента  НЕ ТЕСТИЛОСЬ ЕЩЕ!!!
-    # проверка на пустоту полей
-    required_fields = ['user_login', 'post_id', 'content']
-
-    for field in required_fields:
-        if field not in data:
-            return False, f'Missing required field: {field}'
-        if data[field] == '' or data[field].isspace() == True:
-            return False, f'{field} should not be empty or consist of spaces'
-
-    # проверка на длину полей
-    max_lengths = {
-        'tags': 200,
-    }
-
-    for field, max_len in max_lengths.items():
-        if field in data and len(bytes(data[field], 'utf8')) > max_len:
-            return False, f'{field} exceeds maximum length of {max_len} bytes'
-
-    return True
+    return True, None
 
 
-def is_image_valid(image_base64):  # функция валидации изображения
+def is_image_valid(image_base64: str) -> bool:  # функция валидации изображения
     try:
         # декодируем изображение из base64
         image_data = base64.b64decode(image_base64)
-
-        # Проверка размера файла
-        size_in_mb = len(image_data) / (1024 * 1024)  # размер в мегабайтах
-        if size_in_mb > 2:
-            return False
 
         # Проверка валидности файла
         image = Image.open(BytesIO(image_data))
@@ -126,7 +135,7 @@ def is_image_valid(image_base64):  # функция валидации изоб�
         return False
 
 
-def is_icon_square(base64_image):  # проверка иконки на равные стороны
+def is_icon_square(base64_image: str) -> bool:  # проверка иконки на равные стороны
     # декодируем изображение из base64
     image_data = base64.b64decode(base64_image)
     image = Image.open(BytesIO(image_data))
@@ -134,6 +143,21 @@ def is_icon_square(base64_image):  # проверка иконки на равн
     width, height = image.size
 
     return width == height
+
+
+def check_image_aspect_ratio(image_base64: str) -> bool:  # проверка соотношения сторон изображения
+    # декодируем изображение из base6
+    image_data = base64.b64decode(image_base64)
+    image = Image.open(BytesIO(image_data))
+
+    width, height = image.size
+
+    ratio = 4  # максильно допустимое соотношение
+    # Проверка соотношения ширины и высоты
+    if width / height > ratio or height / width > ratio:
+        return False
+
+    return True
 
 
 def save_icon(image_base64, file_name):  # сохранение иконки пользователя
