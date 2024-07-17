@@ -1,0 +1,48 @@
+##### /api/auth [POST]
+## Target-Action == REGISTER
+
+# correct user data (max data)
+{
+    "login": "new_user",
+    "password": "qwerty12345",
+    "first_name" : "Иван",
+    "middle_name": "Иванович",
+    "sur_name" : "Иванов",
+    "email" : "akinin.stepan@gmail.com",
+    "phone_number" : "+7-918-746-45-39",
+    "pers_photo_data" :" ",  # картинка в base64 всместе с header-ом
+    "captcha_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyMTA4Nzk1MywianRpIjoiZWM2ZDY5YjUtOTJmZS00N2FmLWJkMzItMjEzMzIwMGY5NDliIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6eyJzb2x1dGlvbiI6IlxiXHUwMDAzXHUwMDE5MVx1MDAwMEciLCJhY3R1YWxfdGltZSI6MTcyMTA4ODI1MzI1OX0sIm5iZiI6MTcyMTA4Nzk1MywiZXhwIjoxNzIxMDg4ODUzfQ.N4OJYrGH-Maym-jZIj8bEft4yOIY-2N7pp6vhIuslg0",
+    "input_captcha": "btmnt5"
+}
+
+# correct user data (with middle_name)
+{
+    "login": "new_user",
+    "password": "qwerty12345",
+    "first_name" : "Иван",
+    "middle_name": "Иванович",
+    "sur_name" : "Иванов",
+    "captcha_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyMTA4Nzk1MywianRpIjoiZWM2ZDY5YjUtOTJmZS00N2FmLWJkMzItMjEzMzIwMGY5NDliIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6eyJzb2x1dGlvbiI6IlxiXHUwMDAzXHUwMDE5MVx1MDAwMEciLCJhY3R1YWxfdGltZSI6MTcyMTA4ODI1MzI1OX0sIm5iZiI6MTcyMTA4Nzk1MywiZXhwIjoxNzIxMDg4ODUzfQ.N4OJYrGH-Maym-jZIj8bEft4yOIY-2N7pp6vhIuslg0",
+    "input_captcha": "btmnt5"
+}
+
+# correct user data (min data)
+{
+    "login": "new_user",
+    "password": "qwerty12345",
+    "first_name" : "Безродный",
+    "sur_name" : "Петров",
+    "captcha_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyMTE2MTQxNCwianRpIjoiOGRhZDM3MTUtNTZlMi00ZWI2LThhNTgtMmIzZmRkZDY1NGYzIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6eyJzb2x1dGlvbiI6IlxiLVx1MDAxM1x1MDAwYjdcdTAwMWIiLCJjcmVhdGVkX3RpbWUiOjE3MjExNjE0MTR9LCJuYmYiOjE3MjExNjE0MTQsImV4cCI6MTcyMTE2MjMxNH0.IjsXYjiT3Nvjv8qTbxiLNlCp82lZ-H2hHqmOwMk3Urw",
+    "input_captcha": "bZgTCi"
+}
+
+
+## Target-Action == LOGIN
+
+# correct user data
+{
+    "login": "step",
+    "password": "qwerty",
+    "captcha_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyMTE2MjMzMSwianRpIjoiMzM5ZWZhNjEtY2Y3Yy00YTljLWE5MmItODA2NjYwOGZhODcyIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6eyJzb2x1dGlvbiI6Ilx1MDAwYlx1MDAwNTkvMkUiLCJjcmVhdGVkX3RpbWUiOjE3MjExNjIzMzF9LCJuYmYiOjE3MjExNjIzMzEsImV4cCI6MTcyMTE2MzIzMX0.GPtA8TwmmkOzNcA2DniQQQgQRDjgex_tp92p34LT1r8",
+    "input_captcha": "arMpF7"
+}

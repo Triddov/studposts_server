@@ -21,28 +21,19 @@ class User:  # методы работы с таблицей users
     @staticmethod
     def find_by_login(login):
         cur = conn.cursor()
-        cur.execute("SELECT login, password FROM users WHERE login = %s;", (login,))
+        cur.execute("SELECT * FROM users WHERE login = %s;", (login,))
         user = cur.fetchone()
-        if user:
-            return {
-                'login': user[0],
-                'password': user[1]
-            }
-        return None
+        return user
 
 
 class Post:  # методы работы с таблицей posts
     @staticmethod
-    def create_post(user_login, title, content, tags, image_data):
+    def create_post(unique_id, user_login, title, content, tags, image_data):
         cur = conn.cursor()
         cur.execute("""
-            INSERT INTO posts (user_login, title, content, tags, createdAt, imageData, viewCount, likesCount, dislikesCount)
-            VALUES (%s, %s, %s, %s, NOW(), %s, 0, 0, 0)
-            RETURNING id;
-        """, (user_login, title, content, tags, image_data))
-        post_id = cur.fetchone()[0]
-
-        return post_id
+            INSERT INTO posts (unique_id, user_login, title, content, tags, createdAt, imageData, viewCount, likesCount, dislikesCount)
+            VALUES (%s, %s, %s, %s, %s, NOW(), %s, 0, 0, 0)
+        """, (unique_id, user_login, title, content, tags, image_data))
 
     @staticmethod
     def get_all_posts(order='desc', page=1, limit=0, search=None):
@@ -50,11 +41,11 @@ class Post:  # методы работы с таблицей posts
 
         query = f'SELECT * FROM posts '
 
-        if search != None:
+        if search:
             query += f"WHERE content LIKE '%{search}%' or title LIKE '%{search}%' or tags LIKE '%{search}%' "
-        
+
         query += f'ORDER BY createdAt {order} '
-        
+
         if limit != 0:
             query += f'LIMIT {limit} OFFSET {offset};'
 
@@ -66,22 +57,9 @@ class Post:  # методы работы с таблицей posts
     @staticmethod
     def get_post_by_id(post_id):
         cur = conn.cursor()
-        cur.execute("SELECT * FROM posts WHERE id = %s;", (post_id,))
+        cur.execute("SELECT * FROM posts WHERE unique_id = %s;", (post_id,))
         post = cur.fetchone()
-        if post:
-            return {
-                'id': post[0],
-                'user_login': post[1],
-                'title': post[2],
-                'content': post[3],
-                'tags': post[4],
-                'createdAt': post[5],
-                'imageData': post[6],
-                'viewCount': post[7],
-                'likesCount': post[8],
-                'dislikesCount': post[9]
-            }
-        return None
+        return post
 
     @staticmethod
     def update_post(post_id, title, content, tags, image_data):
@@ -89,28 +67,28 @@ class Post:  # методы работы с таблицей posts
         cur.execute("""
             UPDATE posts
             SET title = %s, content = %s, tags = %s, imageData = %s
-            WHERE id = %s;
+            WHERE unique_id = %s;
         """, (title, content, tags, image_data, post_id))
 
     @staticmethod
     def delete_post(post_id):
         cur = conn.cursor()
-        cur.execute("DELETE FROM posts WHERE id = %s;", (post_id,))
+        cur.execute("DELETE FROM posts WHERE unique_id = %s;", (post_id,))
 
     @staticmethod
     def increment_view(post_id):
         cur = conn.cursor()
-        cur.execute("UPDATE posts SET view_count = view_count + 1 WHERE id = %s", (post_id,))
+        cur.execute("UPDATE posts SET view_count = view_count + 1 WHERE unique_id = %s", (post_id,))
 
     @staticmethod
     def like_post(post_id):
         cur = conn.cursor()
-        cur.execute("UPDATE posts SET likes_count = likes_count + 1 WHERE id = %s", (post_id,))
+        cur.execute("UPDATE posts SET likes_count = likes_count + 1 WHERE unique_id = %s", (post_id,))
 
     @staticmethod
     def dislike_post(post_id):
         cur = conn.cursor()
-        cur.execute("UPDATE posts SET dislikes_count = dislikes_count + 1 WHERE id = %s", (post_id,))
+        cur.execute("UPDATE posts SET dislikes_count = dislikes_count + 1 WHERE unique_id = %s", (post_id,))
 
 
 class Comment:  # методы работы с таблицей comments
@@ -120,11 +98,8 @@ class Comment:  # методы работы с таблицей comments
         cur.execute("""
             INSERT INTO comments (user_login, post_id, content, imageData, tags, createdAt)
             VALUES (%s, %s, %s, %s, %s, NOW())
-            RETURNING id;
         """, (user_login, post_id, content, image_data, tags))
         comment_id = cur.fetchone()[0]
-
-        return comment_id
 
     @staticmethod
     def get_comments_by_post(post_id, sort='date', order='desc', page=1, limit=10):
@@ -155,17 +130,7 @@ class Comment:  # методы работы с таблицей comments
         cur = conn.cursor()
         cur.execute("SELECT * FROM comments WHERE id = %s;", (comment_id,))
         comment = cur.fetchone()
-        if comment:
-            return {
-                'id': comment[0],
-                'user_login': comment[1],
-                'post_id': comment[2],
-                'content': comment[3],
-                'imageData': comment[4],
-                'tags': comment[5],
-                'createdAt': comment[6]
-            }
-        return None
+        return comment
 
     @staticmethod
     def update_comment(comment_id, content, image_data, tags):
@@ -180,4 +145,3 @@ class Comment:  # методы работы с таблицей comments
     def delete_comment(comment_id):
         cur = conn.cursor()
         cur.execute("DELETE FROM comments WHERE id = %s;", (comment_id,))
-
