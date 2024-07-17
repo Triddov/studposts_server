@@ -236,10 +236,21 @@ def handle_posts():
         except ValueError:
             page, limit = 1, 5
 
-        limit = min(max(limit, 1), min(posts_count, 5))
+        # если limit вне диапазона количества постов
+        if 1 > limit or posts_count < limit:
+            # то он равен либо 5, либо количеству постов, если оно меньше 5 (например если постов 4, то limit=4, а не 5)
+            limit = min(posts_count, 5)
 
-        max_page = (posts_count - 1) // limit + 1
-        page = min(max(page, 1), max_page)
+        # формула максимально возможной страницы с данным лимитом и кол-вом постов
+        try:
+            max_page = (posts_count - 1) // limit + 1
+        # если постов нет, нет и limit, но одну страницу мы отобразить должны
+        except ZeroDivisionError:
+            max_page = 1
+        
+        # проверяем page на допустимый диапазон
+        if page < 1 or page > max_page:
+            page = 1
 
         if order not in ['asc', 'desc']:
             order = 'desc'
@@ -257,6 +268,7 @@ def handle_posts():
                 'totalPosts': posts_count,
                 'posts': posts,
             })
+
             return response.send()
 
         # если ошибка в логике сервера
@@ -334,9 +346,79 @@ def handle_post(id):
     pass
 
 
-@api.route('/post/<int:post_id>/comments/', methods=['GET'])
+@api.route('<int:post_id>/comments', methods=['GET'])
 def handle_comments(post_id):
-    pass
+    response = Response()
+
+    try:
+        all_posts = Post.get_all_posts()
+        posts_id = [post[0] for post in all_posts]
+        
+        # если пост с таким id существует
+        if post_id in posts_id:
+            
+            comments_count = len(Comment.get_comments_by_post(post_id))
+
+            # получаем query string параметры
+            limit = request.args.get('limit', default=5)
+            page = request.args.get('page', default=1)
+            order = request.args.get('orderByDate', default='desc')
+            
+            # корректные преобразования значений запроса
+            try:
+                page, limit = int(page), int(limit)
+            except ValueError:
+                page, limit = 1, 5
+
+            if 1 > limit or comments_count < limit:
+                limit = min(comments_count, 5)
+
+            # формула максимально возможной страницы с данным лимитом и кол-вом постов
+            try:
+                max_page = (comments_count - 1) // limit + 1
+            # если постов нет, нет и limit, но одну страницу мы отобразить должны
+            except ZeroDivisionError:
+                max_page = 1
+            
+            # проверяем page на допустимый диапазон
+            if page < 1 or page > max_page:
+                page = 1
+
+            if order not in ['asc', 'desc']:
+                order = 'desc'
+            
+            
+            # пытаемся получить комментарии к посту
+            try:
+                comments = Comment.get_comments_by_post(post_id, order, page, limit)
+                response.set_data({
+                'filters': {
+                    'orderByDate': order
+                },
+                'limit': limit,
+                'page': page,
+                'totalComments': comments_count,
+                'comments': comments,
+                })
+
+                return response.send()
+
+            # если ошибка в логике сервера
+            except:
+                response.set_status(504)
+                return response.send()
+
+        
+        # ошибка "не найдено"
+        else:
+            response.set_status(404)
+            return response.send()
+        
+
+    # общая ошибка
+    except:
+        response.set_status(400)
+        return response.send()
 
 
 @api.route('/post/<int:post_id>/comment/create/', methods=['POST'])

@@ -102,26 +102,20 @@ class Comment:  # методы работы с таблицей comments
         comment_id = cur.fetchone()[0]
 
     @staticmethod
-    def get_comments_by_post(post_id, sort='date', order='desc', page=1, limit=10):
+    def get_comments_by_post(post_id, order='desc', page=1, limit=0):
         offset = (page - 1) * limit  # смещение пагинации
-
-        valid_sort_fields = {'date', 'author', 'content'}  # допустимые поля сортировки
-        if sort not in valid_sort_fields:
-            sort = 'date'  # сортировка по умолчанию, если поле неверное
-
-        valid_order_values = {'asc', 'desc'}  # допустимые значения порядка сортировки
-        if order not in valid_order_values:
-            order = 'desc'  # сортировка по умолчанию, если поле неверное
 
         query = f"""
             SELECT * FROM comments
-            WHERE post_id = %s
-            ORDER BY {sort} {order}
-            LIMIT %s OFFSET %s;
-        """
+            WHERE post_id = {post_id}
+            ORDER BY createdAt {order} """
+
+        if limit != 0:
+            query += f'LIMIT {limit} OFFSET {offset};'
+        
 
         cur = conn.cursor()
-        cur.execute(query, (post_id, limit, offset))
+        cur.execute(query)
         comments = cur.fetchall()
         return comments
 
