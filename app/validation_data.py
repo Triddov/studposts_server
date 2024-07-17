@@ -3,6 +3,7 @@ from io import BytesIO
 from dotenv import load_dotenv
 import base64
 import os
+import re
 
 
 load_dotenv()
@@ -17,7 +18,7 @@ max_lengths = {  # список ограничений полей в базе
     'sur_name': 50,
     'middle_name': 50,
     'email': 36,
-    'phone_number': 20,
+    'phone_number': 12,
     'pers_photo_data': 255,
     'title': 200,
     'tags': 200,
@@ -28,26 +29,31 @@ max_lengths = {  # список ограничений полей в базе
 def check_bad_words(*fields_to_check):
     file_path = 'badwords.txt'
 
+    # если нет файла с badwords
     if not os.path.isfile(file_path):
         raise FileNotFoundError(f"No such file: '{file_path}'")
 
+    # открываем и считываем файл
     with open(file_path, 'r', encoding='utf-8') as file:
         bad_words = {line.strip().lower() for line in file}
 
+    # устанавливаем поля валидации
     required_fields = list(fields_to_check)
 
+    # пропускаем поле, если его значение None
     for field in required_fields:
         if field is None:
             continue
 
         words = field.lower().split()
+        # если найдено хотя бы одно слово - проверка не пройдена
         if any(word in bad_words for word in words):
             return False
 
     return True
 
 
-def check_user_data(data):  # метод проверки данных при регистрации
+def check_user_data(data):
     # обязательные поля
     required_fields = ['login', 'password', 'first_name', 'sur_name']
 
@@ -81,12 +87,29 @@ def check_user_data(data):  # метод проверки данных при р
     if ('email' in data) and ('email' not in ignore_fields) and ('@' not in data['email']):
         return False, "Invalid email format"
 
+    # проверка российского номера телефона
+    phone_pattern = re.compile(r'^(?:\+7|8)?\d{10}$')
+    if 'phone_number' in data and data['phone_number']:
+        if not phone_pattern.match(data['phone_number']):
+            return False, "Invalid phone number format"
+
+    # проверка на отсутствие русских букв в логине и пароле
+    non_russian_pattern = re.compile(r'^[^\u0400-\u04FF]*$')
+    for field in ['login', 'password']:
+        if field in data and data[field]:
+            if not non_russian_pattern.match(data[field]):
+                return False, f"{field} should not contain Russian letters"
+
     return True, None  # возвращаем валидны ли данные и описание ошибки
+
 
 
 def check_post_data(data):  # метод проверки данных поста
     # обязательные поля
     required_fields = ['title', 'content']
+
+    # поля, которые не нужно проверять
+    ignore_fields = ['image_data']
 
     # проверка обязательных полей
     for field in required_fields:
@@ -97,7 +120,7 @@ def check_post_data(data):  # метод проверки данных пост�
 
     # проверка длины полей
     for field, max_len in max_lengths.items():
-        if field in data and len(data[field]) > max_len:
+        if (field in data) and (field not in ignore_fields) and (len(data[field]) > max_len):
             return False, f'{field} exceeds maximum length of {max_len} characters'
 
     return True, None
@@ -131,7 +154,7 @@ def is_image_valid(image_base64: str) -> bool:  # функция валидац�
 
         return True
 
-    except Exception:
+    except Exception as e:
         return False
 
 
@@ -160,10 +183,14 @@ def check_image_aspect_ratio(image_base64: str) -> bool:  # проверка с�
     return True
 
 
-def save_icon(image_base64, file_name):  # сохранение иконки пользователя
+def save_icon(image_base64, file_name):
     icon_path = os.path.join(UPLOAD_FOLDER_ICONS, file_name)
-    image = Image.open(BytesIO(base64.b64decode(image_base64)))
 
+    # Проверка существования директории и создание, если она отсутствует
+    if not os.path.exists(UPLOAD_FOLDER_ICONS):
+        os.makedirs(UPLOAD_FOLDER_ICONS)
+
+    image = Image.open(BytesIO(base64.b64decode(image_base64)))
     image.save(icon_path)
 
     return icon_path

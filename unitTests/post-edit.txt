@@ -1,0 +1,27 @@
+##### /post/edit_post/ [PUT]
+## Target-Action == UPDATE
+
+
+# correct user data (min data)
+{
+    "unique_id": "816cc232-3525-4232-a88e-0cf07c3b508b",
+    "title": "изменение",
+    "content": "изменение"
+}
+
+
+# correct user data (max data)
+{
+    "unique_id": "816cc232-3525-4232-a88e-0cf07c3b508b",
+    "title": "изменение",
+    "content": "изменение"
+    "tags": "изменение"
+    "image_data": " "
+}
+
+
+##### /post/edit_post/ [DELETE]
+## Target-Action == DELETE
+
+
+

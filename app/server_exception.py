@@ -39,7 +39,8 @@ class Response:  # класс ответов, ошибок и сообщений
             200: "Successfully",
             201: "Created",
             202: "Accepted",
-            204: "No Content",
+            205: "Successfully update",  # custom
+            206: "Successfully delete",  # custom
             # статусы клиента
             400: "Bad Request",
             401: "Unauthorized",
@@ -57,6 +58,7 @@ class Response:  # класс ответов, ошибок и сообщений
             416: "Exceeded time captcha limit",  # custom
             417: "Invalid data",  # custom
             418: "Inappropriate content",  # custom
+            419: "Data not found",
             420: "Incorrect image",  # custom
             # статусы сервера
             500: "Internal Server Error",

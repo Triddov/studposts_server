@@ -27,7 +27,7 @@
 
     CREATE TABLE IF NOT EXISTS posts (
         unique_id VARCHAR(50) PRIMARY KEY,
-        user_login VARCHAR(255) NOT NULL,
+        owner_login VARCHAR(255) NOT NULL,
         title VARCHAR(200) NOT NULL,
         content TEXT NOT NULL,
         tags VARCHAR(200),
@@ -36,16 +36,15 @@
         viewCount INTEGER DEFAULT 0,
         likesCount INTEGER DEFAULT 0,
         dislikesCount INTEGER DEFAULT 0,
-        FOREIGN KEY (user_login) REFERENCES users (login)
+        FOREIGN KEY (owner_login) REFERENCES users (login)
     );
 
     CREATE TABLE IF NOT EXISTS comments (
         unique_id VARCHAR(50) PRIMARY KEY,
-        user_login VARCHAR(255) NOT NULL,
+        owner_login VARCHAR(255) NOT NULL,
         post_id VARCHAR(50) NOT NULL,
         content TEXT NOT NULL,
-        tags VARCHAR(200),
         createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (user_login) REFERENCES users (login),
+        FOREIGN KEY (owner_login) REFERENCES users (login),
         FOREIGN KEY (post_id) REFERENCES posts (unique_id)
     );

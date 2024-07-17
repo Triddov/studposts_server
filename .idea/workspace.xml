@@ -5,7 +5,33 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="313496f0-9e1b-4b22-820e-d983be4c79e6" name="Changes" comment="second stable version">
+      <change afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/dataSources/55085044-d2b3-48df-a310-db6dbb5d45c4.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/dataSources/55085044-d2b3-48df-a310-db6dbb5d45c4/storage_v2/_src_/database/STUDPOSTS.A3EaMQ.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/dataSources/55085044-d2b3-48df-a310-db6dbb5d45c4/storage_v2/_src_/database/STUDPOSTS.A3EaMQ/schema/public.abK9xQ.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_7_17_2024_3_05_AM_[Changes]/shelved.patch" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_7_17_2024_3_05_AM__Changes_.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/sqldialects.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/studposts_server.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/initDatabase/initModers.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/unitTests/comment-create.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/unitTests/comments-edit.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/unitTests/handle-comments.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/unitTests/post-edit.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/unitTests/user-edit.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/database.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/routes.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/server_exception.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/server_exception.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/validation_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/validation_data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/это было кодом.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/initdatabase/initdatabase.sql" beforeDir="false" afterPath="$PROJECT_DIR$/initDatabase/initdatabase.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/unitTests/auth.txt" beforeDir="false" afterPath="$PROJECT_DIR$/unitTests/user-create(auth).txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/unitTests/home.txt" beforeDir="false" afterPath="$PROJECT_DIR$/unitTests/handle-posts(home).txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/unitTests/post-create.txt" beforeDir="false" afterPath="$PROJECT_DIR$/unitTests/post-create.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -16,11 +42,28 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Python Script" />
+        <option value="SQL File" />
       </list>
+    </option>
+  </component>
+  <component name="FlaskConsoleOptions" custom-start-script="import sys&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;from flask.cli import ScriptInfo&#10;locals().update(ScriptInfo(create_app=None).load_app().make_shell_context())&#10;print(&quot;Python %s on %s\nApp: %s [%s]\nInstance: %s&quot; % (sys.version, sys.platform, app.import_name, app.env, app.instance_path))">
+    <envs>
+      <env key="FLASK_APP" value="app" />
+    </envs>
+    <option name="myCustomStartScript" value="import sys&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;from flask.cli import ScriptInfo&#10;locals().update(ScriptInfo(create_app=None).load_app().make_shell_context())&#10;print(&quot;Python %s on %s\nApp: %s [%s]\nInstance: %s&quot; % (sys.version, sys.platform, app.import_name, app.env, app.instance_path))" />
+    <option name="myEnvs">
+      <map>
+        <entry key="FLASK_APP" value="app" />
+      </map>
     </option>
   </component>
   <component name="Git.Settings">
     <option name="PUSH_AUTO_UPDATE" value="true" />
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="master" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="ProblemsViewState">
@@ -50,11 +93,33 @@
     "Python.validation_data.executor": "Run",
     "Python.хуй.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "git-widget-placeholder": "stepan",
     "ignore.virus.scanning.warn.message": "true",
-    "last_opened_file_path": "C:/Users/akini/PycharmProjects/studposts_server/unitTests"
+    "last_opened_file_path": "C:/Users/akini/PycharmProjects/PaginationTask",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "settings.qodana",
+    "vue.rearranger.settings.migration": "true"
+  },
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "postgresql",
+      "redis"
+    ]
   }
 }]]></component>
+  <component name="PyConsoleOptionsProvider">
+    <option name="myPythonConsoleState">
+      <console-settings module-name="studposts_server" is-module-sdk="true">
+        <option name="myUseModuleSdk" value="true" />
+        <option name="myModuleName" value="studposts_server" />
+      </console-settings>
+    </option>
+  </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\akini\PycharmProjects\studposts_server\unitTests" />
@@ -62,17 +127,18 @@
       <recent name="C:\Users\akini\PycharmProjects\studposts_server\.venv" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\akini\PycharmProjects\studposts_server\sourses" />
       <recent name="C:\Users\akini\PycharmProjects\studposts_server\unitTests" />
       <recent name="C:\Users\akini\PycharmProjects\studposts_server\Tests" />
       <recent name="C:\Users\akini\PycharmProjects\studposts_server\app" />
       <recent name="C:\Users\akini\PycharmProjects\studposts_server" />
-      <recent name="C:\Users\akini\PycharmProjects\studposts_server\backup" />
     </key>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-python-sdk-babbdf50b680-746f403e7f0c-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-241.15989.155" />
+        <option value="bundled-js-predefined-1d06a55b98c1-0b3e54e931b4-JavaScript-PY-241.18034.82" />
+        <option value="bundled-python-sdk-975db3bf15a3-2767605e8bc2-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-241.18034.82" />
       </set>
     </attachedChunks>
   </component>
@@ -84,6 +150,13 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1720819089322</updated>
+      <workItem from="1721196682352" duration="290000" />
+      <workItem from="1721197046999" duration="235000" />
+      <workItem from="1721208720081" duration="247000" />
+      <workItem from="1721209052202" duration="43000" />
+      <workItem from="1721209511212" duration="415000" />
+      <workItem from="1721210017851" duration="3025000" />
+      <workItem from="1721213893311" duration="41766000" />
     </task>
     <task id="LOCAL-00001" summary="second commit">
       <option name="closed" value="true" />
@@ -157,8 +230,22 @@
       <option name="project" value="LOCAL" />
       <updated>1721173785347</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="second stable version">
+      <option name="closed" value="true" />
+      <created>1721174532240</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1721174532240</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="UnknownFeatures">
+    <option featureType="com.intellij.fileTypeFactory" implementationName=".env" />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">
@@ -180,7 +267,12 @@
     <MESSAGE value="7th commit" />
     <MESSAGE value="first stable version" />
     <MESSAGE value="8th commit" />
+    <MESSAGE value="barahlo2" />
     <MESSAGE value="second stable version" />
     <option name="LAST_COMMIT_MESSAGE" value="second stable version" />
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/studposts_server$validation_data.coverage" NAME="validation_data Coverage Results" MODIFIED="1721213133023" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
+    <SUITE FILE_PATH="coverage/studposts_server$run.coverage" NAME="run Coverage Results" MODIFIED="1721256829293" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
