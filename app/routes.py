@@ -599,8 +599,8 @@ def edit_comment():
 
     return response.send()
 
-@api.route('/edit_user', methods=['PUT'])  # Метод для редактирования профиля пользователя
-@jwt_required()
+
+
 def edit_userprofile():
     response = Response()
 
@@ -647,7 +647,6 @@ def edit_userprofile():
     except Exception:
         response.set_status(400)  # Ошибка в случае любого исключения
         return response.send()
-
 
 
 

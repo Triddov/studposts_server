@@ -25,34 +25,28 @@ class User:  # методы работы с таблицей users
         user = cur.fetchone()
         return user
 
-@staticmethod
-def update_user(login, first_name, middle_name, sur_name, email, phone_number, pers_photo_data):
-    cur = conn.cursor()
-    fields = []
-    values = []
 
-    if first_name:
-        fields.append("firstName = %s")
-        values.append(first_name)
-    if middle_name:
-        fields.append("middleName = %s")
-        values.append(middle_name)
-    if sur_name:
-        fields.append("surName = %s")
-        values.append(sur_name)
-    if email:
-        fields.append("email = %s")
-        values.append(email)
-    if phone_number:
-        fields.append("phoneNumber = %s")
-        values.append(phone_number)
-    if pers_photo_data:
-        fields.append("persPhotoData = %s")
-        values.append(pers_photo_data)
+def update_user(login, first_name=None, middle_name=None, sur_name=None, email=None, phone_number=None, pers_photo_data=None):
+    cur = conn.cursor()
+
+    # Список полей и значений для обновления
+    fields_values = [
+        ("firstName", first_name),
+        ("middleName", middle_name),
+        ("surName", sur_name),
+        ("email", email),
+        ("phoneNumber", phone_number),
+        ("persPhotoData", pers_photo_data)
+    ]
+
+    # Фильтрация ненулевых значений
+    fields = [f"{field} = %s" for field, value in fields_values if value is not None]
+    values = [value for field, value in fields_values if value is not None]
 
     if fields:
         values.append(login)
-        query = f"UPDATE users SET {', '.join(fields)} WHERE login = %s;"
+        set_clause = ', '.join(fields)
+        query = f"UPDATE users SET {set_clause} WHERE login = %s;"
         cur.execute(query, values)
         conn.commit()
 
