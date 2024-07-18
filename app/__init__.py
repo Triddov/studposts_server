@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_cors import CORS, cross_origin
 from flask_jwt_extended import JWTManager  # библиотека для управления JWT-токенами (для аутентификации и авторизации)
 from dotenv import load_dotenv
 import datetime
@@ -12,6 +13,8 @@ jwt = JWTManager()
 def create_app():
     app = Flask(__name__)
 
+    cors = CORS(app)
+    app.config['CORS_HEADERS'] = 'Content-Type'
     app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = datetime.timedelta(minutes=int(os.getenv('AUTHORIZATION_LIMIT')))
 

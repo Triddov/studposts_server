@@ -22,9 +22,12 @@ jwt = JWTManager()  # объект генерации токенов
 
 ## ЗАДАЧИ:
 
-# сделать новую логику некоторых методов и протестить их (они не работают щас блять!)
-# сделать логику модераторов (полномочия без огрничений, кроме удаления других модераторов)
-# сделать методы удаления чужих постов и "бана по ip"  ??
+# сделать логику модераторов (полномочия без огрничений, кроме удаления других модераторов, сделать методы удаления чужих постов и "бана по ip")
+# удаление изменных картинок ?
+# не работает метод исменения данных юзера
+# добавить в /home/ отправляемыемый  объект 'operations': { 'delete': endpoint удаления постов и прочие методы }
+# как добавлять лайки/дизлайки в эндпоите ????
+
 
 def token_required(f):  # метод проверки токенов авторизации
     @wraps(f)
@@ -79,7 +82,7 @@ def get_captcha():
     return response.send()
 
 
-@api.route('/auth', methods=['POST'])  # метод авторизации/регистрации пользователя
+@api.route('/auth/', methods=['POST'])  # метод авторизации/регистрации пользователя
 def auth():
     response = Response()
     try:
@@ -112,9 +115,9 @@ def auth():
         current_time = int(time.time())  # в секундах
 
         # проверка актуального времени капчи
-        # if captcha_created_time + TIME_CAPTCHA_LIMIT < current_time:
-        #     response.set_status(416)
-        #     return response.send()
+        if captcha_created_time + TIME_CAPTCHA_LIMIT < current_time:
+            response.set_status(416)
+            return response.send()
 
         # проверка пользовательского решения капчи
         if input_captcha != captcha_solution:
@@ -150,10 +153,10 @@ def auth():
                     response.set_status(418)
                     return response.send()
 
-                header, pers_photo_data = pers_photo_data.split(",", 1)
-
                 if pers_photo_data is not None:
-                     # проверка иконки на наличие, валидность и "квадратность"
+                    header, pers_photo_data = pers_photo_data.split(",", 1)
+
+                    # проверка иконки на наличие, валидность и "квадратность"
                     if not is_image_valid(pers_photo_data) or not is_icon_square(pers_photo_data):
                         response.set_status(420)
                         return response.send()
@@ -215,7 +218,7 @@ def auth():
         return response.send()
 
 
-@api.route('/home', methods=['GET'])  # метод получения всех постов  !!!
+@api.route('/home/', methods=['GET'])  # метод получения всех постов  TESTS
 def handle_posts():
     response = Response()
 
@@ -251,10 +254,6 @@ def handle_posts():
                     'orderByDate': order,
                     'search': search,
                 },
-                # 'operations': {
-                #     'delete': endpoint удаления постов
-                #
-                # },
                 'limit': limit,
                 'page': page,
                 'totalPosts': posts_count,
@@ -273,27 +272,36 @@ def handle_posts():
         return response.send()
 
 
-@api.route('/<post_id>', methods=['GET'])  # метод получения одного поста(с обновлением просмотровБ лайков и дизлайков) ???
-def hadle_post(post_id):
-    pass
+@api.route('/<post_id>/', methods=['GET'])  # метод получения одного поста(с обновлением просмотров)
+def handle_post(post_id):
+    response = Response()
+
+    try:
+        Post.increment_view(post_id)
+        post = Post.get_post_by_id(post_id)
+        response.set_data({'post': post})
+        return response.send()
+
+    except Exception:
+        response.set_status(504)
 
 
-@api.route('/create_post', methods=['POST'])  # метод создания нового поста
+@api.route('/create_post/', methods=['POST'])  # метод создания нового поста
 @jwt_required()
 def create_post():
     response = Response()
-
-    data = request.get_json()
 
     # получение и обработка данных
     try:
         identity = get_jwt_identity()
         owner_login = encrypt_decrypt(identity["login"], SECRET_KEY)
 
+        data = request.get_json()
+
         title = data.get("title")
         content = data.get("content")
         tags = data.get("tags")
-        image_data = data.get("image_data")
+        image_data = data.get("imagedata")
 
         # валидация всех полей
         is_valid, validation_error = check_post_data(data)
@@ -338,92 +346,89 @@ def create_post():
         return response.send()
 
 
-@api.route('/post/edit_post', methods=['PUT', 'DELETE'])  # метод редактирования и/или удаления поста  !!!
+@api.route('/<post_id>/update/', methods=['PUT'])  # метод редактирования поста
 @jwt_required()
-def edit_post():
+def update_post(post_id):
     response = Response()
-
-    action = request.headers.get('Target-Action')
-
-    if action != "UPDATE" and action != "DELETE":
-        response.set_status(415)
-        return response.send()
 
     try:
         identity = get_jwt_identity()
         owner_login = encrypt_decrypt(identity["login"], SECRET_KEY)
 
-        data = request.get_json()
-        unique_id = data["unique_id"]
-
-        if not Post.get_post_by_id(unique_id):
+        if not Post.get_post_by_id(post_id):
             response.set_status(419)
             return response.send()
+
+        data = request.get_json()
+        title = data.get("title")
+        content = data.get("content")
+        tags = data.get("tags")
+        image_data = data.get("image_data")
+
+        # валидация полей
+        is_valid, validation_error = check_post_data(data)
+        if not is_valid:
+            response.set_status(417)
+            response.set_message(validation_error)
+            return response.send()
+
+        # проверка на плохие слова
+        if not check_bad_words(title, content, tags):
+            response.set_status(418)
+            return response.send()
+
+        if image_data is not None:
+            header, image_data = image_data.split(",", 1)
+            # проверка иконки на наличие и валидность
+            if not is_image_valid(image_data) or not check_image_aspect_ratio(image_data):
+                response.set_status(420)
+                return response.send()
+
+            # сохранение иконки и возврат ее пути для записи
+            unique_filename = generate_uuid() + ".jpg"
+            image_data = save_image(image_data, unique_filename)
 
     except Exception:
         response.set_status(417)
         return response.send()
 
-    if action == "UPDATE" and request.method == 'PUT':
-        try:
-            title = data.get("title")
-            content = data.get("content")
-            tags = data.get("tags")
-            image_data = data.get("image_data")
-
-            # валидация полей
-            is_valid, validation_error = check_post_data(data)
-            if not is_valid:
-                response.set_status(417)
-                response.set_message(validation_error)
-                return response.send()
-
-            # проверка на плохие слова
-            if not check_bad_words(title, content, tags):
-                response.set_status(418)
-                return response.send()
-
-            if image_data is not None:
-                # проверка иконки на наличие и валидность
-                if not is_image_valid(image_data) or not check_image_aspect_ratio(image_data):
-                    response.set_status(420)
-                    return response.send()
-
-                # сохранение иконки и возврат ее пути для записи
-                header, image_data = image_data.split(",", 1)
-                unique_filename = generate_uuid() + ".jpg"
-                image_data = save_image(image_data, unique_filename)
-
-        except Exception:
-            response.set_status(417)
-            return response.send()
-
-        # обновляем пост в базе
-        try:
-            Post.update_post(unique_id, owner_login, title=title, content=content, tags=tags, image_data=image_data)
-
-        # если ошибка в логике сервера
-        except Exception:
-            response.set_status(504)
-            return response.send()
-
+    # обновляем пост в базе
+    try:
+        Post.update_post(post_id, owner_login, title=title, content=content, tags=tags, imagedata=image_data)
         response.set_status(205)
         return response.send()
 
-    if action == "DELETE" and request.method == 'DELETE':
-        try:
-            Post.delete_post(unique_id, owner_login=owner_login)
-
-        # если ошибка в логике сервера
-        except Exception:
-            response.set_status(504)
-            return response.send()
-
-        response.set_status(206)
+    # если ошибка в логике сервера
+    except Exception:
+        response.set_status(504)
         return response.send()
 
 
-@api.route('<int:post_id>/comments', methods=['GET'])  # метод получения комменнтов к посту  ??? tests
+@api.route('/<post_id>/delete/', methods=['DELETE'])  # метод удаления поста
+@jwt_required()
+def delete_post(post_id):
+    response = Response()
+
+    try:
+        jwt_identity = get_jwt_identity()
+        owner_login = encrypt_decrypt(jwt_identity["login"], SECRET_KEY)
+
+    except Exception:
+        response.set_status(417)
+        return response.send()
+
+    try:
+        Post.delete_post(post_id, owner_login=owner_login)
+        response.set_status(206)
+        return response.send()
+
+    # если ошибка в логике сервера
+    except Exception:
+        response.set_status(504)
+        return response.send()
+
+
+@api.route('<post_id>/comments/', methods=['GET'])  # метод получения комментов к посту  TESTS
 def handle_comments(post_id):
     response = Response()
 
@@ -494,7 +499,7 @@ def handle_comments(post_id):
         response.set_status(400)
         return response.send()
 
-@api.route('/<post_id>/add_comment', methods=['POST'])  # метод создания коммента
+@api.route('/<post_id>/add_comment/', methods=['POST'])  # метод создания коммента
 @jwt_required()
 def create_comment(post_id):
     response = Response()
@@ -536,25 +541,57 @@ def create_comment(post_id):
     return response.send()
 
 
-@api.route('/post/comment/<int:id>/', methods=['PUT', 'DELETE'])  # метод редактирования и/или удаления коммента  !!!
+@api.route('/<post_id>/<comment_id>/update/', methods=['PUT'])  # метод редактирования коммента
 @jwt_required()
-def edit_comment():
+def update_comment(post_id, comment_id):
     response = Response()
-
-    action = request.headers.get('Target-Action')
-
-    if action != "UPDATE" and action != "DELETE":
-        response.set_status(415)
-        return response.send()
 
     try:
         identity = get_jwt_identity()
         owner_login = encrypt_decrypt(identity["login"], SECRET_KEY)
 
-        data = request.get_json()
-        unique_id = data["unique_id"]
+        if not Post.get_post_by_id(post_id) or not Comment.get_comment_by_id(comment_id):
+            response.set_status(419)
+            return response.send()
 
-        if not Post.get_post_by_id(unique_id):
+        data = request.get_json()
+        content = data.get("content")
+
+        is_valid, validation_error = check_comment_data(data)
+
+        if not is_valid:
+            response.set_status(417)
+            response.set_message(validation_error)
+            return response.send()
+
+        if not check_bad_words(content):
+            response.set_status(418)
+            return response.send()
+
+    except Exception:
+        response.set_status(417)
+        return response.send()
+
+    try:
+        Comment.update_comment(post_id, comment_id, owner_login, content)
+        response.set_status(205)
+        return response.send()
+
+    except Exception:
+        response.set_status(504)
+        return response.send()
+
+
+@api.route('/<post_id>/<comment_id>/delete/', methods=['DELETE'])  # метод удаления коммента
+@jwt_required()
+def delete_comment(post_id, comment_id):
+    response = Response()
+
+    try:
+        identity = get_jwt_identity()
+        owner_login = encrypt_decrypt(identity["login"], SECRET_KEY)
+
+        if not Post.get_post_by_id(post_id) or not Comment.get_comment_by_id(comment_id):
             response.set_status(419)
             return response.send()
 
@@ -562,49 +599,70 @@ def edit_comment():
         response.set_status(417)
         return response.send()
 
-    if action == "UPDATE" and request.method == 'PUT':
-        try:
-            content = data.get("content")
+    try:
+        Comment.delete_comment(post_id, comment_id, owner_login)
+        response.set_status(206)
+        return response.send()
 
-            is_valid, validation_error = check_comment_data(data)
-
-            if not is_valid:
-                response.set_status(417)
-                response.set_message(validation_error)
-                return response.send()
-
-            if not check_bad_words(content):
-                response.set_status(418)
-                return response.send()
-
-        except Exception:
-            response.set_status(417)
-            return response.send()
-
-        try:
-            Comment.update_comment(unique_id, owner_login, content)
-            response.set_status(205)
-
-        except Exception:
-            response.set_status(504)
-            return response.send()
-
-    if action == "DELETE" and request.method == 'DELETE':
-        try:
-            Comment.delete_comment(unique_id, owner_login)
-            response.set_status(206)
-
-        except Exception:
-            response.set_status(504)
-
-    return response.send()
+    except Exception:
+        response.set_status(504)
 
 
-
-@api.route('/edit_user', methods=['PUT'])  # метод редактирования данных пользователя  ---
-def edit_userprofile():
-    pass
-
+# @api.route('/edit_user/', methods=['PUT'])  # метод редактирования данных пользователя  TESTS
+# @jwt_required()
+# def edit_userprofile():
+#     response = Response()
+#
+#     try:
+#         identity = get_jwt_identity()
+#         login = encrypt_decrypt(identity["login"], SECRET_KEY)
+#
+#         # Получение данных из запроса
+#         data = request.get_json()
+#         first_name = data.get("first_name")
+#         middle_name = data.get("middle_name")
+#         sur_name = data.get("sur_name")
+#         email = data.get("email")
+#         phone_number = data.get("phone_number")
+#         pers_photo_data = data.get("pers_photo_data")
+#
+#         # Валидация данных пользователя
+#         # is_valid, validation_error = check_user_data(data)
+#         # if not is_valid:
+#         #     response.set_status(417)
+#         #     response.set_message(validation_error)
+#         #     return response.send()
+#
+#         # Проверка на наличие недопустимых слов в именах пользователя
+#         if not check_bad_words(first_name, middle_name, sur_name):
+#             response.set_status(418)
+#             return response.send()
+#
+#         # Обработка данных о персональном фото
+#         if pers_photo_data is not None:
+#             header, pers_photo_data = pers_photo_data.split(",", 1)
+#
+#             if not is_image_valid(pers_photo_data) or not is_icon_square(pers_photo_data):
+#                 response.set_status(420)
+#                 return response.send()
+#             unique_filename = generate_uuid() + ".png"
+#             pers_photo_data = save_icon(pers_photo_data, unique_filename)
+#
+#     except Exception:
+#         response.set_status(417)
+#         return response.send()
+#
+#     try:
+#         # Обновление данных пользователя в базе данных
+#         User.update_user(login, first_name, middle_name, sur_name, email, phone_number, pers_photo_data)
+#
+#         response.set_status(205)
+#         return response.send()
+#
+#     except Exception as e:
+#         print(e)
+#         response.set_status(504)
+#         return response.send()
 
 
 

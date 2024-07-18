@@ -4,34 +4,17 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="313496f0-9e1b-4b22-820e-d983be4c79e6" name="Changes" comment="second stable version">
-      <change afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/dataSources/55085044-d2b3-48df-a310-db6dbb5d45c4.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/dataSources/55085044-d2b3-48df-a310-db6dbb5d45c4/storage_v2/_src_/database/STUDPOSTS.A3EaMQ.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/dataSources/55085044-d2b3-48df-a310-db6dbb5d45c4/storage_v2/_src_/database/STUDPOSTS.A3EaMQ/schema/public.abK9xQ.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_7_17_2024_3_05_AM_[Changes]/shelved.patch" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_7_17_2024_3_05_AM__Changes_.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/sqldialects.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/studposts_server.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/initDatabase/initModers.sql" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/unitTests/comment-create.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/unitTests/comments-edit.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/unitTests/handle-comments.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/unitTests/post-edit.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/unitTests/user-edit.txt" afterDir="false" />
+    <list default="true" id="313496f0-9e1b-4b22-820e-d983be4c79e6" name="Changes" comment="9th commit">
+      <change afterPath="$PROJECT_DIR$/unitTests/comments-update.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/database.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/generate_captcha.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/generate_captcha.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/routes.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/server_exception.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/server_exception.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/validation_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/validation_data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/это было кодом.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/initdatabase/initdatabase.sql" beforeDir="false" afterPath="$PROJECT_DIR$/initDatabase/initdatabase.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/unitTests/auth.txt" beforeDir="false" afterPath="$PROJECT_DIR$/unitTests/user-create(auth).txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/unitTests/home.txt" beforeDir="false" afterPath="$PROJECT_DIR$/unitTests/handle-posts(home).txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/unitTests/comments-edit.txt" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/unitTests/post-create.txt" beforeDir="false" afterPath="$PROJECT_DIR$/unitTests/post-create.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/unitTests/post-edit.txt" beforeDir="false" afterPath="$PROJECT_DIR$/unitTests/post-update.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -66,6 +49,18 @@
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Triddov&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Triddov/studposts_server&quot;,
+    &quot;accountId&quot;: &quot;03e9cf60-442a-47d6-b25a-6db9c7882328&quot;
+  }
+}</component>
   <component name="ProblemsViewState">
     <option name="selectedTabId" value="CurrentFile" />
   </component>
@@ -88,6 +83,7 @@
     "Python.check_data.executor": "Run",
     "Python.generate_captcha.executor": "Run",
     "Python.generate_token.executor": "Run",
+    "Python.routes.executor": "Debug",
     "Python.run.executor": "Run",
     "Python.server_exception.executor": "Run",
     "Python.validation_data.executor": "Run",
@@ -156,7 +152,8 @@
       <workItem from="1721209052202" duration="43000" />
       <workItem from="1721209511212" duration="415000" />
       <workItem from="1721210017851" duration="3025000" />
-      <workItem from="1721213893311" duration="41766000" />
+      <workItem from="1721213893311" duration="41874000" />
+      <workItem from="1721289312553" duration="20236000" />
     </task>
     <task id="LOCAL-00001" summary="second commit">
       <option name="closed" value="true" />
@@ -238,7 +235,15 @@
       <option name="project" value="LOCAL" />
       <updated>1721174532240</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="9th commit">
+      <option name="closed" value="true" />
+      <created>1721259297469</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1721259297469</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -269,10 +274,12 @@
     <MESSAGE value="8th commit" />
     <MESSAGE value="barahlo2" />
     <MESSAGE value="second stable version" />
-    <option name="LAST_COMMIT_MESSAGE" value="second stable version" />
+    <MESSAGE value="9th commit" />
+    <option name="LAST_COMMIT_MESSAGE" value="9th commit" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/studposts_server$validation_data.coverage" NAME="validation_data Coverage Results" MODIFIED="1721213133023" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
-    <SUITE FILE_PATH="coverage/studposts_server$run.coverage" NAME="run Coverage Results" MODIFIED="1721256829293" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/studposts_server$routes.coverage" NAME="routes Coverage Results" MODIFIED="1721295874653" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
+    <SUITE FILE_PATH="coverage/studposts_server$run.coverage" NAME="run Coverage Results" MODIFIED="1721310130820" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

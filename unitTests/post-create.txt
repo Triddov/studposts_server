@@ -1,4 +1,4 @@
-##### /api/create-post/ [POST]
+##### /api/create_post/ [POST]
 
 # correct post data (max data)
 {
