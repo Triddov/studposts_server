@@ -13,6 +13,8 @@
         CONNECTION LIMIT = -1
         IS_TEMPLATE = False;
 
+    SET TIME ZONE 'UTC-3';
+
     CREATE TABLE IF NOT EXISTS users (
         login VARCHAR(255) PRIMARY KEY,
         password VARCHAR(128) NOT NULL,
@@ -31,7 +33,7 @@
         title VARCHAR(200) NOT NULL,
         content VARCHAR(5000) NOT NULL,
         tags VARCHAR(200),
-        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        createdAt TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
         imageData VARCHAR(255),
         viewCount INTEGER DEFAULT 0,
         likesCount INTEGER DEFAULT 0,
@@ -44,7 +46,7 @@
         owner_login VARCHAR(255) NOT NULL,
         post_id VARCHAR(50) NOT NULL,
         content VARCHAR(5000) NOT NULL,
-        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        createdAt TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (owner_login) REFERENCES users (login),
         FOREIGN KEY (post_id) REFERENCES posts (unique_id)
     );

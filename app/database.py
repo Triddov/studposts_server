@@ -124,6 +124,24 @@ class Post:  # методы работы с таблицей posts
             raise Exception
 
     @staticmethod
+    def image_already(post_id):
+        cur = conn.cursor()
+        cur.execute("SELECT imagedata FROM posts WHERE unique_id = %s;", (post_id,))
+        already_exists = cur.fetchone()
+        return True if already_exists else False
+
+    @staticmethod
+    def image_filename(post_id):
+        cur = conn.cursor()
+        cur.execute("SELECT imagedata FROM posts WHERE unique_id = %s;", (post_id,))
+        result = cur.fetchone()
+
+        if result:
+            return os.path.basename(result[0])
+        else:
+            raise Exception
+
+    @staticmethod
     def increment_view(post_id):
         cur = conn.cursor()
         cur.execute("UPDATE posts SET viewcount = viewcount + 1 WHERE unique_id = %s", (post_id,))

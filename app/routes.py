@@ -21,21 +21,13 @@ jwt = JWTManager()  # объект генерации токенов
 
 
 ## ЗАДАЧИ:
-# сделать логику модераторов (полномочия без огрничений, кроме удаления других модераторов)
+# 1. сделать логику модераторов (полномочия без ограничений, кроме удаления других модераторов)
 # добавить в /home/ отправляемый объект 'operations': { 'delete': endpoint удаления постов
 # и прочие методы ( для овнера, для модера), просмотр (для всех ), изменить ( для овнера )}
-
 # бан по ip - в методанных запроса (x forward from - название заголовка в header-е)
 
-# принудительно сохранять измененную картинку вместо прошлой
-# эндпоинт данных юзера
-# добавлять лайки/дизлайки в эндпоите (триггеры + дрочь)
-# формат даты и времени
-
-## отревьювить потом:
-
-# функции для юнит-тестов
-# сделать комменты везде
+# 2. добавлять лайки/дизлайки в эндпоите (триггеры + дрочь)
+# 3. метод профиля
 
 def token_required(f):  # метод проверки токенов авторизации
     @wraps(f)
@@ -405,9 +397,12 @@ def update_post(post_id):
                 response.set_status(420)
                 return response.send()
 
-            # сохранение иконки и возврат ее пути для записи
-            unique_filename = generate_uuid() + ".jpg"
-            image_data = save_image(image_data, unique_filename)
+            # сохранение изображения и возврат ее пути для записи(или перезаписи, если она есть уже)
+            if Post.image_already(post_id):
+                unique_filename = Post.image_filename(post_id)
+            else:
+                unique_filename = generate_uuid() + ".png"
+                image_data = save_image(image_data, unique_filename)
 
     except Exception:
         response.set_status(417)
@@ -691,7 +686,10 @@ def delete_comment(post_id):
 #         response.set_status(504)
 #         return response.send()
 
-
+@api.route('/<post_id>/rate/', methods=['PUT'])  # метод лайков/дизлайков под постом
+@jwt_required()
+def rate(post_id):
+    pass
 
 
 
