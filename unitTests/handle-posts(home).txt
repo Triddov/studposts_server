@@ -1,0 +1,56 @@
+##### api/home [GET]
+
+# correct request
+{
+    # значения по умолчанию
+    'limit': '5',
+    'page': '1',
+    'orderByDate': 'desc',
+    'search' : '',
+}
+
+# обращение к несуществующему посту
+http://127.0.0.1:5000/api/16/comments
+
+
+# обращение к посту без комментариев
+http://127.0.0.1:5000/api/1/comments
+
+# обращение к посту с комментариями
+http://127.0.0.1:5000/api/5/comments
+
+# установка пустых полей
+http://127.0.0.1:5000/api/5/comments?limit=&page=&orderByDate=
+
+# некорректные поля (нечисловые и не входящие в диапазон сортировки)
+http://127.0.0.1:5000/api/5/comments?limit=ыфвфывфывфв&page=цукцукцук&orderByDate=пвапвп
+
+# limit = 0
+http://127.0.0.1:5000/api/5/comments?limit=0
+
+# установка limit=1
+http://127.0.0.1:5000/api/5/comments?limit=1
+
+# установка orderByDate=asc
+http://127.0.0.1:5000/api/5/comments?orderByDate=asc
+
+# установка page=0
+http://127.0.0.1:5000/api/5/comments?page=0
+
+# установка page=2 (выше максимума страниц)
+http://127.0.0.1:5000/api/5/comments?page=2
+
+# установка limit=1 и page=5
+http://127.0.0.1:5000/api/5/comments?limit=1&page=5
+
+# установка limit=1 page=5 и orderByDate=asc
+http://127.0.0.1:5000/api/5/comments?limit=1&page=5&orderByDate=asc
+
+# установка limit = 3 и page=3
+http://127.0.0.1:5000/api/5/comments?limit=3&page=3
+
+
+
+
+
+
