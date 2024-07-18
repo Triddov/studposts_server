@@ -25,10 +25,36 @@ class User:  # методы работы с таблицей users
         user = cur.fetchone()
         return user
 
-    @staticmethod
-    def update_user():
-        pass
+@staticmethod
+def update_user(login, first_name, middle_name, sur_name, email, phone_number, pers_photo_data):
+    cur = conn.cursor()
+    fields = []
+    values = []
 
+    if first_name:
+        fields.append("firstName = %s")
+        values.append(first_name)
+    if middle_name:
+        fields.append("middleName = %s")
+        values.append(middle_name)
+    if sur_name:
+        fields.append("surName = %s")
+        values.append(sur_name)
+    if email:
+        fields.append("email = %s")
+        values.append(email)
+    if phone_number:
+        fields.append("phoneNumber = %s")
+        values.append(phone_number)
+    if pers_photo_data:
+        fields.append("persPhotoData = %s")
+        values.append(pers_photo_data)
+
+    if fields:
+        values.append(login)
+        query = f"UPDATE users SET {', '.join(fields)} WHERE login = %s;"
+        cur.execute(query, values)
+        conn.commit()
 
 class Post:  # методы работы с таблицей posts
     @staticmethod

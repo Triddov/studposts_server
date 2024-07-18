@@ -599,13 +599,54 @@ def edit_comment():
 
     return response.send()
 
-
-
-@api.route('/edit_user', methods=['PUT'])  # метод редактирования данных пользователя  ---
+@api.route('/edit_user', methods=['PUT'])  # Метод для редактирования профиля пользователя
+@jwt_required()
 def edit_userprofile():
-    pass
+    response = Response()
 
+    try:
+        identity = get_jwt_identity()
+        owner_login = encrypt_decrypt(identity["login"], SECRET_KEY)
 
+        # Получение данных из запроса
+        data = request.get_json()
+        first_name = data.get("first_name")
+        middle_name = data.get("middle_name")
+        sur_name = data.get("sur_name")
+        email = data.get("email")
+        phone_number = data.get("phone_number")
+        pers_photo_data = data.get("pers_photo_data")
+
+        # Валидация данных пользователя
+        is_valid, validation_error = check_user_data(data)
+        if not is_valid:
+            response.set_status(417)
+            response.set_message(validation_error)
+            return response.send()
+
+        # Проверка на наличие недопустимых слов в именах пользователя
+        if not check_bad_words(first_name, middle_name, sur_name):
+            response.set_status(418)
+            return response.send()
+
+        # Обработка данных о персональном фото
+        if pers_photo_data is not None:
+            header, pers_photo_data = pers_photo_data.split(",", 1)
+            if not is_image_valid(pers_photo_data) or not is_icon_square(pers_photo_data):
+                response.set_status(420)
+                return response.send()
+            unique_filename = generate_uuid() + ".png"
+            pers_photo_data = save_icon(pers_photo_data, unique_filename)
+
+        # Обновление данных пользователя в базе данных
+        User.update_user(owner_login, first_name, middle_name, sur_name, email, phone_number, pers_photo_data)
+
+        response.set_status(205)  # Код успешного обновления данных
+        return response.send()
+
+    except Exception:
+        response.set_status(400)  # Ошибка в случае любого исключения
+        return response.send()
 
 
 
