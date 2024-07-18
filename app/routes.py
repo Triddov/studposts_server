@@ -20,13 +20,22 @@ api = Blueprint('api', __name__)  # добавляет api во всех рау�
 jwt = JWTManager()  # объект генерации токенов
 
 
-# Задачи:
+## ЗАДАЧИ:
+# сделать логику модераторов (полномочия без огрничений, кроме удаления других модераторов)
+# добавить в /home/ отправляемый объект 'operations': { 'delete': endpoint удаления постов
+# и прочие методы ( для овнера, для модера), просмотр (для всех ), изменить ( для овнера )}
 
-# дотестить метод handle_posts()
-# сделать все тесты картинок постов и иконок
+# бан по ip - в методанных запроса (x forward from - название заголовка в header-е)
 
-# волюм для sourses
+# принудительно сохранять измененную картинку вместо прошлой
+# эндпоинт данных юзера
+# добавлять лайки/дизлайки в эндпоите (триггеры + дрочь)
+# формат даты и времени
 
+## отревьювить потом:
+
+# функции для юнит-тестов
+# сделать комменты везде
 
 def token_required(f):  # метод проверки токенов авторизации
     @wraps(f)
@@ -42,10 +51,10 @@ def token_required(f):  # метод проверки токенов автор�
 
         try:
             identity = get_jwt_identity()  # получение токена авторизации
-            user_login = encrypt_decrypt(identity["login"], SECRET_KEY)
+            owner_login = encrypt_decrypt(identity["login"], SECRET_KEY)
             password = encrypt_decrypt(identity["password"], SECRET_KEY)
 
-            user = User.find_by_login(user_login)
+            user = User.find_by_login(owner_login)
 
             # проверка логина и пароля пользователя
             if not user or password != user[1]:
@@ -81,7 +90,7 @@ def get_captcha():
     return response.send()
 
 
-@api.route('/auth', methods=['POST'])  # метод авторизации/регистрации пользователя
+@api.route('/auth/', methods=['POST'])  # метод авторизации/регистрации пользователя
 def auth():
     response = Response()
     try:
@@ -152,6 +161,18 @@ def auth():
                     response.set_status(418)
                     return response.send()
 
+                if pers_photo_data is not None:
+                    header, pers_photo_data = pers_photo_data.split(",", 1)
+
+                    # проверка иконки на наличие, валидность и "квадратность"
+                    if not is_image_valid(pers_photo_data) or not is_icon_square(pers_photo_data):
+                        response.set_status(420)
+                        return response.send()
+
+                    # сохранение иконки и возврат ее пути для записи
+                    unique_filename = generate_uuid() + ".png"
+                    pers_photo_data = save_icon(pers_photo_data, unique_filename)
+
             # если данные некорректны
             except Exception:
                 response.set_status(417)
@@ -162,17 +183,6 @@ def auth():
                 if User.find_by_login(login):
                     response.set_status(409)
                     return response.send()
-
-                if pers_photo_data is not None:
-                    # проверка иконки на наличие, валидность и "квадратность"
-                    if not is_image_valid(pers_photo_data) or not is_icon_square(pers_photo_data):
-                        response.set_status(420)
-                        return response.send()
-
-                    # сохранение иконки и возврат ее пути для записи
-                    header, pers_photo_data = pers_photo_data.split(",", 1)
-                    unique_filename = generate_uuid()+".jpg"
-                    pers_photo_data = save_icon(pers_photo_data, unique_filename)
 
                 # создание юзера в базе и выдача токена
                 User.create_user(login, password, first_name, middle_name, sur_name, email, phone_number, pers_photo_data)
@@ -216,7 +226,7 @@ def auth():
         return response.send()
 
 
-@api.route('/home', methods=['GET'])  # метод получения всех постов
+@api.route('/home/', methods=['GET'])  # метод получения всех постов
 def handle_posts():
     response = Response()
 
@@ -244,10 +254,11 @@ def handle_posts():
         # формула максимально возможной страницы с данным лимитом и кол-вом постов
         try:
             max_page = (posts_count - 1) // limit + 1
+
         # если постов нет, нет и limit, но одну страницу мы отобразить должны
         except ZeroDivisionError:
             max_page = 1
-        
+
         # проверяем page на допустимый диапазон
         if page < 1 or page > max_page:
             page = 1
@@ -282,22 +293,36 @@ def handle_posts():
         return response.send()
 
 
-@api.route('/post/create/', methods=['POST'])  # метод создания нового поста
+@api.route('/<post_id>/', methods=['GET'])  # метод получения одного поста(с обновлением просмотров)
+def handle_post(post_id):
+    response = Response()
+
+    try:
+        Post.increment_view(post_id)
+        post = Post.get_post_by_id(post_id)
+        response.set_data({'post': post})
+        return response.send()
+
+    except Exception:
+        response.set_status(504)
+
+
+@api.route('/create_post/', methods=['POST'])  # метод создания нового поста
 @jwt_required()
 def create_post():
     response = Response()
 
-    data = request.get_json()
-
     # получение и обработка данных
     try:
         identity = get_jwt_identity()
-        user_login = encrypt_decrypt(identity["login"], SECRET_KEY)
+        owner_login = encrypt_decrypt(identity["login"], SECRET_KEY)
+
+        data = request.get_json()
 
         title = data.get("title")
         content = data.get("content")
         tags = data.get("tags")
-        image_data = data.get("image_data")
+        image_data = data.get("imagedata")
 
         # валидация всех полей
         is_valid, validation_error = check_post_data(data)
@@ -319,19 +344,103 @@ def create_post():
     # запись нового поста
     try:
         if image_data is not None:
+            header, image_data = image_data.split(",", 1)
+
             # проверка иконки на наличие и валидность
             if not is_image_valid(image_data) or not check_image_aspect_ratio(image_data):
                 response.set_status(420)
                 return response.send()
 
             # сохранение иконки и возврат ее пути для записи
-            header, image_data = image_data.split(",", 1)
-            unique_filename = generate_uuid() + ".jpg"
+            unique_filename = generate_uuid() + ".png"
             image_data = save_image(image_data, unique_filename)
 
         unique_id = generate_uuid()
-        Post.create_post(unique_id, user_login, title, content, tags, image_data)
+        Post.create_post(unique_id, owner_login, title, content, tags, image_data)
 
+        return response.send()
+
+    # если ошибка в логике сервера
+    except Exception as e:
+        print(e)
+        response.set_status(421)
+        return response.send()
+
+
+@api.route('/<post_id>/update/', methods=['PUT'])  # метод редактирования поста
+@jwt_required()
+def update_post(post_id):
+    response = Response()
+
+    try:
+        identity = get_jwt_identity()
+        owner_login = encrypt_decrypt(identity["login"], SECRET_KEY)
+
+        if not Post.get_post_by_id(post_id):
+            response.set_status(419)
+            return response.send()
+
+        data = request.get_json()
+        title = data.get("title")
+        content = data.get("content")
+        tags = data.get("tags")
+        image_data = data.get("image_data")
+
+        # валидация полей
+        is_valid, validation_error = check_post_data(data)
+        if not is_valid:
+            response.set_status(417)
+            response.set_message(validation_error)
+            return response.send()
+
+        # проверка на плохие слова
+        if not check_bad_words(title, content, tags):
+            response.set_status(418)
+            return response.send()
+
+        if image_data is not None:
+            header, image_data = image_data.split(",", 1)
+            # проверка иконки на наличие и валидность
+            if not is_image_valid(image_data) or not check_image_aspect_ratio(image_data):
+                response.set_status(420)
+                return response.send()
+
+            # сохранение иконки и возврат ее пути для записи
+            unique_filename = generate_uuid() + ".jpg"
+            image_data = save_image(image_data, unique_filename)
+
+    except Exception:
+        response.set_status(417)
+        return response.send()
+
+    # обновляем пост в базе
+    try:
+        Post.update_post(post_id, owner_login, title=title, content=content, tags=tags, imagedata=image_data)
+        response.set_status(205)
+        return response.send()
+
+    # если ошибка в логике сервера
+    except Exception:
+        response.set_status(421)
+        return response.send()
+
+
+@api.route('/<post_id>/delete/', methods=['DELETE'])  # метод удаления поста
+@jwt_required()
+def delete_post(post_id):
+    response = Response()
+
+    try:
+        jwt_identity = get_jwt_identity()
+        owner_login = encrypt_decrypt(jwt_identity["login"], SECRET_KEY)
+
+    except Exception:
+        response.set_status(417)
+        return response.send()
+
+    try:
+        Post.delete_post(post_id, owner_login=owner_login)
+        response.set_status(206)
         return response.send()
 
     # если ошибка в логике сервера
@@ -340,30 +449,24 @@ def create_post():
         return response.send()
 
 
-@api.route('/post/<int:id>/', methods=['GET', 'PUT', 'DELETE'])
-@jwt_required()
-def handle_post(id):
-    pass
-
-
-@api.route('<int:post_id>/comments', methods=['GET'])
+@api.route('<post_id>/comments/', methods=['GET'])  # метод получения комментов к посту
 def handle_comments(post_id):
     response = Response()
 
     try:
         all_posts = Post.get_all_posts()
         posts_id = [post[0] for post in all_posts]
-        
+
         # если пост с таким id существует
         if post_id in posts_id:
-            
+
             comments_count = len(Comment.get_comments_by_post(post_id))
 
             # получаем query string параметры
             limit = request.args.get('limit', default=5)
             page = request.args.get('page', default=1)
             order = request.args.get('orderByDate', default='desc')
-            
+
             # корректные преобразования значений запроса
             try:
                 page, limit = int(page), int(limit)
@@ -379,26 +482,25 @@ def handle_comments(post_id):
             # если постов нет, нет и limit, но одну страницу мы отобразить должны
             except ZeroDivisionError:
                 max_page = 1
-            
+
             # проверяем page на допустимый диапазон
             if page < 1 or page > max_page:
                 page = 1
 
             if order not in ['asc', 'desc']:
                 order = 'desc'
-            
-            
+
             # пытаемся получить комментарии к посту
             try:
                 comments = Comment.get_comments_by_post(post_id, order, page, limit)
                 response.set_data({
-                'filters': {
-                    'orderByDate': order
-                },
-                'limit': limit,
-                'page': page,
-                'totalComments': comments_count,
-                'comments': comments,
+                    'filters': {
+                        'orderByDate': order
+                    },
+                    'limit': limit,
+                    'page': page,
+                    'totalComments': comments_count,
+                    'comments': comments,
                 })
 
                 return response.send()
@@ -408,42 +510,188 @@ def handle_comments(post_id):
                 response.set_status(504)
                 return response.send()
 
-        
         # ошибка "не найдено"
         else:
             response.set_status(404)
             return response.send()
-        
 
     # общая ошибка
-    except:
+    except Exception as e:
+        print(e)
         response.set_status(400)
         return response.send()
 
 
-@api.route('/post/<int:post_id>/comment/create/', methods=['POST'])
+@api.route('/<post_id>/add_comment/', methods=['POST'])  # метод создания коммента
 @jwt_required()
-def create_comment():
-    pass
+def create_comment(post_id):
+    response = Response()
+
+    try:
+        identity = get_jwt_identity()
+        owner_login = encrypt_decrypt(identity["login"], SECRET_KEY)
+
+        # Извлечение полей из данных запроса
+        data = request.get_json()
+        content = data.get('content')
+
+        # Валидация данных комментария
+        is_valid, validation_error = check_comment_data(data)
+
+        if not is_valid:
+            response.set_status(417)
+            response.set_message(validation_error)
+            return response.send()
+
+        # Проверка на наличие неприемлемого контента с помощью проверки плохих слов
+        if not check_bad_words(content):
+            response.set_status(418)
+            return response.send()
+    except:
+        response.set_status(417)
+        return response.send()
+
+    try:
+        unique_id = generate_uuid()
+        # Создание комментария в базе данных
+        Comment.create_comment(unique_id, owner_login, post_id, content)
+
+    except Exception:
+        response.set_status(504)
+        return response.send()
+
+    response.set_status(201)
+    return response.send()
 
 
-@api.route('/post/<int:post_id>/comment/<int:id>/', methods=['PUT', 'DELETE'])
+@api.route('/<post_id>/update_comment/', methods=['PUT'])  # метод редактирования коммента
 @jwt_required()
-def handle_comment(id):
-    pass
+def update_comment(post_id):
+    response = Response()
+
+    try:
+        identity = get_jwt_identity()
+        owner_login = encrypt_decrypt(identity["login"], SECRET_KEY)
+
+        data = request.get_json()
+        content = data.get("content")
+        comment_id = data.get("comment_id")
+
+        if not Post.get_post_by_id(post_id) or not Comment.get_comment_by_id(comment_id):
+            response.set_status(419)
+            return response.send()
+
+        is_valid, validation_error = check_comment_data(data)
+
+        if not is_valid:
+            response.set_status(417)
+            response.set_message(validation_error)
+            return response.send()
+
+        if not check_bad_words(content):
+            response.set_status(418)
+            return response.send()
+
+    except Exception:
+        response.set_status(417)
+        return response.send()
+
+    try:
+        Comment.update_comment(comment_id, owner_login, content)
+        response.set_status(205)
+        return response.send()
+
+    except Exception:
+        response.set_status(421)
+        return response.send()
 
 
-@api.route('/posts/<int:post_id>/view', methods=['PUT'])
-def update_view_count(post_id):
-    pass
+@api.route('/<post_id>/delete_comment/', methods=['DELETE'])  # метод удаления коммента
+@jwt_required()
+def delete_comment(post_id):
+    response = Response()
+
+    data = request.get_json()
+    comment_id = data.get("comment_id")
+
+    try:
+        identity = get_jwt_identity()
+        owner_login = encrypt_decrypt(identity["login"], SECRET_KEY)
+
+        if not Post.get_post_by_id(post_id) or not Comment.get_comment_by_id(comment_id):
+            response.set_status(419)
+            return response.send()
+
+    except Exception:
+        response.set_status(417)
+        return response.send()
+
+    try:
+        Comment.delete_comment(comment_id, owner_login)
+        response.set_status(206)
+        return response.send()
+
+    except Exception:
+        response.set_status(421)
 
 
-@api.route('/posts/<int:post_id>/like', methods=['PUT'])
-def update_likes_count(post_id):
-    pass
+# @api.route('/edit_user/', methods=['PUT'])  # метод редактирования данных пользователя  TESTS
+# @jwt_required()
+# def edit_userprofile():
+#     response = Response()
+#
+#     try:
+#         identity = get_jwt_identity()
+#         login = encrypt_decrypt(identity["login"], SECRET_KEY)
+#
+#         # Получение данных из запроса
+#         data = request.get_json()
+#         first_name = data.get("first_name")
+#         middle_name = data.get("middle_name")
+#         sur_name = data.get("sur_name")
+#         email = data.get("email")
+#         phone_number = data.get("phone_number")
+#         pers_photo_data = data.get("pers_photo_data")
+#
+#         # Валидация данных пользователя
+#         # is_valid, validation_error = check_user_data(data)
+#         # if not is_valid:
+#         #     response.set_status(417)
+#         #     response.set_message(validation_error)
+#         #     return response.send()
+#
+#         # Проверка на наличие недопустимых слов в именах пользователя
+#         if not check_bad_words(first_name, middle_name, sur_name):
+#             response.set_status(418)
+#             return response.send()
+#
+#         # Обработка данных о персональном фото
+#         if pers_photo_data is not None:
+#             header, pers_photo_data = pers_photo_data.split(",", 1)
+#
+#             if not is_image_valid(pers_photo_data) or not is_icon_square(pers_photo_data):
+#                 response.set_status(420)
+#                 return response.send()
+#             unique_filename = generate_uuid() + ".png"
+#             pers_photo_data = save_icon(pers_photo_data, unique_filename)
+#
+#     except Exception:
+#         response.set_status(417)
+#         return response.send()
+#
+#     try:
+#         # Обновление данных пользователя в базе данных
+#         User.update_user(login, first_name, middle_name, sur_name, email, phone_number, pers_photo_data)
+#
+#         response.set_status(205)
+#         return response.send()
+#
+#     except Exception as e:
+#         print(e)
+#         response.set_status(504)
+#         return response.send()
 
 
-@api.route('/posts/<int:post_id>/dislike', methods=['PUT'])
-def update_dislikes_count(post_id):
-    pass
+
+
 
