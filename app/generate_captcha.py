@@ -9,7 +9,7 @@ def generate_captcha():  # метод генерации текста капчи
     return captcha_str  # текст капчи, который будет на изображении
 
 def generate_captcha_image(captcha_text):  # метод генерации изображения капчи и перевод его в строку base64
-    image = ImageCaptcha()
+    image = ImageCaptcha(width=240, height=90)
     data = image.generate(captcha_text)
     image_data = BytesIO(data.getvalue())
     base64_image = base64.b64encode(image_data.getvalue()).decode('utf-8')

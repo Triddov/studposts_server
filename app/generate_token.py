@@ -13,7 +13,7 @@ def generate_uuid():  # метод генерация уникального и�
     return str(uuid.uuid4())
 
 
-def create_user_jwt_token(login: str, password: str) -> str:  # мой метод создания токена авторизации
+def create_user_jwt_token(login: str, password: str) -> str:  # метод создания токена авторизации
     authorization_limit = int(time.time())
     token = create_access_token(identity={"created_time": authorization_limit, "login": login, "password": password})
     return token

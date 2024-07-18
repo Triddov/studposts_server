@@ -29,7 +29,7 @@
         unique_id VARCHAR(50) PRIMARY KEY,
         owner_login VARCHAR(255) NOT NULL,
         title VARCHAR(200) NOT NULL,
-        content TEXT NOT NULL,
+        content VARCHAR(5000) NOT NULL,
         tags VARCHAR(200),
         createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         imageData VARCHAR(255),
@@ -43,7 +43,7 @@
         unique_id VARCHAR(50) PRIMARY KEY,
         owner_login VARCHAR(255) NOT NULL,
         post_id VARCHAR(50) NOT NULL,
-        content TEXT NOT NULL,
+        content VARCHAR(5000) NOT NULL,
         createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (owner_login) REFERENCES users (login),
         FOREIGN KEY (post_id) REFERENCES posts (unique_id)

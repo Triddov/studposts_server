@@ -60,6 +60,7 @@ class Response:  # класс ответов, ошибок и сообщений
             418: "Inappropriate content",  # custom
             419: "Data not found",
             420: "Incorrect image",  # custom
+            421: "Insufficient rights",
             # статусы сервера
             500: "Internal Server Error",
             502: "Bad Gateway",

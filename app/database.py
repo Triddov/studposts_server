@@ -58,8 +58,7 @@ class Post:  # методы работы с таблицей posts
     def create_post(unique_id, owner_login, title, content, tags, image_data):
         cur = conn.cursor()
         cur.execute("""INSERT INTO posts (unique_id, owner_login, title, content, tags, createdAt, imageData, viewCount, likesCount, dislikesCount)
-            VALUES (%s, %s, %s, %s, %s, NOW(), %s, 0, 0, 0)
-""", (unique_id, owner_login, title, content, tags, image_data))
+            VALUES (%s, %s, %s, %s, %s, NOW(), %s, 0, 0, 0)""", (unique_id, owner_login, title, content, tags, image_data))
 
     @staticmethod
     def get_all_posts(order='desc', page=1, limit=0, search=None):
@@ -114,9 +113,12 @@ class Post:  # методы работы с таблицей posts
 
         # Сначала проверяем, что логин пользователя совпадает с логином создателя поста
         cur.execute("SELECT owner_login FROM posts WHERE unique_id = %s", (unique_id,))
-        result = cur.fetchone()
+        user = cur.fetchone()
 
-        if result and result[0] == owner_login:
+        cur.execute("SELECT privileged FROM users WHERE login = %s", (owner_login,))
+        privileged = cur.fetchone()
+
+        if (user and user[0] == owner_login) or privileged:
             cur.execute("DELETE FROM posts WHERE unique_id = %s;", (unique_id,))
         else:
             raise Exception
@@ -129,12 +131,12 @@ class Post:  # методы работы с таблицей posts
     @staticmethod
     def like_post(post_id):
         cur = conn.cursor()
-        cur.execute("UPDATE posts SET likes_count = likes_count + 1 WHERE unique_id = %s", (post_id,))
+        cur.execute("UPDATE posts SET likescount = likescount + 1 WHERE unique_id = %s", (post_id,))
 
     @staticmethod
     def dislike_post(post_id):
         cur = conn.cursor()
-        cur.execute("UPDATE posts SET dislikes_count = dislikes_count + 1 WHERE unique_id = %s", (post_id,))
+        cur.execute("UPDATE posts SET dislikescount = dislikescount + 1 WHERE unique_id = %s", (post_id,))
 
 
 class Comment:  # методы работы с таблицей comments
@@ -157,26 +159,20 @@ class Comment:  # методы работы с таблицей comments
             raise Exception
 
     @staticmethod
-    def get_comments_by_post(post_id, sort='date', order='desc', page=1, limit=10):
+    def get_comments_by_post(post_id, order='desc', page=1, limit=0):
         offset = (page - 1) * limit  # смещение пагинации
 
-        valid_sort_fields = {'date', 'author', 'content'}  # допустимые поля сортировки
-        if sort not in valid_sort_fields:
-            sort = 'date'  # сортировка по умолчанию, если поле неверное
-
-        valid_order_values = {'asc', 'desc'}  # допустимые значения порядка сортировки
-        if order not in valid_order_values:
-            order = 'desc'  # сортировка по умолчанию, если поле неверное
-
-        query = f"""
+        # Используйте параметризованный запрос для безопасности и правильной обработки типов данных
+        query = """
             SELECT * FROM comments
             WHERE post_id = %s
-            ORDER BY {sort} {order}
-            LIMIT %s OFFSET %s;
-        """
+            ORDER BY createdAt """ + order
+
+        if limit != 0:
+            query += f' LIMIT {limit} OFFSET {offset};'
 
         cur = conn.cursor()
-        cur.execute(query, (post_id, limit, offset))
+        cur.execute(query, (post_id,))
         comments = cur.fetchall()
         return comments
 
@@ -188,9 +184,10 @@ class Comment:  # методы работы с таблицей comments
         return comment
 
     @staticmethod
-    def update_comment(post_id, comment_id, owner_login, content):
+    def update_comment(comment_id, owner_login, content):
         cur = conn.cursor()
-        cur.execute("SELECT owner_login FROM posts WHERE unique_id = %s", (post_id,))
+
+        cur.execute("SELECT owner_login FROM comments WHERE unique_id = %s", (comment_id,))
         result = cur.fetchone()
 
         if result and result[0] == owner_login:
@@ -203,13 +200,16 @@ class Comment:  # методы работы с таблицей comments
             raise Exception
 
     @staticmethod
-    def delete_comment(post_id, comment_id, owner_login):
+    def delete_comment(comment_id, owner_login):
 
         cur = conn.cursor()
-        cur.execute("SELECT owner_login FROM posts WHERE unique_id = %s", (post_id,))
-        result = cur.fetchone()
+        cur.execute("SELECT owner_login FROM comments WHERE unique_id = %s", (comment_id,))
+        user = cur.fetchone()
 
-        if result and result[0] == owner_login:
+        cur.execute("SELECT privileged FROM users WHERE login = %s", (owner_login,))
+        privileged = cur.fetchone()
+
+        if (user and user[0] == owner_login) or privileged:
             cur.execute("DELETE FROM comments WHERE unique_id = %s;", (comment_id,))
         else:
             raise Exception

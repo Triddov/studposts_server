@@ -21,13 +21,21 @@ jwt = JWTManager()  # объект генерации токенов
 
 
 ## ЗАДАЧИ:
+# сделать логику модераторов (полномочия без огрничений, кроме удаления других модераторов)
+# добавить в /home/ отправляемый объект 'operations': { 'delete': endpoint удаления постов
+# и прочие методы ( для овнера, для модера), просмотр (для всех ), изменить ( для овнера )}
 
-# сделать логику модераторов (полномочия без огрничений, кроме удаления других модераторов, сделать методы удаления чужих постов и "бана по ip")
-# удаление изменных картинок ?
-# не работает метод исменения данных юзера
-# добавить в /home/ отправляемыемый  объект 'operations': { 'delete': endpoint удаления постов и прочие методы }
-# как добавлять лайки/дизлайки в эндпоите ????
+# бан по ip - в методанных запроса (x forward from - название заголовка в header-е)
 
+# принудительно сохранять измененную картинку вместо прошлой
+# эндпоинт данных юзера
+# добавлять лайки/дизлайки в эндпоите (триггеры + дрочь)
+# формат даты и времени
+
+## отревьювить потом:
+
+# функции для юнит-тестов
+# сделать комменты везде
 
 def token_required(f):  # метод проверки токенов авторизации
     @wraps(f)
@@ -218,7 +226,7 @@ def auth():
         return response.send()
 
 
-@api.route('/home/', methods=['GET'])  # метод получения всех постов  TESTS
+@api.route('/home/', methods=['GET'])  # метод получения всех постов
 def handle_posts():
     response = Response()
 
@@ -238,10 +246,22 @@ def handle_posts():
         except ValueError:
             page, limit = 1, 5
 
-        limit = min(max(limit, 1), min(posts_count, 5))
+        # если limit вне диапазона количества постов
+        if 1 > limit or posts_count < limit:
+            # то он равен либо 5, либо количеству постов, если оно меньше 5 (например если постов 4, то limit=4, а не 5)
+            limit = min(posts_count, 5)
 
-        max_page = (posts_count - 1) // limit + 1
-        page = min(max(page, 1), max_page)
+        # формула максимально возможной страницы с данным лимитом и кол-вом постов
+        try:
+            max_page = (posts_count - 1) // limit + 1
+
+        # если постов нет, нет и limit, но одну страницу мы отобразить должны
+        except ZeroDivisionError:
+            max_page = 1
+
+        # проверяем page на допустимый диапазон
+        if page < 1 or page > max_page:
+            page = 1
 
         if order not in ['asc', 'desc']:
             order = 'desc'
@@ -259,6 +279,7 @@ def handle_posts():
                 'totalPosts': posts_count,
                 'posts': posts,
             })
+
             return response.send()
 
         # если ошибка в логике сервера
@@ -342,7 +363,7 @@ def create_post():
     # если ошибка в логике сервера
     except Exception as e:
         print(e)
-        response.set_status(504)
+        response.set_status(421)
         return response.send()
 
 
@@ -400,7 +421,7 @@ def update_post(post_id):
 
     # если ошибка в логике сервера
     except Exception:
-        response.set_status(504)
+        response.set_status(421)
         return response.send()
 
 
@@ -428,7 +449,7 @@ def delete_post(post_id):
         return response.send()
 
 
-@api.route('<post_id>/comments/', methods=['GET'])  # метод получения комментов к посту  TESTS
+@api.route('<post_id>/comments/', methods=['GET'])  # метод получения комментов к посту
 def handle_comments(post_id):
     response = Response()
 
@@ -495,9 +516,11 @@ def handle_comments(post_id):
             return response.send()
 
     # общая ошибка
-    except:
+    except Exception as e:
+        print(e)
         response.set_status(400)
         return response.send()
+
 
 @api.route('/<post_id>/add_comment/', methods=['POST'])  # метод создания коммента
 @jwt_required()
@@ -541,21 +564,22 @@ def create_comment(post_id):
     return response.send()
 
 
-@api.route('/<post_id>/<comment_id>/update/', methods=['PUT'])  # метод редактирования коммента
+@api.route('/<post_id>/update_comment/', methods=['PUT'])  # метод редактирования коммента
 @jwt_required()
-def update_comment(post_id, comment_id):
+def update_comment(post_id):
     response = Response()
 
     try:
         identity = get_jwt_identity()
         owner_login = encrypt_decrypt(identity["login"], SECRET_KEY)
 
+        data = request.get_json()
+        content = data.get("content")
+        comment_id = data.get("comment_id")
+
         if not Post.get_post_by_id(post_id) or not Comment.get_comment_by_id(comment_id):
             response.set_status(419)
             return response.send()
-
-        data = request.get_json()
-        content = data.get("content")
 
         is_valid, validation_error = check_comment_data(data)
 
@@ -573,19 +597,22 @@ def update_comment(post_id, comment_id):
         return response.send()
 
     try:
-        Comment.update_comment(post_id, comment_id, owner_login, content)
+        Comment.update_comment(comment_id, owner_login, content)
         response.set_status(205)
         return response.send()
 
     except Exception:
-        response.set_status(504)
+        response.set_status(421)
         return response.send()
 
 
-@api.route('/<post_id>/<comment_id>/delete/', methods=['DELETE'])  # метод удаления коммента
+@api.route('/<post_id>/delete_comment/', methods=['DELETE'])  # метод удаления коммента
 @jwt_required()
-def delete_comment(post_id, comment_id):
+def delete_comment(post_id):
     response = Response()
+
+    data = request.get_json()
+    comment_id = data.get("comment_id")
 
     try:
         identity = get_jwt_identity()
@@ -600,12 +627,12 @@ def delete_comment(post_id, comment_id):
         return response.send()
 
     try:
-        Comment.delete_comment(post_id, comment_id, owner_login)
+        Comment.delete_comment(comment_id, owner_login)
         response.set_status(206)
         return response.send()
 
     except Exception:
-        response.set_status(504)
+        response.set_status(421)
 
 
 # @api.route('/edit_user/', methods=['PUT'])  # метод редактирования данных пользователя  TESTS
