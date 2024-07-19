@@ -26,12 +26,13 @@ class User:  # методы работы с таблицей users
         return user
 
     @staticmethod
-    def update_user(login, first_name=None, middle_name=None, sur_name=None, email=None, phone_number=None, pers_photo_data=None):
+    def update_user(original_login, login=None, password=None, first_name=None, middle_name=None, sur_name=None, email=None, phone_number=None, pers_photo_data=None):
         cur = conn.cursor()
-        fields, values = [], []
+        fields = []
 
         update_fields = {
             "login": login,
+            "password": password,
             "firstName": first_name,
             "middleName": middle_name,
             "surName": sur_name,
@@ -39,18 +40,18 @@ class User:  # методы работы с таблицей users
             "phoneNumber": phone_number,
             "persPhotoData": pers_photo_data
         }
-
+        
         for field, value in update_fields.items():
             if value:
-                fields.append(f"{field} = %s")
-                values.append(value)
+                fields.append(f"{field} = '{value}'")
 
         if fields:
-            query = f"UPDATE users SET {', '.join(fields)} WHERE login = %s;"
-            cur.execute(query, values)
-
+            
+            query = f"UPDATE users SET {', '.join(fields)} WHERE login = '{original_login}';"
+            cur.execute(query)
+            
         else:
-            raise Exception
+            raise Exception # данных не поступило
 
 
 class Post:  # методы работы с таблицей posts

@@ -100,10 +100,11 @@ def auth():
         if action != "REGISTER" and action != "LOGIN":
             response.set_status(415)
             return response.send()
-
+        
         data = request.get_json()
         input_captcha = data.get("input_captcha")
         captcha_solution_token = data.get("captcha_token")
+        
 
         # проверка наличия полей решения капчи
         if not captcha_solution_token or not input_captcha:
@@ -635,61 +636,102 @@ def delete_comment(post_id):
         response.set_status(421)
 
 
-# @api.route('/edit_user/', methods=['PUT'])  # метод редактирования данных пользователя  TESTS
-# @jwt_required()
-# def edit_userprofile():
-#     response = Response()
-#
-#     try:
-#         identity = get_jwt_identity()
-#         login = encrypt_decrypt(identity["login"], SECRET_KEY)
-#
-#         # Получение данных из запроса
-#         data = request.get_json()
-#         first_name = data.get("first_name")
-#         middle_name = data.get("middle_name")
-#         sur_name = data.get("sur_name")
-#         email = data.get("email")
-#         phone_number = data.get("phone_number")
-#         pers_photo_data = data.get("pers_photo_data")
-#
-#         # Валидация данных пользователя
-#         # is_valid, validation_error = check_user_data(data)
-#         # if not is_valid:
-#         #     response.set_status(417)
-#         #     response.set_message(validation_error)
-#         #     return response.send()
-#
-#         # Проверка на наличие недопустимых слов в именах пользователя
-#         if not check_bad_words(first_name, middle_name, sur_name):
-#             response.set_status(418)
-#             return response.send()
-#
-#         # Обработка данных о персональном фото
-#         if pers_photo_data is not None:
-#             header, pers_photo_data = pers_photo_data.split(",", 1)
-#
-#             if not is_image_valid(pers_photo_data) or not is_icon_square(pers_photo_data):
-#                 response.set_status(420)
-#                 return response.send()
-#             unique_filename = generate_uuid() + ".png"
-#             pers_photo_data = save_icon(pers_photo_data, unique_filename)
-#
-#     except Exception:
-#         response.set_status(417)
-#         return response.send()
-#
-#     try:
-#         # Обновление данных пользователя в базе данных
-#         User.update_user(login, first_name, middle_name, sur_name, email, phone_number, pers_photo_data)
-#
-#         response.set_status(205)
-#         return response.send()
-#
-#     except Exception as e:
-#         print(e)
-#         response.set_status(504)
-#         return response.send()
+# тут осталось че, 
+# 1)логика "пустых" полей, означающих, что данные пользователь хочет сбросить
+# 2)функция удаления токена и перенаправление на /auth при изменении логина и пароля
+# 3)проверка картинки (она все ломает)
+
+@api.route('/edit_user', methods=['PUT'])  # метод редактирования данных пользователя  TESTS
+@jwt_required()
+def edit_userprofile():
+    response = Response()
+    encoded_password, encoded_login, access_token = None, None, None # заготовки для будущего токена
+
+    try:
+        identity = get_jwt_identity()
+        original_login = encrypt_decrypt(identity["login"], SECRET_KEY)
+        original_password = encrypt_decrypt(identity["password"], SECRET_KEY)
+
+        # Получение данных из запроса
+        data = request.get_json()
+        login = data.get("login")
+        password = data.get("password")
+        first_name = data.get("first_name")
+        middle_name = data.get("middle_name")
+        sur_name = data.get("sur_name")
+        email = data.get("email")
+        phone_number = data.get("phone_number")
+        pers_photo_data = data.get("pers_photo_data")
+        
+
+        # Валидация данных пользователя
+        is_valid, validation_error = check_user_data(data, 'update')
+        if not is_valid:
+            response.set_status(417)
+            response.set_message(validation_error)
+            return response.send()
+
+        # Проверка на наличие недопустимых слов в именах пользователя
+        if not check_bad_words(first_name, middle_name, sur_name):
+            response.set_status(418)
+            return response.send()
+        # Обработка данных о персональном фото (не трогал, нужны тесты)
+        if pers_photo_data is not None:
+            header, pers_photo_data = pers_photo_data.split(",", 1)
+
+            if not is_image_valid(pers_photo_data) or not is_icon_square(pers_photo_data):
+                response.set_status(420)
+                return response.send()
+            unique_filename = generate_uuid() + ".png"
+            pers_photo_data = save_icon(pers_photo_data, unique_filename)
+        
+        # проверка, не существует ли новый логин в базе
+        if login:
+            user = User.find_by_login(login)
+            if user:
+                response.set_status(409)
+                return response.send()
+
+            encoded_login = encrypt_decrypt(login, SECRET_KEY)
+            
+            
+    except Exception:
+        
+        response.set_status(417)
+        return response.send()
+    
+
+    try:
+        # Обновление данных пользователя в базе данных
+        User.update_user(original_login, login, password, first_name, middle_name, sur_name, email, phone_number, pers_photo_data)
+        
+        try:
+            # временный говнокод для нового токена. вместо этого нужно сделать удаление действующего токена и перенаправить пользователя на /auth
+            if password:
+                encoded_password = encrypt_decrypt(password, SECRET_KEY)
+            
+            if encoded_login and encoded_password:
+                access_token = create_user_jwt_token(encoded_login, encoded_password)
+            elif encoded_login:
+                access_token = create_user_jwt_token(encoded_login, original_password)
+            elif encoded_password:
+                access_token = create_user_jwt_token(original_login, encoded_password)
+            
+            response.set_status(205)
+            if access_token:
+                response.set_data(({
+                "session_token": access_token
+                }))
+            return response.send()
+        
+        except:
+            response.set_status(405)
+            return response.send()
+
+    # данных не поступило (мейби новый статус?)
+    except Exception:
+        response.set_status(417) 
+        return response.send()
 
 
 

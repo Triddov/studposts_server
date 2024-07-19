@@ -12,6 +12,8 @@
         TABLESPACE = pg_default
         CONNECTION LIMIT = -1
         IS_TEMPLATE = False;
+    
+    SET TIME ZONE 'UTC-3';
 
     CREATE TABLE IF NOT EXISTS users (
         login VARCHAR(255) PRIMARY KEY,
@@ -37,6 +39,7 @@
         likesCount INTEGER DEFAULT 0,
         dislikesCount INTEGER DEFAULT 0,
         FOREIGN KEY (owner_login) REFERENCES users (login)
+        ON UPDATE CASCADE
     );
 
     CREATE TABLE IF NOT EXISTS comments (
@@ -45,6 +48,7 @@
         post_id VARCHAR(50) NOT NULL,
         content VARCHAR(5000) NOT NULL,
         createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (owner_login) REFERENCES users (login),
+        FOREIGN KEY (owner_login) REFERENCES users (login)
+        ON UPDATE CASCADE,
         FOREIGN KEY (post_id) REFERENCES posts (unique_id)
     );
