@@ -1,24 +1,29 @@
 from flask import Flask
-from flask_jwt_extended import JWTManager  # библиотека для управления JWT-токенами (для аутентификации и авторизации)
+from .config import config
+from .extensions import jwt, redis_store
+from .database import init_db
 from dotenv import load_dotenv
-import datetime
 import os
 
 load_dotenv()  # Загрузка переменных окружения из .env файла
 
-jwt = JWTManager()
 
-
-def create_app():
+def create_app(config_name):
     app = Flask(__name__)
 
-    app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
-    app.config['JWT_ACCESS_TOKEN_EXPIRES'] = datetime.timedelta(minutes=int(os.getenv('AUTHORIZATION_LIMIT')))
+    app.config.from_object(config[config_name])
+    # Настройки приложения
+    app.config['JWT_SECRET_KEY'] = os.getenv('SECRET_KEY')  # Замените на ваш секретный ключ
+    app.config['DATABASE_URL'] = os.getenv('DATABASE_URL')
 
     # Инициализация расширений
     jwt.init_app(app)
 
-    # Регистрация блюпринтов (в раутах будет префикс api)
+    # Инициализация базы данных
+    with app.app_context():
+        init_db()
+
+    # Регистрация блюпринтов
     from .routes import api
     app.register_blueprint(api, url_prefix='/api')
 
