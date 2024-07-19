@@ -181,7 +181,9 @@ def auth():
 
             # если ошибка в логике сервера
             except Exception:
+                print(1)
                 response.set_status(504)
+
                 return response.send()
 
         # логика авторизации
@@ -691,12 +693,12 @@ def delete_comment(post_id):
 def rate(post_id):
     pass
 
-@api.route('/sourse/<image_type>/<filename>', methods=['GET'])
-def get_image(image_type, filename):
-    response = Response()
 
-    if image_type not in ['post_images', 'profile_images']:
+@api.route('/sources/<path:folder>/<path:filename>', methods=['GET'])
+def get_source(folder, filename):
+    valid_folders = ['userProfileIcons', 'userPostImages']
+    if folder not in valid_folders:
+        response = Response()
         response.set_status(404)
-
-    directory = os.path.join(current_app.root_path, 'static', image_type)
-    return send_from_directory(directory, filename)
+        return response.send()
+    return send_from_directory(os.path.join(current_app.root_path, 'static', folder), filename)

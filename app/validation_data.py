@@ -12,6 +12,7 @@ UPLOAD_FOLDER_ICONS = os.getenv('UPLOAD_FOLDER_ICONS')
 UPLOAD_FOLDER_IMAGES = os.getenv('UPLOAD_FOLDER_IMAGES')
 
 max_lengths = {  # список ограничений полей в базе
+    # поля юзера:
     'login': 255,
     'password': 128,
     'first_name': 50,
@@ -20,6 +21,7 @@ max_lengths = {  # список ограничений полей в базе
     'email': 36,
     'phone_number': 12,
     'pers_photo_data': 255,
+    # поля постов:
     'title': 200,
     'tags': 200,
     'image_data': 255,
@@ -40,12 +42,18 @@ def check_bad_words(*fields_to_check):
     # устанавливаем поля валидации
     required_fields = list(fields_to_check)
 
+    # регулярное выражение для удаления знаков препинания
+    pattern = re.compile(r'[^\w\s]', re.UNICODE)
+
     # пропускаем поле, если его значение None
     for field in required_fields:
         if field is None:
             continue
 
-        words = field.lower().split()
+        # удаление знаков препинания и подобного
+        cleaned_field = pattern.sub('', field)
+        words = cleaned_field.lower().split()
+
         # если найдено хотя бы одно слово - проверка не пройдена
         if any(word in bad_words for word in words):
             return False
@@ -69,7 +77,7 @@ def check_user_data(data):
         if field not in data:
             return False, f"Missing required field: {field}"
 
-        if not data[field] or " " in data[field]:
+        if not data[field] or data[field].isspace():
             return False, f"{field} should not be empty or contain spaces"
 
     # проверка длины полей
@@ -103,7 +111,6 @@ def check_user_data(data):
     return True, None  # возвращаем валидны ли данные и описание ошибки
 
 
-
 def check_post_data(data):  # метод проверки данных поста
     # обязательные поля
     required_fields = ['title', 'content']
@@ -115,7 +122,7 @@ def check_post_data(data):  # метод проверки данных пост�
     for field in required_fields:
         if field not in data:
             return False, f'Missing required field: {field}'
-        if data[field] == " ":
+        if data[field].isspace():
             return False, f'{field} should not be empty'
 
     # проверка длины полей
@@ -132,7 +139,7 @@ def check_comment_data(data):  # метод проверки данных ком
     for field in required_fields:
         if field not in data:
             return False, f'Missing required field: {field}'
-        if data[field] == " ":
+        if data[field].isspace():
             return False, f'{field} should not be empty'
 
     # проверка длины полей
@@ -154,7 +161,7 @@ def is_image_valid(image_base64: str) -> bool:  # функция валидац�
 
         return True
 
-    except Exception as e:
+    except:
         return False
 
 
@@ -196,10 +203,13 @@ def save_icon(image_base64, file_name):
     return icon_path
 
 
-def save_image(image_base64, file_name):  # сохранение изображения
+def save_image(image_base64, file_name):
+    # Создаем путь файла
     image_path = os.path.join(UPLOAD_FOLDER_IMAGES, file_name)
     image = Image.open(BytesIO(base64.b64decode(image_base64)))
 
+    # Сохраняем изображение по указанному пути
     image.save(image_path)
 
-    return image_path
+    # Возвращаем путь к изображению с правильными слэшами для текущей ОС
+    return image_path.replace('\\', '/')
