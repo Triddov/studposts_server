@@ -61,38 +61,44 @@ def check_bad_words(*fields_to_check):
     return True
 
 
-def check_user_data(data):
-    # обязательные поля
-    required_fields = ['login', 'password', 'first_name', 'sur_name']
+def check_user_data(data, action='register'):
+    # поля, которые пользователь может менять и устанавливать в принципе
+    allowed_fields = ['login', 'password', 'first_name', 'sur_name', 'middle_name', 'email', 'phone_number']
 
-    # поля, которые не нужно проверять
-    ignore_fields = ['input_captcha', 'captcha_token', 'pers_photo_data']
+    # обязательные поля для регистрации
+    if action == 'register':
+        required_fields = ['login', 'password', 'first_name', 'sur_name']
+
+        # проверка обязательных полей
+        for field in required_fields:
+            if field not in data:
+                return False, f"Missing required field: {field}"
+
+            if not data[field] or data[field].isspace():
+                return False, f"{field} should not be empty"
+
+    # проверка всех полей на содержание пробельных символов
+    for field in allowed_fields:
+        if field in data and data[field].isspace():
+            return False, f"{field} should not contain spaces"
 
     # поля, для которых есть значения минимальной длины
     min_length_fields = ['first_name', 'sur_name', 'middle_name']
     min_length = 2
 
-    # проверка обязательных полей
-    for field in required_fields:
-        if field not in data:
-            return False, f"Missing required field: {field}"
-
-        if not data[field] or data[field].isspace():
-            return False, f"{field} should not be empty or contain spaces"
-
-    # проверка длины полей
-    for field, max_length in max_lengths.items():
-        if (field in data) and (field not in ignore_fields) and (len(data[field]) > max_length):
-            return False, f"{field} exceeds maximum length of {max_length} characters"
-
     # проверка минимальной длины полей
     for field in min_length_fields:
-        if field in data and data[field]:  # только если поле существует и не пустое
+        if (field in data) and (data[field]):  # только если поле существует и не пустое
             if len(data[field]) < min_length:
                 return False, f"{field} should be at least 2 characters long"
 
+    # проверка на превышение максимальной длины полей
+    for field, max_length in max_lengths.items():
+        if (field in data) and (field in allowed_fields) and (len(data[field]) > max_length):
+            return False, f"{field} exceeds maximum length of {max_length} characters"
+
     # проверка email на валидность
-    if ('email' in data) and ('email' not in ignore_fields) and ('@' not in data['email']):
+    if ('email' in data) and (data['email']) and ('@' not in data['email']):
         return False, "Invalid email format"
 
     # проверка российского номера телефона

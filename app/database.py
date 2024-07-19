@@ -16,7 +16,17 @@ class User:  # методы работы с таблицей users
         cur.execute("""
             INSERT INTO users (login, password, firstName, middleName, surName, privileged, email, phoneNumber, persphotodata)
             VALUES (%s, %s, %s, %s, %s, FALSE, %s, %s, %s)
+            RETURNING firstName, middleName, surName, privileged, email, phoneNumber, persphotodata
         """, (login, password, first_name, middle_name, sur_name, email, phone_number, pers_photo_data))
+        user_data = cur.fetchone()
+        return user_data
+
+    @staticmethod
+    def get_user(login):
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM users WHERE login = %s", (login,))
+        user_data = cur.fetchone()
+        return user_data
 
     @staticmethod
     def find_by_login(login):
@@ -26,12 +36,14 @@ class User:  # методы работы с таблицей users
         return user
 
     @staticmethod
-    def update_user(login, first_name=None, middle_name=None, sur_name=None, email=None, phone_number=None, pers_photo_data=None):
+    def update_user(original_login, login=None, password=None, first_name=None, middle_name=None, sur_name=None,
+                    email=None, phone_number=None, pers_photo_data=None):
         cur = conn.cursor()
-        fields, values = [], []
+        fields = []
 
         update_fields = {
             "login": login,
+            "password": password,
             "firstName": first_name,
             "middleName": middle_name,
             "surName": sur_name,
@@ -42,15 +54,15 @@ class User:  # методы работы с таблицей users
 
         for field, value in update_fields.items():
             if value:
-                fields.append(f"{field} = %s")
-                values.append(value)
+                fields.append(f"{field} = '{value}'")
 
         if fields:
-            query = f"UPDATE users SET {', '.join(fields)} WHERE login = %s;"
-            cur.execute(query, values)
+
+            query = f"UPDATE users SET {', '.join(fields)} WHERE login = '{original_login}';"
+            cur.execute(query)
 
         else:
-            raise Exception
+            raise Exception  # данных не поступило
 
 
 class Post:  # методы работы с таблицей posts
@@ -147,14 +159,48 @@ class Post:  # методы работы с таблицей posts
         cur.execute("UPDATE posts SET viewcount = viewcount + 1 WHERE unique_id = %s", (post_id,))
 
     @staticmethod
-    def like_post(post_id):
+    def like_post(login, post_id, action):
         cur = conn.cursor()
-        cur.execute("UPDATE posts SET likescount = likescount + 1 WHERE unique_id = %s", (post_id,))
+
+        if action == 'like':
+            cur.execute(f"SELECT * FROM likes WHERE post_id = '{post_id}' and owner_login = '{login}';")
+            if cur.fetchone():
+                return False, 'like has already been set'
+
+            cur.execute(f"INSERT INTO likes (owner_login, post_id) VALUES ('{login}', '{post_id}');")
+
+            cur.execute(f"DELETE FROM dislikes WHERE post_id = '{post_id}' and owner_login = '{login}';")
+
+        elif action == 'unlike':
+            cur.execute(f"SELECT * FROM likes WHERE post_id = '{post_id}' and owner_login = '{login}';")
+            if not cur.fetchone():
+                return False, "like hasn't been set"
+
+            cur.execute(f"DELETE FROM likes WHERE post_id = '{post_id}' and owner_login = '{login}';")
+
+        return True, None
 
     @staticmethod
-    def dislike_post(post_id):
+    def dislike_post(login, post_id, action):
         cur = conn.cursor()
-        cur.execute("UPDATE posts SET dislikescount = dislikescount + 1 WHERE unique_id = %s", (post_id,))
+
+        if action == 'dislike':
+            cur.execute(f"SELECT * FROM dislikes WHERE post_id = '{post_id}' and owner_login = '{login}';")
+            if cur.fetchone():
+                return False, 'dislike has already been set'
+
+            cur.execute(f"INSERT INTO dislikes (owner_login, post_id) VALUES ('{login}', '{post_id}');")
+
+            cur.execute(f"DELETE FROM likes WHERE post_id = '{post_id}' and owner_login = '{login}';")
+
+        elif action == 'undislike':
+            cur.execute(f"SELECT * FROM dislikes WHERE post_id = '{post_id}' and owner_login = '{login}';")
+            if not cur.fetchone():
+                return False, "dislike hasn't been set"
+
+            cur.execute(f"DELETE FROM dislikes WHERE post_id = '{post_id}' and owner_login = '{login}';")
+
+        return True, None
 
 
 class Comment:  # методы работы с таблицей comments
@@ -231,3 +277,4 @@ class Comment:  # методы работы с таблицей comments
             cur.execute("DELETE FROM comments WHERE unique_id = %s;", (comment_id,))
         else:
             raise Exception
+

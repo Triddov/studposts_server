@@ -25,9 +25,8 @@ jwt = JWTManager()  # объект генерации токенов
 # добавить в /home/ отправляемый объект 'operations': { 'delete': endpoint удаления постов
 # и прочие методы ( для овнера, для модера), просмотр (для всех ), изменить ( для овнера )}
 # бан по ip - в методанных запроса (x forward from - название заголовка в header-е)
-
-# 2. добавлять лайки/дизлайки в эндпоите (триггеры + дрочь)
-# 3. метод профиля
+# 2. правки альберт-сергей (писать ниже:)
+#
 
 def token_required(f):  # метод проверки токенов авторизации
     @wraps(f)
@@ -82,7 +81,7 @@ def get_captcha():
     return response.send()
 
 
-@api.route('/auth/', methods=['POST'])  # метод авторизации/регистрации пользователя
+@api.route('/auth', methods=['POST'])  # метод авторизации/регистрации пользователя
 def auth():
     response = Response()
     try:
@@ -127,6 +126,8 @@ def auth():
         # поля для обоих сценариев
         login = data.get('login')
         password = data.get('password')
+
+        user_data = []
 
         # логика регистрации
         if action == 'REGISTER':
@@ -177,7 +178,7 @@ def auth():
                     return response.send()
 
                 # создание юзера в базе и выдача токена
-                User.create_user(login, password, first_name, middle_name, sur_name, email, phone_number, pers_photo_data)
+                user_data = User.create_user(login, password, first_name, middle_name, sur_name, email, phone_number, pers_photo_data)
 
             # если ошибка в логике сервера
             except Exception:
@@ -188,14 +189,14 @@ def auth():
         if action == 'LOGIN':
             # проверка пользователя
             try:
-                user = User.find_by_login(login)
+                user_data = User.find_by_login(login)
 
             # если ошибка в логике сервера
             except Exception:
                 response.set_status(504)
                 return response.send()
 
-            if not user or user[1] != password:
+            if not user_data or user_data[1] != password:
                 response.set_status(417)
                 return response.send()
 
@@ -207,7 +208,8 @@ def auth():
         access_token = create_user_jwt_token(encoded_login, encoded_password)
 
         response.set_data({
-            "session_token": access_token
+            "session_token": access_token,
+            "user_data": user_data
         })
 
         return response.send()
@@ -218,7 +220,7 @@ def auth():
         return response.send()
 
 
-@api.route('/home/', methods=['GET'])  # метод получения всех постов
+@api.route('/home', methods=['GET'])  # метод получения всех постов
 def handle_posts():
     response = Response()
 
@@ -266,6 +268,11 @@ def handle_posts():
                     'orderByDate': order,
                     'search': search,
                 },
+                'operations': {
+                    'viewPost': '/api/<post_id>',  # эндпоинт для просмотра поста
+                    'deletePost': '/api/<post_id>/delete',  # эндпоинт для удаления поста
+                    'banUserByIP': '/api/user_banIP'  # эндпоинт для бана пользователя по IP
+                },
                 'limit': limit,
                 'page': page,
                 'totalPosts': posts_count,
@@ -299,7 +306,7 @@ def handle_post(post_id):
         response.set_status(504)
 
 
-@api.route('/create_post/', methods=['POST'])  # метод создания нового поста
+@api.route('/home/create_post', methods=['POST'])  # метод создания нового поста
 @jwt_required()
 def create_post():
     response = Response()
@@ -400,6 +407,7 @@ def update_post(post_id):
             # сохранение изображения и возврат ее пути для записи(или перезаписи, если она есть уже)
             if Post.image_already(post_id):
                 unique_filename = Post.image_filename(post_id)
+                os.remove("sourses/userPostImages"+unique_filename)
             else:
                 unique_filename = generate_uuid() + ".png"
                 image_data = save_image(image_data, unique_filename)
@@ -444,7 +452,7 @@ def delete_post(post_id):
         return response.send()
 
 
-@api.route('<post_id>/comments/', methods=['GET'])  # метод получения комментов к посту
+@api.route('<post_id>/comments', methods=['GET'])  # метод получения комментов к посту
 def handle_comments(post_id):
     response = Response()
 
@@ -517,7 +525,7 @@ def handle_comments(post_id):
         return response.send()
 
 
-@api.route('/<post_id>/add_comment/', methods=['POST'])  # метод создания коммента
+@api.route('/<post_id>/add_comment', methods=['POST'])  # метод создания коммента
 @jwt_required()
 def create_comment(post_id):
     response = Response()
@@ -559,7 +567,7 @@ def create_comment(post_id):
     return response.send()
 
 
-@api.route('/<post_id>/update_comment/', methods=['PUT'])  # метод редактирования коммента
+@api.route('/<post_id>/update_comment', methods=['PUT'])  # метод редактирования коммента
 @jwt_required()
 def update_comment(post_id):
     response = Response()
@@ -601,7 +609,7 @@ def update_comment(post_id):
         return response.send()
 
 
-@api.route('/<post_id>/delete_comment/', methods=['DELETE'])  # метод удаления коммента
+@api.route('/<post_id>/delete_comment', methods=['DELETE'])  # метод удаления коммента
 @jwt_required()
 def delete_comment(post_id):
     response = Response()
@@ -630,66 +638,169 @@ def delete_comment(post_id):
         response.set_status(421)
 
 
-# @api.route('/edit_user/', methods=['PUT'])  # метод редактирования данных пользователя  TESTS
-# @jwt_required()
-# def edit_userprofile():
-#     response = Response()
-#
-#     try:
-#         identity = get_jwt_identity()
-#         login = encrypt_decrypt(identity["login"], SECRET_KEY)
-#
-#         # Получение данных из запроса
-#         data = request.get_json()
-#         first_name = data.get("first_name")
-#         middle_name = data.get("middle_name")
-#         sur_name = data.get("sur_name")
-#         email = data.get("email")
-#         phone_number = data.get("phone_number")
-#         pers_photo_data = data.get("pers_photo_data")
-#
-#         # Валидация данных пользователя
-#         # is_valid, validation_error = check_user_data(data)
-#         # if not is_valid:
-#         #     response.set_status(417)
-#         #     response.set_message(validation_error)
-#         #     return response.send()
-#
-#         # Проверка на наличие недопустимых слов в именах пользователя
-#         if not check_bad_words(first_name, middle_name, sur_name):
-#             response.set_status(418)
-#             return response.send()
-#
-#         # Обработка данных о персональном фото
-#         if pers_photo_data is not None:
-#             header, pers_photo_data = pers_photo_data.split(",", 1)
-#
-#             if not is_image_valid(pers_photo_data) or not is_icon_square(pers_photo_data):
-#                 response.set_status(420)
-#                 return response.send()
-#             unique_filename = generate_uuid() + ".png"
-#             pers_photo_data = save_icon(pers_photo_data, unique_filename)
-#
-#     except Exception:
-#         response.set_status(417)
-#         return response.send()
-#
-#     try:
-#         # Обновление данных пользователя в базе данных
-#         User.update_user(login, first_name, middle_name, sur_name, email, phone_number, pers_photo_data)
-#
-#         response.set_status(205)
-#         return response.send()
-#
-#     except Exception as e:
-#         print(e)
-#         response.set_status(504)
-#         return response.send()
+@api.route('/edit_user', methods=['PUT'])  # метод редактирования данных пользователя
+@jwt_required()
+def edit_userprofile():
+    response = Response()
+    encoded_password, encoded_login, access_token = None, None, None  # заготовки для будущего токена
+
+    try:
+        identity = get_jwt_identity()
+        original_login = encrypt_decrypt(identity["login"], SECRET_KEY)
+        original_password = encrypt_decrypt(identity["password"], SECRET_KEY)
+
+        # Получение данных из запроса
+        data = request.get_json()
+        login = data.get("login")
+        password = data.get("password")
+        first_name = data.get("first_name")
+        middle_name = data.get("middle_name")
+        sur_name = data.get("sur_name")
+        email = data.get("email")
+        phone_number = data.get("phone_number")
+        pers_photo_data = data.get("pers_photo_data")
+
+        # Валидация данных пользователя
+        is_valid, validation_error = check_user_data(data, 'update')
+        if not is_valid:
+            response.set_status(417)
+            response.set_message(validation_error)
+            return response.send()
+
+        # Проверка на наличие недопустимых слов в именах пользователя
+        if not check_bad_words(first_name, middle_name, sur_name):
+            response.set_status(418)
+            return response.send()
+
+        # Обработка данных о персональном фото
+        if pers_photo_data is not None:
+            header, pers_photo_data = pers_photo_data.split(",", 1)
+
+            if not is_image_valid(pers_photo_data) or not is_icon_square(pers_photo_data):
+                response.set_status(420)
+                return response.send()
+            unique_filename = generate_uuid() + ".png"
+            pers_photo_data = save_icon(pers_photo_data, unique_filename)
+
+        # проверка, не существует ли новый логин в базе
+        if login:
+            user = User.find_by_login(login)
+            if user:
+                response.set_status(409)
+                return response.send()
+
+            encoded_login = encrypt_decrypt(login, SECRET_KEY)
+
+    except Exception:
+
+        response.set_status(417)
+        return response.send()
+
+    try:
+        # Обновление данных пользователя в базе данных
+        User.update_user(original_login, login, password, first_name, middle_name, sur_name, email, phone_number, pers_photo_data)
+
+        try:
+            if password:
+                encoded_password = encrypt_decrypt(password, SECRET_KEY)
+
+            if encoded_login and encoded_password:
+                access_token = create_user_jwt_token(encoded_login, encoded_password)
+            elif encoded_login:
+                access_token = create_user_jwt_token(encoded_login, original_password)
+            elif encoded_password:
+                access_token = create_user_jwt_token(original_login, encoded_password)
+
+            response.set_status(205)
+            if access_token:
+                response.set_data(({
+                    "session_token": access_token
+                }))
+            return response.send()
+
+        except:
+            response.set_status(405)
+            return response.send()
+
+    # данных не поступило
+    except Exception:
+        response.set_status(417)
+        return response.send()
+
 
 @api.route('/<post_id>/rate/', methods=['PUT'])  # метод лайков/дизлайков под постом
 @jwt_required()
 def rate(post_id):
-    pass
+    response = Response()
 
+    try:
+        identity = get_jwt_identity()
+        login = encrypt_decrypt(identity["login"], SECRET_KEY)
+
+        all_posts = Post.get_all_posts()
+        posts_id = [post[0] for post in all_posts]
+
+        # если пост с таким id существует
+        if post_id in posts_id:
+
+            data = request.get_json()
+            action = data.get('action')
+
+            try:
+                # перебор доступных action
+                if action in ['like', 'unlike']:
+                    is_successful, message = Post.like_post(login, post_id, action)
+
+                elif action in ['dislike', 'undislike']:
+                    is_successful, message = Post.dislike_post(login, post_id, action)
+
+                # неизвестное действие
+                else:
+                    response.set_status(412)
+                    return response.send()
+
+                if is_successful:
+                    # успешно
+                    response.set_status(200)
+                    return response.send()
+
+                # некорректное действие
+                response.set_data({
+                    "error": message
+                })
+                response.set_status(415)
+                return response.send()
+
+            except:
+                response.set_status(504)
+                return response.send()
+
+        # ошибка "не найдено"
+        else:
+            response.set_status(404)
+            return response.send()
+
+    # общая ошибка
+    except:
+        response.set_status(400)
+        return response.send()
+
+
+@api.route('/get_user', methods=['GET'])
+@jwt_required()
+def get_user():
+    response = Response()
+
+    identity = get_jwt_identity()
+    login = encrypt_decrypt(identity["login"], SECRET_KEY)
+
+    try:
+        user_data = User.get_user(login)
+        response.set_data(user_data)
+        response.send()
+
+    except Exception:
+        response.set_status(404)
+        return response.send()
 
 

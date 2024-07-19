@@ -4,11 +4,20 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="313496f0-9e1b-4b22-820e-d983be4c79e6" name="Changes" comment="11th commit">
+    <list default="true" id="313496f0-9e1b-4b22-820e-d983be4c79e6" name="Changes" comment="third stable version">
+      <change afterPath="$PROJECT_DIR$/nginx_blacklist.conf" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/55085044-d2b3-48df-a310-db6dbb5d45c4.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/55085044-d2b3-48df-a310-db6dbb5d45c4.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/55085044-d2b3-48df-a310-db6dbb5d45c4/storage_v2/_src_/database/STUDPOSTS.A3EaMQ/schema/public.abK9xQ.meta" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/55085044-d2b3-48df-a310-db6dbb5d45c4/storage_v2/_src_/database/STUDPOSTS.A3EaMQ/schema/public.abK9xQ.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/c8fcfc29-83cb-4532-8ac7-04c419bb6ff6.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/c8fcfc29-83cb-4532-8ac7-04c419bb6ff6.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/database.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/generate_token.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/generate_token.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/routes.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/initDatabase/initdatabase.sql" beforeDir="false" afterPath="$PROJECT_DIR$/initDatabase/initDatabase.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/validation_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/validation_data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/initDatabase/initDatabase.sql" beforeDir="false" afterPath="$PROJECT_DIR$/initDatabase/initDatabase.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/run.py" beforeDir="false" afterPath="$PROJECT_DIR$/run.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -68,40 +77,41 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Python.__init__.executor&quot;: &quot;Run&quot;,
-    &quot;Python.badwords_checker.executor&quot;: &quot;Run&quot;,
-    &quot;Python.banned_words_checker.executor&quot;: &quot;Run&quot;,
-    &quot;Python.captcha.executor&quot;: &quot;Run&quot;,
-    &quot;Python.check_data.executor&quot;: &quot;Run&quot;,
-    &quot;Python.generate_captcha.executor&quot;: &quot;Run&quot;,
-    &quot;Python.generate_token.executor&quot;: &quot;Run&quot;,
-    &quot;Python.routes.executor&quot;: &quot;Debug&quot;,
-    &quot;Python.run.executor&quot;: &quot;Run&quot;,
-    &quot;Python.server_exception.executor&quot;: &quot;Run&quot;,
-    &quot;Python.validation_data.executor&quot;: &quot;Run&quot;,
-    &quot;Python.хуй.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;stepan&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/akini/PycharmProjects/PaginationTask&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;settings.qodana&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python.__init__.executor": "Run",
+    "Python.badwords_checker.executor": "Run",
+    "Python.banned_words_checker.executor": "Run",
+    "Python.captcha.executor": "Run",
+    "Python.check_data.executor": "Run",
+    "Python.database.executor": "Run",
+    "Python.generate_captcha.executor": "Run",
+    "Python.generate_token.executor": "Run",
+    "Python.routes.executor": "Run",
+    "Python.run.executor": "Run",
+    "Python.server_exception.executor": "Run",
+    "Python.validation_data.executor": "Run",
+    "Python.хуй.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "git-widget-placeholder": "stepan",
+    "ignore.virus.scanning.warn.message": "true",
+    "last_opened_file_path": "C:/Users/akini/PycharmProjects/PaginationTask",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "settings.qodana",
+    "vue.rearranger.settings.migration": "true"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;DatabaseDriversLRU&quot;: [
-      &quot;postgresql&quot;,
-      &quot;redis&quot;
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "postgresql",
+      "redis"
     ]
   }
-}</component>
+}]]></component>
   <component name="PyConsoleOptionsProvider">
     <option name="myPythonConsoleState">
       <console-settings module-name="studposts_server" is-module-sdk="true">
@@ -148,7 +158,9 @@
       <workItem from="1721210017851" duration="3025000" />
       <workItem from="1721213893311" duration="41874000" />
       <workItem from="1721289312553" duration="21319000" />
-      <workItem from="1721315504160" duration="22094000" />
+      <workItem from="1721315504160" duration="22363000" />
+      <workItem from="1721378318456" duration="5994000" />
+      <workItem from="1721404118959" duration="7879000" />
     </task>
     <task id="LOCAL-00001" summary="second commit">
       <option name="closed" value="true" />
@@ -254,7 +266,15 @@
       <option name="project" value="LOCAL" />
       <updated>1721338708957</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="third stable version">
+      <option name="closed" value="true" />
+      <created>1721344740854</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1721344740854</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -288,11 +308,14 @@
     <MESSAGE value="9th commit" />
     <MESSAGE value="10th commit" />
     <MESSAGE value="11th commit" />
-    <option name="LAST_COMMIT_MESSAGE" value="11th commit" />
+    <MESSAGE value="third stable version" />
+    <option name="LAST_COMMIT_MESSAGE" value="third stable version" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/studposts_server$generate_token.coverage" NAME="generate_token Coverage Results" MODIFIED="1721410314757" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
     <SUITE FILE_PATH="coverage/studposts_server$validation_data.coverage" NAME="validation_data Coverage Results" MODIFIED="1721213133023" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
-    <SUITE FILE_PATH="coverage/studposts_server$routes.coverage" NAME="routes Coverage Results" MODIFIED="1721295874653" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
-    <SUITE FILE_PATH="coverage/studposts_server$run.coverage" NAME="run Coverage Results" MODIFIED="1721343497620" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/studposts_server$routes.coverage" NAME="routes Coverage Results" MODIFIED="1721410408064" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
+    <SUITE FILE_PATH="coverage/studposts_server$run.coverage" NAME="run Coverage Results" MODIFIED="1721411888656" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/studposts_server$database.coverage" NAME="database Coverage Results" MODIFIED="1721404436276" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
   </component>
 </project>
