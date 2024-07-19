@@ -736,4 +736,61 @@ def edit_userprofile():
 
 
 
+@api.route('/<post_id>/rate/', methods=['PUT'])  # метод лайков/дизлайков под постом
+@jwt_required()
+def rate(post_id):
+    response = Response()
 
+    try: 
+        identity = get_jwt_identity()
+        login = encrypt_decrypt(identity["login"], SECRET_KEY)
+
+        all_posts = Post.get_all_posts()
+        posts_id = [post[0] for post in all_posts]
+
+        # если пост с таким id существует
+        if post_id in posts_id:
+
+            data = request.get_json()
+            action = data.get('action')
+
+            try:
+                # перебор доступных action
+                if action in ['like', 'unlike']:
+                    is_succesful, message = Post.like_post(login, post_id, action)
+                
+                elif action in ['dislike', 'undislike']:
+                    is_succesful, message = Post.dislike_post(login, post_id, action)
+
+                # неизвестное действие
+                else:
+                    response.set_status(412)
+                    return response.send()
+                
+                if is_succesful:
+                    # успешно
+                    response.set_status(200)
+                    return response.send()
+                
+                # некорректное действие
+                response.set_data({
+                    "error" : message
+                })
+                response.set_status(415)
+                return response.send()
+            
+            except:
+                response.set_status(504)
+                return response.send()
+
+
+        # ошибка "не найдено"
+        else:
+            response.set_status(404)
+            return response.send()
+    
+
+    # общая ошибка
+    except:
+        response.set_status(400) 
+        return response.send()
