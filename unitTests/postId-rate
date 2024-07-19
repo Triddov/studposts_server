@@ -1,0 +1,149 @@
+##### api/postId/rate [PUT]
+
+http://127.0.0.1:5000/api/unique_idd/rate
+
+# лайк при нажатом дизлайке (дизлайк убирается автоматически)
+body = {
+    "action" : "like"
+}
+
+expected = {
+    "message": "Successfully",
+    "status": 200
+}
+
+
+# лайк при нажатом лайке
+body = {
+    "action" : "like"
+}
+
+expected = {
+    "error": "like has already been set",
+    "message": "Incorrect action",
+    "status": 415
+}
+
+
+# отмена лайка
+body = {
+    "action" : "unlike"
+}
+
+expected = {
+    "message": "Successfully",
+    "status": 200
+}
+
+
+# отмена лайка при отсутствии лайка
+body = {
+    "action" : "unlike"
+}
+
+expected = {
+    "error": "like hasn't been set",
+    "message": "Incorrect action",
+    "status": 415
+}
+
+
+# лайк после отмены лайка
+body = {
+    "action" : "like"
+}
+
+expected = {
+    "message": "Successfully",
+    "status": 200
+}
+
+
+# дизлайк с нажатым лайком (лайк автоматически уберется)
+body = {
+    "action" : "dislike"
+}
+
+expected = {
+    "message": "Successfully",
+    "status": 200
+}
+
+
+# дизлайк при нажатом дизлайке
+body = {
+    "action" : "dislike"
+}
+
+expected = {
+    "error": "dislike has already been set",
+    "message": "Incorrect action",
+    "status": 415
+}
+
+
+# отмена дизлайка
+body = {
+    "action" : "undislike"
+}
+
+expected = {
+    "message": "Successfully",
+    "status": 200
+}
+
+
+# отмена дизлайка без дизлайка
+body = {
+    "action" : "undislike"
+}
+
+expected = {
+    "error": "dislike hasn't been set",
+    "message": "Incorrect action",
+    "status": 415
+}
+
+
+# установка дизлайка после отмены
+body = {
+    "action" : "dislike"
+}
+
+expected = {
+    "message": "Successfully",
+    "status": 200
+}
+
+
+# некорректный запрос
+body = {
+    "action" : "ываацуавча"
+}
+
+expected = {
+    "message": "Undefined action",
+    "status": 412
+}
+
+
+# нулевой запрос
+body = {
+    "action" : ""
+}
+
+expected = {
+    "message": "Undefined action",
+    "status": 412
+}
+
+
+# отсутствие запроса
+body = {
+
+}
+
+expected = {
+    "message": "Undefined action",
+    "status": 412
+}
