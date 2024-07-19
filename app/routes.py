@@ -228,6 +228,7 @@ def auth():
 
 
 @api.route('/home/', methods=['GET'])  # метод получения всех постов
+@jwt_required(True)
 def handle_posts():
     response = Response()
 
@@ -270,6 +271,39 @@ def handle_posts():
         # получение постов по запросу
         try:
             posts = Post.get_all_posts(order, page, limit, search)
+
+            # к постам добавляем последним пунктом словарь operations со списком доступных операций
+            posts = [list(post) + [{'view': f'/api/{post[0]}'}] for post in posts]
+
+            # operations = {
+            #     'view' : 'url c конкретным id поста/операция'
+            # }
+
+            # проверка, авторизован ли пользователь и какие у него доступны операции
+            try:
+                identity = get_jwt_identity()
+                login = encrypt_decrypt(identity["login"], SECRET_KEY)
+
+                # модифицируем операции в зависимости от роли пользователя
+                for post in posts:
+                    # если он создатель
+                    if post[1] == login:
+                        post[-1] |= {
+                            'delete' : f'/api/{post[0]}/delete',
+                            'update' : f'/api/{post[0]}/update'
+                            }
+                    
+                    # если он модератор и это не пост другого модератора
+                    elif (User.is_moderator(login)) and (not User.is_moderator(post[1])):
+                        post[-1] |= {
+                            'delete' : f'/api/{post[0]}/delete',
+                            'ban' : f'/api/ban' # тут должен быть эндпоинт бана
+                            }
+
+            except Exception as e:
+                print(e)
+
+            
             response.set_data({
                 'filters': {
                     'orderByDate': order,
@@ -284,7 +318,8 @@ def handle_posts():
             return response.send()
 
         # если ошибка в логике сервера
-        except:
+        except Exception as e:
+            print(e)
             response.set_status(504)
             return response.send()
 
@@ -294,14 +329,48 @@ def handle_posts():
         return response.send()
 
 
+# чекнуть логин и айди поста
+
+
+# @api.route('<post_id>/название_каждой_операции/', methods=['GET'])  # метод получения комментов к посту
+# @api.route('<post_id>/название_каждой_операции/', methods=['GET'])  # метод получения комментов к посту
+
+
 @api.route('/<post_id>/', methods=['GET'])  # метод получения одного поста(с обновлением просмотров)
+@jwt_required(True)
 def handle_post(post_id):
     response = Response()
 
     try:
         Post.increment_view(post_id)
-        post = Post.get_post_by_id(post_id)
-        response.set_data({'post': post})
+        post = list(Post.get_post_by_id(post_id))
+        post.append({'view': f'/api/{post[0]}'})
+         # проверка, авторизован ли пользователь и какие у него доступны операции
+        try:
+            identity = get_jwt_identity()
+            login = encrypt_decrypt(identity["login"], SECRET_KEY)
+
+            # модифицируем операции в зависимости от роли пользователя
+            if post[1] == login:
+                post[-1] |= {
+                    'delete' : f'/api/{post[0]}/delete',
+                    'update' : f'/api/{post[0]}/update'
+                    }
+                    
+            # если он модератор и это не пост другого модератора
+            elif (User.is_moderator(login)) and (not User.is_moderator(post[1])):
+                post[-1] |= {
+                    'delete' : f'/api/{post[0]}/delete',
+                    'ban' : f'/api/ban' #### тут должен быть эндпоинт бана, ещё нужно саму функцию и всю связанную логику
+                    }
+
+        except Exception as e:
+            print(e)
+
+        response.set_data({
+            'post': post,
+            'reaction' : {'like/dislike/none'} ####к home и post_id нужно передать отображение реакций
+            })
         return response.send()
 
     except Exception:
@@ -450,6 +519,7 @@ def delete_post(post_id):
         return response.send()
 
 
+#### нужо сделать operations для комментов, для овнера и модера
 @api.route('<post_id>/comments/', methods=['GET'])  # метод получения комментов к посту
 def handle_comments(post_id):
     response = Response()
@@ -638,9 +708,10 @@ def delete_comment(post_id):
 
 # тут осталось че, 
 # 1)логика "пустых" полей, означающих, что данные пользователь хочет сбросить
-# 2)функция удаления токена и перенаправление на /auth при изменении логина и пароля
 # 3)проверка картинки (она все ломает)
 
+
+#### доделать пустые поля и картинку
 @api.route('/edit_user', methods=['PUT'])  # метод редактирования данных пользователя  TESTS
 @jwt_required()
 def edit_userprofile():
@@ -735,7 +806,7 @@ def edit_userprofile():
 
 
 
-
+#### большую часть логики Post.like_post() и тд вынести в триггеры, оставить для action только like dislike
 @api.route('/<post_id>/rate/', methods=['PUT'])  # метод лайков/дизлайков под постом
 @jwt_required()
 def rate(post_id):
@@ -794,3 +865,6 @@ def rate(post_id):
     except:
         response.set_status(400) 
         return response.send()
+
+
+#### и конечно же по идее ВСЕ НУЖНО ПРОТЕСТИТЬ))))

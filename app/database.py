@@ -2,6 +2,8 @@ import psycopg2
 from dotenv import load_dotenv
 import os
 
+import psycopg2.extras
+
 load_dotenv()
 
 conn = psycopg2.connect(os.getenv('DATABASE_URL'))  # подключение к базе
@@ -24,6 +26,12 @@ class User:  # методы работы с таблицей users
         cur.execute("SELECT * FROM users WHERE login = %s;", (login,))
         user = cur.fetchone()
         return user
+    
+    def is_moderator(login):
+        cur = conn.cursor()
+        cur.execute("SELECT privileged FROM users WHERE login = %s;", (login,))
+        user = cur.fetchone()
+        return user[0]
 
     @staticmethod
     def update_user(original_login, login=None, password=None, first_name=None, middle_name=None, sur_name=None, email=None, phone_number=None, pers_photo_data=None):
