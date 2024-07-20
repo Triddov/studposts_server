@@ -272,38 +272,31 @@ def handle_posts():
         try:
             posts = Post.get_all_posts(order, page, limit, search)
 
-            # к постам добавляем последним пунктом словарь operations со списком доступных операций
-            posts = [list(post) + [{'view': f'/api/{post[0]}'}] for post in posts]
-
-            # operations = {
-            #     'view' : 'url c конкретным id поста/операция'
-            # }
 
             # проверка, авторизован ли пользователь и какие у него доступны операции
             try:
                 identity = get_jwt_identity()
                 login = encrypt_decrypt(identity["login"], SECRET_KEY)
-
+                
                 # модифицируем операции в зависимости от роли пользователя
                 for post in posts:
                     # если он создатель
-                    if post[1] == login:
-                        post[-1] |= {
-                            'delete' : f'/api/{post[0]}/delete',
-                            'update' : f'/api/{post[0]}/update'
+                    if post['owner_login'] == login:
+                        post['operations'] = {
+                            'delete' : f'/api/{post['unique_id']}/delete',
+                            'update' : f'/api/{post['unique_id']}/update'
                             }
                     
                     # если он модератор и это не пост другого модератора
-                    elif (User.is_moderator(login)) and (not User.is_moderator(post[1])):
-                        post[-1] |= {
-                            'delete' : f'/api/{post[0]}/delete',
-                            'ban' : f'/api/ban' # тут должен быть эндпоинт бана
+                    elif (User.is_moderator(login)) and (not User.is_moderator(post['owner_login'])):
+                        post['operations'] = {
+                            'delete' : f'/api/{post['unique_id']}/delete',
+                            'ban' : f'/api/ban_ip' # тут должен быть эндпоинт бана
                             }
 
             except Exception as e:
                 print(e)
-
-            
+                
             response.set_data({
                 'filters': {
                     'orderByDate': order,
@@ -319,7 +312,6 @@ def handle_posts():
 
         # если ошибка в логике сервера
         except Exception as e:
-            print(e)
             response.set_status(504)
             return response.send()
 
@@ -329,11 +321,6 @@ def handle_posts():
         return response.send()
 
 
-# чекнуть логин и айди поста
-
-
-# @api.route('<post_id>/название_каждой_операции/', methods=['GET'])  # метод получения комментов к посту
-# @api.route('<post_id>/название_каждой_операции/', methods=['GET'])  # метод получения комментов к посту
 
 
 @api.route('/<post_id>/', methods=['GET'])  # метод получения одного поста(с обновлением просмотров)
@@ -343,34 +330,34 @@ def handle_post(post_id):
 
     try:
         Post.increment_view(post_id)
-        post = list(Post.get_post_by_id(post_id))
-        post.append({'view': f'/api/{post[0]}'})
+        post = Post.get_post_by_id(post_id)
+
          # проверка, авторизован ли пользователь и какие у него доступны операции
         try:
             identity = get_jwt_identity()
             login = encrypt_decrypt(identity["login"], SECRET_KEY)
 
             # модифицируем операции в зависимости от роли пользователя
-            if post[1] == login:
-                post[-1] |= {
-                    'delete' : f'/api/{post[0]}/delete',
-                    'update' : f'/api/{post[0]}/update'
+            if post['owner_login'] == login:
+                post['operations'] = {
+                    'delete' : f'/api/{post['unique_id']}/delete',
+                    'update' : f'/api/{post['unique_id']}/update'
                     }
                     
             # если он модератор и это не пост другого модератора
-            elif (User.is_moderator(login)) and (not User.is_moderator(post[1])):
-                post[-1] |= {
-                    'delete' : f'/api/{post[0]}/delete',
-                    'ban' : f'/api/ban' #### тут должен быть эндпоинт бана, ещё нужно саму функцию и всю связанную логику
+            elif (User.is_moderator(login)) and (not User.is_moderator(post['owner_login'])):
+                post['operations'] = {
+                    'delete' : f'/api/{post['unique_id']}/delete',
+                    'ban' : f'/api/ban_ip' #### тут должен быть эндпоинт бана, ещё нужно саму функцию и всю связанную логику
                     }
 
-        except Exception as e:
-            print(e)
-
+        except Exception:
+            pass
+        
         response.set_data({
             'post': post,
-            'reaction' : {'like/dislike/none'} ####к home и post_id нужно передать отображение реакций
-            })
+            'reaction' : 'like/dislike/none' ####к home и post_id нужно передать отображение реакций
+            })  
         return response.send()
 
     except Exception:
@@ -521,12 +508,13 @@ def delete_post(post_id):
 
 #### нужо сделать operations для комментов, для овнера и модера
 @api.route('<post_id>/comments/', methods=['GET'])  # метод получения комментов к посту
+@jwt_required(True)
 def handle_comments(post_id):
     response = Response()
 
     try:
         all_posts = Post.get_all_posts()
-        posts_id = [post[0] for post in all_posts]
+        posts_id = [post['unique_id'] for post in all_posts]
 
         # если пост с таким id существует
         if post_id in posts_id:
@@ -564,6 +552,32 @@ def handle_comments(post_id):
             # пытаемся получить комментарии к посту
             try:
                 comments = Comment.get_comments_by_post(post_id, order, page, limit)
+
+                # проверка, авторизован ли пользователь и какие у него доступны операции
+                try:
+                    identity = get_jwt_identity()
+                    login = encrypt_decrypt(identity["login"], SECRET_KEY)
+
+                    for comment in comments:
+                        # модифицируем операции в зависимости от роли пользователя
+                        if comment['owner_login'] == login:
+                            comment['operations'] = {
+                                'delete' : f'/api/{comment['post_id']}/delete_comment',
+                                'update' : f'/api/{comment['post_id']}/update_comment'
+                                }
+                                
+                        # если он модератор и это не пост другого модератора
+                        elif (User.is_moderator(login)) and (not User.is_moderator(comment['owner_login'])):
+                            comment['operations'] = {
+                                'delete' : f'/api/{comment['post_id']}/delete_comment',
+                                'ban' : f'/api/ban_ip' #### тут должен быть эндпоинт бана, ещё нужно саму функцию и всю связанную логику
+                                }
+
+                except Exception as e:
+                    print(e)
+                    pass
+
+
                 response.set_data({
                     'filters': {
                         'orderByDate': order
@@ -817,7 +831,7 @@ def rate(post_id):
         login = encrypt_decrypt(identity["login"], SECRET_KEY)
 
         all_posts = Post.get_all_posts()
-        posts_id = [post[0] for post in all_posts]
+        posts_id = [post['unique_id'] for post in all_posts]
 
         # если пост с таким id существует
         if post_id in posts_id:

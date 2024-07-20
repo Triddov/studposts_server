@@ -85,7 +85,20 @@ class Post:  # методы работы с таблицей posts
 
         cur = conn.cursor()
         cur.execute(query)
-        posts = cur.fetchall()
+        posts = list(cur.fetchall())
+        for i in range(len(posts)):
+            posts[i] = {
+            "unique_id" : posts[i][0],
+            "owner_login" : posts[i][1],
+            "title" : posts[i][2],
+            "content" : posts[i][3],
+            "tags" : posts[i][4],
+            "createdAt" : posts[i][5],
+            "imageData" : posts[i][6],
+            "viewCount" : posts[i][7],
+            "likesCount" : posts[i][8],
+            "dislikesCount" : posts[i][9]
+            }
         return posts
 
     @staticmethod
@@ -93,7 +106,19 @@ class Post:  # методы работы с таблицей posts
         cur = conn.cursor()
         cur.execute("SELECT * FROM posts WHERE unique_id = %s;", (unique_id,))
         post = cur.fetchone()
-        return post
+        answer = {
+            "unique_id" : post[0],
+            "owner_login" : post[1],
+            "title" : post[2],
+            "content" : post[3],
+            "tags" : post[4],
+            "createdAt" : post[5],
+            "imageData" : post[6],
+            "viewCount" : post[7],
+            "likesCount" : post[8],
+            "dislikesCount" : post[9]
+        }
+        return answer
 
     @staticmethod
     def update_post(unique_id, owner_login, **field):
@@ -218,7 +243,17 @@ class Comment:  # методы работы с таблицей comments
 
         cur = conn.cursor()
         cur.execute(query, (post_id,))
-        comments = cur.fetchall()
+        comments = list(cur.fetchall())
+
+        for i in range(len(comments)):
+            comments[i] = {
+            "unique_id" : comments[i][0],
+            "owner_login" : comments[i][1],
+            "post_id" : comments[i][2],
+            "content" : comments[i][3],
+            "createdAt" : comments[i][4],
+            }
+        
         return comments
 
     @staticmethod
