@@ -1,4 +1,4 @@
-from flask import Blueprint, request, current_app, send_from_directory
+from flask import Blueprint, request, current_app, send_from_directory, json
 from flask_jwt_extended import get_jwt_identity, JWTManager, jwt_required, decode_token
 from .database import *
 from .generate_captcha import *
@@ -299,6 +299,16 @@ def handle_post(post_id):
 
     except Exception:
         response.set_status(504)
+
+
+@api.route('/sources/<folder>/<filename>/', methods=['GET'])
+def sources(folder, filename):
+    valid_folders = ['userProfileIcons', 'userPostImages']
+    if folder not in valid_folders:
+        response = Response()
+        response.set_status(404)
+        return response.send()
+    return send_from_directory(os.path.join(current_app.root_path, 'static', folder), filename)
 
 
 @api.route('/create_post/', methods=['POST'])  # метод создания нового поста
@@ -693,12 +703,33 @@ def delete_comment(post_id):
 def rate(post_id):
     pass
 
-
-@api.route('/sources/<path:folder>/<path:filename>', methods=['GET'])
-def get_source(folder, filename):
-    valid_folders = ['userProfileIcons', 'userPostImages']
+@api.route('/sources/<folder>/<filename>', methods=['GET'])
+@jwt_required()
+def get_image(folder, filename):
+    print(3)
+    valid_folders = ['postImages', 'profileImages', 'userProfileIcons']
     if folder not in valid_folders:
         response = Response()
-        response.set_status(404)
-        return response.send()
-    return send_from_directory(os.path.join(current_app.root_path, 'static', folder), filename)
+        response.status_code = 404
+        return response
+
+    try:
+        image_path = os.path.join('sources', folder, filename)
+        if not os.path.exists(image_path):
+            response = Response()
+            response.status_code = 404
+            return response
+
+        with open(image_path, "rb") as image_file:
+            encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
+            response = Response()
+            response.set_data(json.dumps({'image_base64': encoded_string}))
+            response.set_status(200)
+            response.headers['Content-Type'] = 'application/json'
+            return response
+
+    except Exception as e:
+        print(e)
+        response = Response()
+        response.set_status(500)
+        return response
