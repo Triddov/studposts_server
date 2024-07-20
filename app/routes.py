@@ -10,23 +10,20 @@ from functools import wraps
 import time
 import os
 
+
 load_dotenv()
 
 SECRET_KEY = os.getenv('JWT_SECRET_KEY')
 TIME_CAPTCHA_LIMIT = int(os.getenv('CAPTCHA_EXPIRATION_MINUTES')) * 60  # в секундах
 AUTHORIZATION_LIMIT = int(os.getenv('AUTHORIZATION_LIMIT')) * 60  # в секундах
 
+nginx_blacklist_path = 'nginx_blacklist.conf'  # путь из корня проекта к списку забаненных по ip
+nginx_banned_ips = load_nginx_blacklist(nginx_blacklist_path)
+
 api = Blueprint('api', __name__)  # добавляет api во всех раутах
+
 jwt = JWTManager()  # объект генерации токенов
 
-
-## ЗАДАЧИ:
-# 1. сделать логику модераторов (полномочия без ограничений, кроме удаления других модераторов)
-# добавить в /home/ отправляемый объект 'operations': { 'delete': endpoint удаления постов
-# и прочие методы ( для овнера, для модера), просмотр (для всех ), изменить ( для овнера )}
-# бан по ip - в методанных запроса (x forward from - название заголовка в header-е)
-# 2. правки альберт-сергей (писать ниже:)
-#
 
 def token_required(f):  # метод проверки токенов авторизации
     @wraps(f)
@@ -48,7 +45,7 @@ def token_required(f):  # метод проверки токенов автор�
             user = User.find_by_login(owner_login)
 
             # проверка логина и пароля пользователя
-            if not user or password != user[1]:
+            if not user or password != user['password']:
                 response.set_status(410)
                 return response.send()
 
@@ -60,6 +57,16 @@ def token_required(f):  # метод проверки токенов автор�
         return f(*args, **kwargs)
 
     return decorator
+
+
+@api.before_request
+def check_ban_ip():
+    response = Response()
+
+    ip = request.remote_addr
+    if ip in nginx_banned_ips:
+        response.set_status(403)   # abort(403)
+        return response.send()
 
 
 @api.route('/captcha', methods=['GET'])  # метод генерации и получения капчи
@@ -127,7 +134,7 @@ def auth():
         login = data.get('login')
         password = data.get('password')
 
-        user_data = []
+        user_data = {}
 
         # логика регистрации
         if action == 'REGISTER':
@@ -178,7 +185,7 @@ def auth():
                     return response.send()
 
                 # создание юзера в базе и выдача токена
-                user_data = User.create_user(login, password, first_name, middle_name, sur_name, email, phone_number, pers_photo_data)
+                user_data = User.create_user(login, password, first_name, sur_name, middle_name, email, phone_number, pers_photo_data)
 
             # если ошибка в логике сервера
             except Exception:
@@ -196,7 +203,7 @@ def auth():
                 response.set_status(504)
                 return response.send()
 
-            if not user_data or user_data[1] != password:
+            if not user_data or user_data['password'] != password:
                 response.set_status(417)
                 return response.send()
 
@@ -220,7 +227,8 @@ def auth():
         return response.send()
 
 
-@api.route('/home', methods=['GET'])  # метод получения всех постов
+@api.route('/home/', methods=['GET'])  # метод получения всех постов
+@jwt_required(True)
 def handle_posts():
     response = Response()
 
@@ -263,15 +271,38 @@ def handle_posts():
         # получение постов по запросу
         try:
             posts = Post.get_all_posts(order, page, limit, search)
+
+            # к постам добавляем последним пунктом словарь operations со списком доступных операций
+            posts = [list(post) + [{}] for post in posts]
+
+            # проверка, авторизован ли пользователь и какие у него доступны операции
+            try:
+                identity = get_jwt_identity()
+                login = encrypt_decrypt(identity["login"], SECRET_KEY)
+
+                # модифицируем операции в зависимости от роли пользователя
+                for post in posts:
+                    # если он создатель
+                    if post[1] == login:
+                        post[-1] |= {
+                            'delete': f'/api/{post[0]}/delete',
+                            'update': f'/api/{post[0]}/update'
+                        }
+
+                    # если он модератор и это не пост другого модератора
+                    elif (User.is_moderator(login)) and (not User.is_moderator(post[1])):
+                        post[-1] |= {
+                            'delete': f'/api/{post[0]}/delete',
+                            'ban': f'/api/ban'  # тут должен быть эндпоинт бана
+                        }
+
+            except Exception as e:
+                print(e)
+
             response.set_data({
                 'filters': {
                     'orderByDate': order,
                     'search': search,
-                },
-                'operations': {
-                    'viewPost': '/api/<post_id>',  # эндпоинт для просмотра поста
-                    'deletePost': '/api/<post_id>/delete',  # эндпоинт для удаления поста
-                    'banUserByIP': '/api/user_banIP'  # эндпоинт для бана пользователя по IP
                 },
                 'limit': limit,
                 'page': page,
@@ -282,7 +313,7 @@ def handle_posts():
             return response.send()
 
         # если ошибка в логике сервера
-        except:
+        except Exception:
             response.set_status(504)
             return response.send()
 
@@ -293,13 +324,41 @@ def handle_posts():
 
 
 @api.route('/<post_id>/', methods=['GET'])  # метод получения одного поста(с обновлением просмотров)
+@jwt_required(True)
 def handle_post(post_id):
     response = Response()
 
     try:
         Post.increment_view(post_id)
-        post = Post.get_post_by_id(post_id)
-        response.set_data({'post': post})
+        post = list(Post.get_post_by_id(post_id))
+        post.append({})
+        # проверка, авторизован ли пользователь и какие у него доступны операции
+        try:
+            identity = get_jwt_identity()
+            login = encrypt_decrypt(identity["login"], SECRET_KEY)
+
+            # модифицируем операции в зависимости от роли пользователя
+            if post[1] == login:
+                post[-1] |= {
+                    'delete': f'/api/{post[0]}/delete',
+                    'update': f'/api/{post[0]}/update'
+                }
+
+            # если он модератор и это не пост другого модератора
+            elif (User.is_moderator(login)) and (not User.is_moderator(post[1])):
+                post[-1] |= {
+                    'delete': f'/api/{post[0]}/delete',
+                    'ban': f'/api/ban'
+                    #### тут должен быть эндпоинт бана, ещё нужно саму функцию и всю связанную логику
+                }
+
+        except Exception as e:
+            print(e)
+
+        response.set_data({
+            'post': post,
+            # 'reaction': {'like/dislike/none'}
+        })
         return response.send()
 
     except Exception:
@@ -321,7 +380,7 @@ def create_post():
         title = data.get("title")
         content = data.get("content")
         tags = data.get("tags")
-        image_data = data.get("imagedata")
+        image_data = data.get("image_data")
 
         # валидация всех полей
         is_valid, validation_error = check_post_data(data)
@@ -360,13 +419,12 @@ def create_post():
         return response.send()
 
     # если ошибка в логике сервера
-    except Exception as e:
-        print(e)
+    except Exception:
         response.set_status(421)
         return response.send()
 
 
-@api.route('/<post_id>/update/', methods=['PUT'])  # метод редактирования поста
+@api.route('/<post_id>/update/', methods=['PUT'])  # метод редактирования поста !!!
 @jwt_required()
 def update_post(post_id):
     response = Response()
@@ -452,7 +510,9 @@ def delete_post(post_id):
         return response.send()
 
 
+#### нужо сделать operations для комментов, для овнера и модера
 @api.route('<post_id>/comments', methods=['GET'])  # метод получения комментов к посту
+@jwt_required(True)
 def handle_comments(post_id):
     response = Response()
 
@@ -495,7 +555,29 @@ def handle_comments(post_id):
 
             # пытаемся получить комментарии к посту
             try:
-                comments = Comment.get_comments_by_post(post_id, order, page, limit)
+                comments = Comment.get_comments_by_post(order, page, limit)
+
+                comments = [list(comment) + [{}] for comment in comments]
+                try:
+                    identity = get_jwt_identity()
+                    login = encrypt_decrypt(identity["login"], SECRET_KEY)
+                    for comment in comments:
+                        # если он создатель
+                        if comment[1] == login:
+                            comment[-1] |= {
+                                'delete': f'/api/{comment[0]}/delete',
+                                'update': f'/api/{comment[0]}/update'
+                            }
+
+                        # если он модератор и это не пост другого модератора
+                        elif (User.is_moderator(login)) and (not User.is_moderator(comment[1])):
+                            comment[-1] |= {
+                                'delete': f'/api/{comment[0]}/delete',
+                                'ban': f'/api/ban'  # тут должен быть эндпоинт бана
+                            }
+                except Exception as e:
+                    print(e)
+
                 response.set_data({
                     'filters': {
                         'orderByDate': order
@@ -509,7 +591,8 @@ def handle_comments(post_id):
                 return response.send()
 
             # если ошибка в логике сервера
-            except:
+            except Exception as e:
+                print(e)
                 response.set_status(504)
                 return response.send()
 
@@ -519,8 +602,7 @@ def handle_comments(post_id):
             return response.send()
 
     # общая ошибка
-    except Exception as e:
-        print(e)
+    except Exception:
         response.set_status(400)
         return response.send()
 
@@ -796,11 +878,28 @@ def get_user():
 
     try:
         user_data = User.get_user(login)
-        response.set_data(user_data)
-        response.send()
+        response.set_data({"user_data": user_data})
+        return response.send()
 
     except Exception:
         response.set_status(404)
         return response.send()
 
+
+@api.route('/ban_ip', methods=['POST'])
+def ban_ip():
+    response = Response()
+
+    ip_address = request.form.get('ip_address')
+    if ip_address:
+        with open(nginx_blacklist_path, 'a') as ban_list:
+            ban_list.write(f"deny {ip_address};\n")
+
+        nginx_banned_ips.add(ip_address)
+        response.set_message(f"IP {ip_address} has been banned")
+        return response.send()
+
+    response.set_status(400)
+    response.set_message("Invalid IP address")
+    return response.send()
 

@@ -61,6 +61,18 @@ def check_bad_words(*fields_to_check):
     return True
 
 
+def load_nginx_blacklist(filepath):
+    banned_ips = set()
+    with open(filepath, 'r') as f:
+        for line in f:
+            if line.strip().startswith('deny'):
+                parts = line.split()
+                if len(parts) > 1:
+                    ip = parts[1].rstrip(';')
+                    banned_ips.add(ip)
+    return banned_ips
+
+
 def check_user_data(data, action='register'):
     # поля, которые пользователь может менять и устанавливать в принципе
     allowed_fields = ['login', 'password', 'first_name', 'sur_name', 'middle_name', 'email', 'phone_number']
@@ -74,8 +86,8 @@ def check_user_data(data, action='register'):
             if field not in data:
                 return False, f"Missing required field: {field}"
 
-            if not data[field] or data[field].isspace():
-                return False, f"{field} should not be empty"
+            if not data[field] or data[field].isspace() or " " in data[field]:
+                return False, f"{field} should not be empty or contain spaces"
 
     # проверка всех полей на содержание пробельных символов
     for field in allowed_fields:
