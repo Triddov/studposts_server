@@ -293,6 +293,8 @@ def handle_posts():
                             'delete' : f'/api/{post['unique_id']}/delete',
                             'ban' : f'/api/ban_ip' # тут должен быть эндпоинт бана
                             }
+                    
+                    post['reaction'] = User.get_reaction_at_post(login, post['unique_id'])
 
             except Exception as e:
                 print(e)
@@ -350,13 +352,18 @@ def handle_post(post_id):
                     'delete' : f'/api/{post['unique_id']}/delete',
                     'ban' : f'/api/ban_ip' #### тут должен быть эндпоинт бана, ещё нужно саму функцию и всю связанную логику
                     }
+            print('ok')
+            post['reaction'] = User.get_reaction_at_post(login, post['unique_id'])
+            
 
-        except Exception:
+        except Exception as e:
+            print(e)
             pass
         
+        
+
         response.set_data({
-            'post': post,
-            'reaction' : 'like/dislike/none' ####к home и post_id нужно передать отображение реакций
+            'post': post
             })  
         return response.send()
 

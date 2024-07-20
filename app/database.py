@@ -60,6 +60,20 @@ class User:  # методы работы с таблицей users
             
         else:
             raise Exception # данных не поступило
+    
+    @staticmethod
+    def get_reaction_at_post(login, post_id):
+        cur = conn.cursor()
+
+        cur.execute(f"SELECT * FROM likes WHERE post_id = '{post_id}' and owner_login = '{login}';")
+        if cur.fetchone():
+            return 'like'
+        else:
+            cur.execute(f"SELECT * FROM dislikes WHERE post_id = '{post_id}' and owner_login = '{login}';")
+            if cur.fetchone():
+                return 'dislike'
+            else:
+                return 'none'
 
 
 class Post:  # методы работы с таблицей posts
@@ -119,6 +133,8 @@ class Post:  # методы работы с таблицей posts
             "dislikesCount" : post[9]
         }
         return answer
+
+    
 
     @staticmethod
     def update_post(unique_id, owner_login, **field):
@@ -205,6 +221,10 @@ class Post:  # методы работы с таблицей posts
             cur.execute(f"DELETE FROM dislikes WHERE post_id = '{post_id}' and owner_login = '{login}';")
         
         return True, None
+    
+    
+
+            
     
     
 
