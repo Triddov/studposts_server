@@ -10,6 +10,9 @@ from functools import wraps
 import time
 import os
 
+# обновить логику бана по ip - в таблицу user добавить флаг is_blocked
+# сделать дефолтную картинку
+
 
 load_dotenv()
 
@@ -591,8 +594,7 @@ def handle_comments(post_id):
                 return response.send()
 
             # если ошибка в логике сервера
-            except Exception as e:
-                print(e)
+            except Exception:
                 response.set_status(504)
                 return response.send()
 

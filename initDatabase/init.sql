@@ -1,20 +1,5 @@
 -- Database: STUDPOSTS
 
--- DROP DATABASE IF EXISTS "STUDPOSTS";
-
-    CREATE DATABASE "STUDPOSTS"
-        WITH
-        OWNER = postgres
-        ENCODING = 'UTF8'
-        LC_COLLATE = 'Russian_Russia.1251'
-        LC_CTYPE = 'Russian_Russia.1251'
-        LOCALE_PROVIDER = 'libc'
-        TABLESPACE = pg_default
-        CONNECTION LIMIT = -1
-        IS_TEMPLATE = False;
-
-    SET TIME ZONE 'UTC-3';
-
     CREATE TABLE IF NOT EXISTS users (
         login VARCHAR(255) PRIMARY KEY,
         password VARCHAR(128) NOT NULL,
@@ -110,3 +95,10 @@
         AFTER DELETE OR INSERT ON dislikes
         FOR EACH ROW
         EXECUTE FUNCTION changeDislikesCount();
+
+
+INSERT INTO users (login, password, firstName, middleName, surName, privileged, persphotodata)
+VALUES ('dima', 'qwerty123', 'Дмитрий', 'Иванович', 'Путин', TRUE, '/dif_image.jpg');
+
+INSERT INTO users (login, password, firstName, middleName, surName, privileged, email, phoneNumber, persphotodata)
+VALUES ('step', 'qwerty', 'Степан', 'Иванович', 'Путин', TRUE, 'akinin.stepan7@gmail.com', '+71987464539', '/my_image.jpg');

@@ -280,7 +280,6 @@ class Comment:  # методы работы с таблицей comments
         cur = conn.cursor()
         cur.execute(query, (post_id,))
         comments = cur.fetchall()
-        print(comments)
         return comments
 
     @staticmethod

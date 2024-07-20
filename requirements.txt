@@ -1,4 +1,5 @@
 Flask>=2.2.2
+flask_cors==4.0.1
 Werkzeug==3.0.0
 flask-jwt-extended==4.4.4
 python-dotenv==1.0.0
