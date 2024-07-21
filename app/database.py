@@ -78,8 +78,8 @@ class User:  # методы работы с таблицей users
         return user[0]
 
     @staticmethod
-    def update_user(original_login, login=None, password=None, first_name=None, middle_name=None, sur_name=None, 
-                    email=None, phone_number=None, pers_photo_data=None):
+    def update_user(original_login, login, password, first_name, middle_name, sur_name, 
+                    email, phone_number, pers_photo_data):
         cur = conn.cursor()
         fields = []
 
@@ -95,14 +95,17 @@ class User:  # методы работы с таблицей users
         }
         
         for field, value in update_fields.items():
-            if value:
+            if value == '':
+                fields.append(f"{field} = NULL")
+            elif value:
                 fields.append(f"{field} = '{value}'")
-
+        
         if fields:
             
             query = f"UPDATE users SET {', '.join(fields)} WHERE login = '{original_login}';"
             cur.execute(query)
             
+        
         else:
             raise Exception # данных не поступило
     

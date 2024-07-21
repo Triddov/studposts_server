@@ -745,7 +745,7 @@ def edit_userprofile():
         email = data.get("email")
         phone_number = data.get("phone_number")
         pers_photo_data = data.get("pers_photo_data")
-        
+        print(data)
 
         # Валидация данных пользователя
         is_valid, validation_error = check_user_data(data, 'update')
@@ -753,7 +753,7 @@ def edit_userprofile():
             response.set_status(417)
             response.set_message(validation_error)
             return response.send()
-
+    
         # Проверка на наличие недопустимых слов в именах пользователя
         if not check_bad_words(first_name, middle_name, sur_name):
             response.set_status(418)
@@ -776,6 +776,7 @@ def edit_userprofile():
                 return response.send()
 
             encoded_login = encrypt_decrypt(login, SECRET_KEY)
+        
             
             
     except Exception:
@@ -785,6 +786,7 @@ def edit_userprofile():
     
 
     try:
+        
         # Обновление данных пользователя в базе данных
         User.update_user(original_login, login, password, first_name, middle_name, sur_name, email, phone_number, pers_photo_data)
         
