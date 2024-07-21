@@ -13,19 +13,63 @@ conn.autocommit = True  # не требует каждый раз вызыват
 
 class User:  # методы работы с таблицей users
     @staticmethod
-    def create_user(login, password, first_name, middle_name, sur_name, email, phone_number, pers_photo_data):
+    def create_user(login, password, first_name, sur_name, middle_name=None, email=None, phone_number=None,
+                    pers_photo_data=None):
         cur = conn.cursor()
         cur.execute("""
             INSERT INTO users (login, password, firstName, middleName, surName, privileged, email, phoneNumber, persphotodata)
             VALUES (%s, %s, %s, %s, %s, FALSE, %s, %s, %s)
         """, (login, password, first_name, middle_name, sur_name, email, phone_number, pers_photo_data))
 
+        user_data = cur.fetchone() 
+
+        response = {}
+
+        # Extracting each field and adding to the response dictionary only if it's not None
+        fields = ['login', 'firstName', 'middleName', 'surName', 'privileged', 'email', 'phoneNumber', 'persPhotodata']
+        for i, field in enumerate(fields):
+            if user_data[i] is not None:
+                response[field] = user_data[i]
+
+        return response
+
+    @staticmethod
+    def get_user(login):
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM users WHERE login = %s", (login,))
+        user_data = cur.fetchone()
+        response = {
+            'login': user_data[0],
+            'firstName': user_data[2],
+            'surName': user_data[3],
+            'middleName': user_data[4],
+            'privileged': user_data[5],
+            'email': user_data[6],
+            'phoneNumber': user_data[7],
+            'persPhotodata': user_data[8]
+        }
+        return response
+
     @staticmethod
     def find_by_login(login):
         cur = conn.cursor()
         cur.execute("SELECT * FROM users WHERE login = %s;", (login,))
-        user = cur.fetchone()
-        return user
+        user_data = cur.fetchone()
+        if user_data:
+            response = {
+                'login': user_data[0],
+                'password': user_data[1],
+                'firstName': user_data[2],
+                'surName': user_data[3],
+                'middleName': user_data[4],
+                'privileged': user_data[5],
+                'email': user_data[6],
+                'phoneNumber': user_data[7],
+                'persPhotodata': user_data[8]
+            }
+            return response
+        else:
+            return False
     
     def is_moderator(login):
         cur = conn.cursor()
@@ -34,7 +78,8 @@ class User:  # методы работы с таблицей users
         return user[0]
 
     @staticmethod
-    def update_user(original_login, login=None, password=None, first_name=None, middle_name=None, sur_name=None, email=None, phone_number=None, pers_photo_data=None):
+    def update_user(original_login, login=None, password=None, first_name=None, middle_name=None, sur_name=None, 
+                    email=None, phone_number=None, pers_photo_data=None):
         cur = conn.cursor()
         fields = []
 
@@ -173,6 +218,26 @@ class Post:  # методы работы с таблицей posts
         else:
             raise Exception
 
+    
+    @staticmethod
+    def image_already(post_id):
+        cur = conn.cursor()
+        cur.execute("SELECT imagedata FROM posts WHERE unique_id = %s;", (post_id,))
+        already_exists = cur.fetchone()
+        return True if already_exists else False
+
+    @staticmethod
+    def image_filename(post_id):
+        cur = conn.cursor()
+        cur.execute("SELECT imagedata FROM posts WHERE unique_id = %s;", (post_id,))
+        result = cur.fetchone()
+
+        if result:
+            return os.path.basename(result[0])
+        else:
+            raise Exception
+
+    
     @staticmethod
     def increment_view(post_id):
         cur = conn.cursor()

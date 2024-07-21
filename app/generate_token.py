@@ -3,10 +3,11 @@ from dotenv import load_dotenv
 import uuid  # библиотека генерации уникальных идентификаторов (UUID)
 import time
 import os
+from datetime import datetime
 
 load_dotenv()
 
-AUTHORIZATION_LIMIT = os.getenv("AUTHORIZATION_LIMIT")
+AUTHORIZATION_LIMIT = int(os.getenv("AUTHORIZATION_LIMIT")) * 60  # в секундах
 
 
 def generate_uuid():  # метод генерация уникального идентификатора
@@ -14,8 +15,11 @@ def generate_uuid():  # метод генерация уникального и�
 
 
 def create_user_jwt_token(login: str, password: str) -> str:  # метод создания токена авторизации
-    authorization_limit = int(time.time())
-    token = create_access_token(identity={"created_time": authorization_limit, "login": login, "password": password})
+    authorization_create = datetime.fromtimestamp(int(time.time())).strftime('%Y-%m-%d %H:%M:%S')
+    expected_time = datetime.fromtimestamp(int(time.time()) + AUTHORIZATION_LIMIT).strftime('%Y-%m-%d %H:%M:%S')
+    token = create_access_token(identity={"created_time": authorization_create,
+                                          "login": login, "password": password,
+                                          "expected_time": expected_time})
     return token
 
 
