@@ -13,21 +13,20 @@ expected = {
 }
 
 
-# лайк при нажатом лайке
+# лайк при нажатом лайке (не увеличится число)
 body = {
     "action" : "like"
 }
 
 expected = {
-    "error": "like has already been set",
-    "message": "Incorrect action",
-    "status": 415
+    "message": "Successfully",
+    "status": 200
 }
 
 
 # отмена лайка
 body = {
-    "action" : "unlike"
+    "action" : "none"
 }
 
 expected = {
@@ -38,13 +37,12 @@ expected = {
 
 # отмена лайка при отсутствии лайка
 body = {
-    "action" : "unlike"
+    "action" : "none"
 }
 
 expected = {
-    "error": "like hasn't been set",
-    "message": "Incorrect action",
-    "status": 415
+    "message": "Successfully",
+    "status": 200
 }
 
 
@@ -70,21 +68,20 @@ expected = {
 }
 
 
-# дизлайк при нажатом дизлайке
+# дизлайк при нажатом дизлайке (не увеличится число)
 body = {
     "action" : "dislike"
 }
 
 expected = {
-    "error": "dislike has already been set",
-    "message": "Incorrect action",
-    "status": 415
+    "message": "Successfully",
+    "status": 200
 }
 
 
 # отмена дизлайка
 body = {
-    "action" : "undislike"
+    "action" : "none"
 }
 
 expected = {
@@ -95,13 +92,12 @@ expected = {
 
 # отмена дизлайка без дизлайка
 body = {
-    "action" : "undislike"
+    "action" : "none"
 }
 
 expected = {
-    "error": "dislike hasn't been set",
-    "message": "Incorrect action",
-    "status": 415
+    "message": "Successfully",
+    "status": 200
 }
 
 

@@ -244,48 +244,24 @@ class Post:  # методы работы с таблицей posts
         cur.execute("UPDATE posts SET viewcount = viewcount + 1 WHERE unique_id = %s", (post_id,))
 
     @staticmethod
-    def like_post(login, post_id, action):
+    def rate_post(login, post_id, action):
         cur = conn.cursor()
         
         if action == 'like':
             cur.execute(f"SELECT * FROM likes WHERE post_id = '{post_id}' and owner_login = '{login}';")
-            if cur.fetchone():
-                return False, 'like has already been set'
-            
-            cur.execute(f"INSERT INTO likes (owner_login, post_id) VALUES ('{login}', '{post_id}');")
-
-            cur.execute(f"DELETE FROM dislikes WHERE post_id = '{post_id}' and owner_login = '{login}';")
-        
-        elif action == 'unlike':
-            cur.execute(f"SELECT * FROM likes WHERE post_id = '{post_id}' and owner_login = '{login}';")
             if not cur.fetchone():
-                return False, "like hasn't been set"
-
-            cur.execute(f"DELETE FROM likes WHERE post_id = '{post_id}' and owner_login = '{login}';")
+                # при вставке в likes/dislikes срабатывает sql триггер, увеличивающий кол-во реакций посту
+                # и автоматически убирает противоположную реакцию 
+                cur.execute(f"INSERT INTO likes (owner_login, post_id) VALUES ('{login}', '{post_id}');")
         
-        return True, None
-
-    @staticmethod
-    def dislike_post(login, post_id, action):
-        cur = conn.cursor()
-        
-        if action == 'dislike':
-            cur.execute(f"SELECT * FROM dislikes WHERE post_id = '{post_id}' and owner_login = '{login}';")
-            if cur.fetchone():
-                return False, 'dislike has already been set'
-
-            cur.execute(f"INSERT INTO dislikes (owner_login, post_id) VALUES ('{login}', '{post_id}');")
-            
-            cur.execute(f"DELETE FROM likes WHERE post_id = '{post_id}' and owner_login = '{login}';")
-        
-        elif action == 'undislike':
+        elif action == 'dislike':
             cur.execute(f"SELECT * FROM dislikes WHERE post_id = '{post_id}' and owner_login = '{login}';")
             if not cur.fetchone():
-                return False, "dislike hasn't been set"
+                cur.execute(f"INSERT INTO dislikes (owner_login, post_id) VALUES ('{login}', '{post_id}');")
 
+        elif action == 'none':
+            cur.execute(f"DELETE FROM likes WHERE post_id = '{post_id}' and owner_login = '{login}';")
             cur.execute(f"DELETE FROM dislikes WHERE post_id = '{post_id}' and owner_login = '{login}';")
-        
-        return True, None
     
     
 

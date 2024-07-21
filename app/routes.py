@@ -839,27 +839,15 @@ def rate(post_id):
 
             try:
                 # перебор доступных action
-                if action in ['like', 'unlike']:
-                    is_succesful, message = Post.like_post(login, post_id, action)
-                
-                elif action in ['dislike', 'undislike']:
-                    is_succesful, message = Post.dislike_post(login, post_id, action)
+                if action in ['like', 'dislike', 'none']:
+                    Post.rate_post(login, post_id, action)
 
                 # неизвестное действие
                 else:
                     response.set_status(412)
                     return response.send()
-                
-                if is_succesful:
-                    # успешно
-                    response.set_status(200)
-                    return response.send()
-                
-                # некорректное действие
-                response.set_data({
-                    "error" : message
-                })
-                response.set_status(415)
+
+                response.set_status(200)
                 return response.send()
             
             except:
