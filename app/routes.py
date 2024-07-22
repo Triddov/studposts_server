@@ -186,7 +186,7 @@ def auth():
                     return response.send()
 
                 # создание юзера в базе и выдача токена
-                user_data = User.create_user(login, password, first_name, middle_name, sur_name, email, phone_number, pers_photo_data)
+                user_data = User.create_user(login, password, first_name, sur_name, middle_name, email, phone_number, pers_photo_data)
 
             # если ошибка в логике сервера
             except Exception:
@@ -718,11 +718,6 @@ def delete_comment(post_id):
         response.set_status(421)
 
 
-# тут осталось че, 
-# 1)логика "пустых" полей, означающих, что данные пользователь хочет сбросить
-# 3)проверка картинки (она все ломает)
-
-
 
 @api.route('/edit_user', methods=['PUT'])  # метод редактирования данных пользователя  TESTS
 @jwt_required()
@@ -758,7 +753,7 @@ def edit_userprofile():
         if not check_bad_words(first_name, middle_name, sur_name):
             response.set_status(418)
             return response.send()
-        # Обработка данных о персональном фото (не трогал, нужны тесты)
+        # Обработка данных о персональном фото
         if pers_photo_data is not None:
             header, pers_photo_data = pers_photo_data.split(",", 1)
 
