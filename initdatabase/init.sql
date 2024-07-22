@@ -9,7 +9,7 @@
         privileged BOOLEAN DEFAULT FALSE,
         email VARCHAR(36),
         phoneNumber VARCHAR(20),
-        persPhotoData VARCHAR(255)
+        persPhotoData VARCHAR(255) DEFAULT 'sourses/userProfileIcons/default_user_icon.png' NOT NULL
     );
 
     CREATE TABLE IF NOT EXISTS posts (

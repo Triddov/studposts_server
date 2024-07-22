@@ -753,10 +753,17 @@ def edit_userprofile():
         if not check_bad_words(first_name, middle_name, sur_name):
             response.set_status(418)
             return response.send()
+        
         # Обработка данных о персональном фото
-        if pers_photo_data is not None:
-            header, pers_photo_data = pers_photo_data.split(",", 1)
+        
+        # кейс сброса изображения до дефолтного
+        if pers_photo_data == '':
+            pers_photo_data = "sourses/userProfileIcons/default_user_icon.png"
 
+        # кейс других данных
+        elif pers_photo_data is not None:
+            header, pers_photo_data = pers_photo_data.split(",", 1)
+            
             if not is_image_valid(pers_photo_data) or not is_icon_square(pers_photo_data):
                 response.set_status(420)
                 return response.send()
