@@ -1,4 +1,11 @@
 from flask import jsonify, make_response
+from datetime import datetime
+
+
+def log_status(error):
+    with open('logs.txt', 'a') as log_file:
+        log_file.write(f"{datetime.now().strftime('date:%m/%d/%y time:%H:%M:%S')}"
+                       f" error message: {error}\n")
 
 
 class Response:  # класс ответов, ошибок и сообщений в теле запросов
