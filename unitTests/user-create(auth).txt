@@ -26,14 +26,14 @@
     "input_captcha": "btmnt5"
 }
 
-# correct user data (min data)
-{
+# correct user data (min data){
     "login": "new_user",
     "password": "qwerty12345",
     "first_name" : "Безродный",
     "captcha_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyMTE2MTQxNCwianRpIjoiOGRhZDM3MTUtNTZlMi00ZWI2LThhNTgtMmIzZmRkZDY1NGYzIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6eyJzb2x1dGlvbiI6IlxiLVx1MDAxM1x1MDAwYjdcdTAwMWIiLCJjcmVhdGVkX3RpbWUiOjE3MjExNjE0MTR9LCJuYmYiOjE3MjExNjE0MTQsImV4cCI6MTcyMTE2MjMxNH0.IjsXYjiT3Nvjv8qTbxiLNlCp82lZ-H2hHqmOwMk3Urw",
     "input_captcha": "bZgTCi"
 }
+
 
 
 ## Target-Action == LOGIN

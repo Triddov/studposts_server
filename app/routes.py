@@ -124,14 +124,15 @@ def auth():
         current_time = int(time.time())  # в секундах
 
         # проверка актуального времени капчи
-        if captcha_created_time + TIME_CAPTCHA_LIMIT < current_time:
-            response.set_status(416)
-            return response.send()
+        # if captcha_created_time + TIME_CAPTCHA_LIMIT < current_time:
+        #     response.set_status(416)
+        #     return response.send()
 
         # проверка пользовательского решения капчи
         if input_captcha != captcha_solution:
             response.set_status(414)
             return response.send()
+
 
         # поля для обоих сценариев
         login = data.get('login')
