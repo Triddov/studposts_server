@@ -2,6 +2,8 @@ import psycopg2
 from dotenv import load_dotenv
 import os
 
+import psycopg2.extras
+
 load_dotenv()
 
 conn = psycopg2.connect(os.getenv('DATABASE_URL'))  # подключение к базе
@@ -17,10 +19,9 @@ class User:  # методы работы с таблицей users
         cur.execute("""
             INSERT INTO users (login, password, firstName, middleName, surName, privileged, email, phoneNumber, persphotodata)
             VALUES (%s, %s, %s, %s, %s, FALSE, %s, %s, %s)
-            RETURNING login, firstName, middleName, surName, privileged, email, phoneNumber, persphotodata
         """, (login, password, first_name, middle_name, sur_name, email, phone_number, pers_photo_data))
 
-        user_data = cur.fetchone()
+        user_data = cur.fetchone() 
 
         response = {}
 
@@ -50,13 +51,6 @@ class User:  # методы работы с таблицей users
         return response
 
     @staticmethod
-    def is_moderator(login):
-        cur = conn.cursor()
-        cur.execute("SELECT privileged FROM users WHERE login = %s;", (login,))
-        user = cur.fetchone()
-        return user[0]
-
-    @staticmethod
     def find_by_login(login):
         cur = conn.cursor()
         cur.execute("SELECT * FROM users WHERE login = %s;", (login,))
@@ -78,8 +72,15 @@ class User:  # методы работы с таблицей users
             return False
 
     @staticmethod
-    def update_user(original_login, login=None, password=None, first_name=None, middle_name=None, sur_name=None,
-                    email=None, phone_number=None, pers_photo_data=None):
+    def is_moderator(login):
+        cur = conn.cursor()
+        cur.execute("SELECT privileged FROM users WHERE login = %s;", (login,))
+        user = cur.fetchone()
+        return user[0]
+
+    @staticmethod
+    def update_user(original_login, login, password, first_name, middle_name, sur_name, 
+                    email, phone_number, pers_photo_data):
         cur = conn.cursor()
         fields = []
 
@@ -93,18 +94,35 @@ class User:  # методы работы с таблицей users
             "phoneNumber": phone_number,
             "persPhotoData": pers_photo_data
         }
-
+        
         for field, value in update_fields.items():
-            if value:
+            if value == '':
+                fields.append(f"{field} = NULL")
+            elif value:
                 fields.append(f"{field} = '{value}'")
-
+        
         if fields:
-
+            
             query = f"UPDATE users SET {', '.join(fields)} WHERE login = '{original_login}';"
             cur.execute(query)
-
+            
+        
         else:
-            raise Exception  # данных не поступило
+            raise Exception # данных не поступило
+    
+    @staticmethod
+    def get_reaction_at_post(login, post_id):
+        cur = conn.cursor()
+
+        cur.execute(f"SELECT * FROM likes WHERE post_id = '{post_id}' and owner_login = '{login}';")
+        if cur.fetchone():
+            return 'like'
+        else:
+            cur.execute(f"SELECT * FROM dislikes WHERE post_id = '{post_id}' and owner_login = '{login}';")
+            if cur.fetchone():
+                return 'dislike'
+            else:
+                return 'none'
 
 
 class Post:  # методы работы с таблицей posts
@@ -130,7 +148,20 @@ class Post:  # методы работы с таблицей posts
 
         cur = conn.cursor()
         cur.execute(query)
-        posts = cur.fetchall()
+        posts = list(cur.fetchall())
+        for i in range(len(posts)):
+            posts[i] = {
+            "unique_id" : posts[i][0],
+            "owner_login" : posts[i][1],
+            "title" : posts[i][2],
+            "content" : posts[i][3],
+            "tags" : posts[i][4],
+            "createdAt" : posts[i][5],
+            "imageData" : posts[i][6],
+            "viewCount" : posts[i][7],
+            "likesCount" : posts[i][8],
+            "dislikesCount" : posts[i][9]
+            }
         return posts
 
     @staticmethod
@@ -138,7 +169,21 @@ class Post:  # методы работы с таблицей posts
         cur = conn.cursor()
         cur.execute("SELECT * FROM posts WHERE unique_id = %s;", (unique_id,))
         post = cur.fetchone()
-        return post
+        answer = {
+            "unique_id" : post[0],
+            "owner_login" : post[1],
+            "title" : post[2],
+            "content" : post[3],
+            "tags" : post[4],
+            "createdAt" : post[5],
+            "imageData" : post[6],
+            "viewCount" : post[7],
+            "likesCount" : post[8],
+            "dislikesCount" : post[9]
+        }
+        return answer
+
+    
 
     @staticmethod
     def update_post(unique_id, owner_login, **field):
@@ -177,6 +222,7 @@ class Post:  # методы работы с таблицей posts
         else:
             raise Exception
 
+    
     @staticmethod
     def image_already(post_id):
         cur = conn.cursor()
@@ -195,55 +241,32 @@ class Post:  # методы работы с таблицей posts
         else:
             raise Exception
 
+    
     @staticmethod
     def increment_view(post_id):
         cur = conn.cursor()
         cur.execute("UPDATE posts SET viewcount = viewcount + 1 WHERE unique_id = %s", (post_id,))
 
     @staticmethod
-    def like_post(login, post_id, action):
+    def rate_post(login, post_id, action):
         cur = conn.cursor()
-
+        
         if action == 'like':
             cur.execute(f"SELECT * FROM likes WHERE post_id = '{post_id}' and owner_login = '{login}';")
-            if cur.fetchone():
-                return False, 'like has already been set'
-
-            cur.execute(f"INSERT INTO likes (owner_login, post_id) VALUES ('{login}', '{post_id}');")
-
-            cur.execute(f"DELETE FROM dislikes WHERE post_id = '{post_id}' and owner_login = '{login}';")
-
-        elif action == 'unlike':
-            cur.execute(f"SELECT * FROM likes WHERE post_id = '{post_id}' and owner_login = '{login}';")
             if not cur.fetchone():
-                return False, "like hasn't been set"
-
-            cur.execute(f"DELETE FROM likes WHERE post_id = '{post_id}' and owner_login = '{login}';")
-
-        return True, None
-
-    @staticmethod
-    def dislike_post(login, post_id, action):
-        cur = conn.cursor()
-
-        if action == 'dislike':
-            cur.execute(f"SELECT * FROM dislikes WHERE post_id = '{post_id}' and owner_login = '{login}';")
-            if cur.fetchone():
-                return False, 'dislike has already been set'
-
-            cur.execute(f"INSERT INTO dislikes (owner_login, post_id) VALUES ('{login}', '{post_id}');")
-
-            cur.execute(f"DELETE FROM likes WHERE post_id = '{post_id}' and owner_login = '{login}';")
-
-        elif action == 'undislike':
+                # при вставке в likes/dislikes срабатывает sql триггер, увеличивающий кол-во реакций посту
+                # и автоматически убирает противоположную реакцию 
+                cur.execute(f"INSERT INTO likes (owner_login, post_id) VALUES ('{login}', '{post_id}');")
+        
+        elif action == 'dislike':
             cur.execute(f"SELECT * FROM dislikes WHERE post_id = '{post_id}' and owner_login = '{login}';")
             if not cur.fetchone():
-                return False, "dislike hasn't been set"
+                cur.execute(f"INSERT INTO dislikes (owner_login, post_id) VALUES ('{login}', '{post_id}');")
 
+        elif action == 'none':
+            cur.execute(f"DELETE FROM likes WHERE post_id = '{post_id}' and owner_login = '{login}';")
             cur.execute(f"DELETE FROM dislikes WHERE post_id = '{post_id}' and owner_login = '{login}';")
-
-        return True, None
-
+    
 
 class Comment:  # методы работы с таблицей comments
     @staticmethod
@@ -279,7 +302,17 @@ class Comment:  # методы работы с таблицей comments
 
         cur = conn.cursor()
         cur.execute(query, (post_id,))
-        comments = cur.fetchall()
+        comments = list(cur.fetchall())
+
+        for i in range(len(comments)):
+            comments[i] = {
+            "unique_id" : comments[i][0],
+            "owner_login" : comments[i][1],
+            "post_id" : comments[i][2],
+            "content" : comments[i][3],
+            "createdAt" : comments[i][4],
+            }
+        
         return comments
 
     @staticmethod
@@ -319,4 +352,3 @@ class Comment:  # методы работы с таблицей comments
             cur.execute("DELETE FROM comments WHERE unique_id = %s;", (comment_id,))
         else:
             raise Exception
-

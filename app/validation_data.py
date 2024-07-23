@@ -73,10 +73,11 @@ def load_nginx_blacklist(filepath):
     return banned_ips
 
 
-def check_user_data(data, action='register'):
+def check_user_data(data, action = 'register'):
+    
     # поля, которые пользователь может менять и устанавливать в принципе
     allowed_fields = ['login', 'password', 'first_name', 'sur_name', 'middle_name', 'email', 'phone_number']
-
+    
     # обязательные поля для регистрации
     if action == 'register':
         required_fields = ['login', 'password', 'first_name', 'sur_name']
@@ -86,12 +87,12 @@ def check_user_data(data, action='register'):
             if field not in data:
                 return False, f"Missing required field: {field}"
 
-            if not data[field] or data[field].isspace() or " " in data[field]:
-                return False, f"{field} should not be empty or contain spaces"
-
+            if not data[field] or data[field]:
+                return False, f"{field} should not be empty"
+    
     # проверка всех полей на содержание пробельных символов
     for field in allowed_fields:
-        if field in data and data[field].isspace():
+        if field in data and ' ' in data[field]:
             return False, f"{field} should not contain spaces"
 
     # поля, для которых есть значения минимальной длины

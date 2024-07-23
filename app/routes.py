@@ -10,21 +10,17 @@ from functools import wraps
 import time
 import os
 
-# обновить логику бана по ip - в таблицу user добавить флаг is_blocked
-# сделать дефолтную картинку
-
-
 load_dotenv()
 
 SECRET_KEY = os.getenv('JWT_SECRET_KEY')
 TIME_CAPTCHA_LIMIT = int(os.getenv('CAPTCHA_EXPIRATION_MINUTES')) * 60  # в секундах
 AUTHORIZATION_LIMIT = int(os.getenv('AUTHORIZATION_LIMIT')) * 60  # в секундах
 
+
 nginx_blacklist_path = 'nginx_blacklist.conf'  # путь из корня проекта к списку забаненных по ip
 nginx_banned_ips = load_nginx_blacklist(nginx_blacklist_path)
 
 api = Blueprint('api', __name__)  # добавляет api во всех раутах
-
 jwt = JWTManager()  # объект генерации токенов
 
 
@@ -54,7 +50,7 @@ def token_required(f):  # метод проверки токенов автор�
 
         # если ошибка декодирования
         except Exception as err:
-            log_status(err)
+            log_status(err, __name__)
             response.set_status(406)
             return response.send()
 
@@ -71,6 +67,7 @@ def check_ban_ip():
     if ip in nginx_banned_ips:
         response.set_status(403)   # abort(403)
         return response.send()
+
 
 
 @api.route('/captcha', methods=['GET'])  # метод генерации и получения капчи
@@ -101,10 +98,11 @@ def auth():
         if action != "REGISTER" and action != "LOGIN":
             response.set_status(415)
             return response.send()
-
+        
         data = request.get_json()
         input_captcha = data.get("input_captcha")
         captcha_solution_token = data.get("captcha_token")
+        
 
         # проверка наличия полей решения капчи
         if not captcha_solution_token or not input_captcha:
@@ -118,7 +116,7 @@ def auth():
             captcha_created_time = decoded_captcha_token['sub']['created_time']
 
         except Exception as err:
-            log_status(err)
+            log_status(err, __name__)
             response.set_status(413)
             return response.send()
 
@@ -133,7 +131,6 @@ def auth():
         if input_captcha != captcha_solution:
             response.set_status(414)
             return response.send()
-
 
         # поля для обоих сценариев
         login = data.get('login')
@@ -180,7 +177,7 @@ def auth():
 
             # если данные некорректны
             except Exception as err:
-                log_status(err)
+                log_status(err, __name__)
                 response.set_status(417)
                 return response.send()
 
@@ -195,7 +192,7 @@ def auth():
 
             # если ошибка в логике сервера
             except Exception as err:
-                log_status(err)
+                log_status(err, __name__)
                 response.set_status(504)
                 return response.send()
 
@@ -207,7 +204,7 @@ def auth():
 
             # если ошибка в логике сервера
             except Exception as err:
-                log_status(err)
+                log_status(err, __name__)
                 response.set_status(504)
                 return response.send()
 
@@ -224,19 +221,19 @@ def auth():
 
         response.set_data({
             "session_token": access_token,
-            "user_data": user_data
+            'user_data' : user_data
         })
 
         return response.send()
 
     # общая ошибка
     except Exception as err:
-        log_status(err)
+        log_status(err, __name__)
         response.set_status(400)
         return response.send()
 
 
-@api.route('/home/', methods=['GET'])  # метод получения всех постов
+@api.route('/home', methods=['GET'])  # метод получения всех постов
 @jwt_required(True)
 def handle_posts():
     response = Response()
@@ -255,7 +252,7 @@ def handle_posts():
         try:
             page, limit = int(page), int(limit)
         except ValueError as err:
-            log_status(err)
+            log_status(err, __name__)
             page, limit = 1, 5
 
         # если limit вне диапазона количества постов
@@ -269,7 +266,7 @@ def handle_posts():
 
         # если постов нет, нет и limit, но одну страницу мы отобразить должны
         except ZeroDivisionError as err:
-            log_status(err)
+            log_status(err, __name__)
             max_page = 1
 
         # проверяем page на допустимый диапазон
@@ -283,33 +280,33 @@ def handle_posts():
         try:
             posts = Post.get_all_posts(order, page, limit, search)
 
-            # к постам добавляем последним пунктом словарь operations со списком доступных операций
-            posts = [list(post) + [{}] for post in posts]
 
             # проверка, авторизован ли пользователь и какие у него доступны операции
             try:
                 identity = get_jwt_identity()
                 login = encrypt_decrypt(identity["login"], SECRET_KEY)
-
+                
                 # модифицируем операции в зависимости от роли пользователя
                 for post in posts:
                     # если он создатель
-                    if post[1] == login:
-                        post[-1] |= {
-                            'delete': f'/api/{post[0]}/delete',
-                            'update': f'/api/{post[0]}/update'
-                        }
-
+                    if post['owner_login'] == login:
+                        post['operations'] = {
+                            'delete' : f'/api/{post['unique_id']}/delete',
+                            'update' : f'/api/{post['unique_id']}/update'
+                            }
+                    
                     # если он модератор и это не пост другого модератора
-                    elif (User.is_moderator(login)) and (not User.is_moderator(post[1])):
-                        post[-1] |= {
-                            'delete': f'/api/{post[0]}/delete',
-                            'ban': f'/api/ban'  # тут должен быть эндпоинт бана
-                        }
+                    elif (User.is_moderator(login)) and (not User.is_moderator(post['owner_login'])):
+                        post['operations'] = {
+                            'delete' : f'/api/{post['unique_id']}/delete',
+                            'ban' : f'/api/ban_ip'
+                            }
+                    
+                    post['reaction'] = User.get_reaction_at_post(login, post['unique_id'])
 
             except Exception as err:
-                log_status(err)
-
+                log_status(err, __name__)
+                
             response.set_data({
                 'filters': {
                     'orderByDate': order,
@@ -325,57 +322,58 @@ def handle_posts():
 
         # если ошибка в логике сервера
         except Exception as err:
-            log_status(err)
+            log_status(err, __name__)
             response.set_status(504)
             return response.send()
 
     # общая ошибка
     except Exception as err:
-        log_status(err)
+        log_status(err, __name__)
         response.set_status(400)
         return response.send()
 
 
-@api.route('/<post_id>/', methods=['GET'])  # метод получения одного поста(с обновлением просмотров)
+@api.route('/<post_id>', methods=['GET'])  # метод получения одного поста(с обновлением просмотров)
 @jwt_required(True)
 def handle_post(post_id):
     response = Response()
 
     try:
         Post.increment_view(post_id)
-        post = list(Post.get_post_by_id(post_id))
-        post.append({})
-        # проверка, авторизован ли пользователь и какие у него доступны операции
+        post = Post.get_post_by_id(post_id)
+
+         # проверка, авторизован ли пользователь и какие у него доступны операции
         try:
             identity = get_jwt_identity()
             login = encrypt_decrypt(identity["login"], SECRET_KEY)
 
             # модифицируем операции в зависимости от роли пользователя
-            if post[1] == login:
-                post[-1] |= {
-                    'delete': f'/api/{post[0]}/delete',
-                    'update': f'/api/{post[0]}/update'
-                }
-
+            if post['owner_login'] == login:
+                post['operations'] = {
+                    'delete' : f'/api/{post['unique_id']}/delete',
+                    'update' : f'/api/{post['unique_id']}/update'
+                    }
+                    
             # если он модератор и это не пост другого модератора
-            elif (User.is_moderator(login)) and (not User.is_moderator(post[1])):
-                post[-1] |= {
-                    'delete': f'/api/{post[0]}/delete',
-                    'ban': f'/api/ban'
-                    #### тут должен быть эндпоинт бана, ещё нужно саму функцию и всю связанную логику
-                }
+            elif (User.is_moderator(login)) and (not User.is_moderator(post['owner_login'])):
+                post['operations'] = {
+                    'delete' : f'/api/{post['unique_id']}/delete',
+                    'ban' : f'/api/ban_ip'
+                    }
+
+            # добавляем поле с реакцией пользователя на пост
+            post['reaction'] = User.get_reaction_at_post(login, post['unique_id'])
 
         except Exception as err:
-            log_status(err)
+            log_status(err, __name__)
 
         response.set_data({
-            'post': post,
-            # 'reaction': {'like/dislike/none'}
-        })
+            'post': post
+            })  
         return response.send()
 
     except Exception as err:
-        log_status(err)
+        log_status(err, __name__)
         response.set_status(504)
 
 
@@ -410,7 +408,7 @@ def create_post():
 
     # если данные некорректны
     except Exception as err:
-        log_status(err)
+        log_status(err, __name__)
         response.set_status(417)
         return response.send()
 
@@ -435,16 +433,15 @@ def create_post():
 
     # если ошибка в логике сервера
     except Exception as err:
-        log_status(err)
+        log_status(err, __name__)
         response.set_status(421)
         return response.send()
 
 
-@api.route('/<post_id>/update/', methods=['PUT'])  # метод редактирования поста !!!
+@api.route('/<post_id>/update', methods=['PUT'])  # метод редактирования поста
 @jwt_required()
 def update_post(post_id):
     response = Response()
-
     try:
         identity = get_jwt_identity()
         owner_login = encrypt_decrypt(identity["login"], SECRET_KEY)
@@ -487,7 +484,7 @@ def update_post(post_id):
                 image_data = save_image(image_data, unique_filename)
 
     except Exception as err:
-        log_status(err)
+        log_status(err, __name__)
         response.set_status(417)
         return response.send()
 
@@ -499,7 +496,7 @@ def update_post(post_id):
 
     # если ошибка в логике сервера
     except Exception as err:
-        log_status(err)
+        log_status(err, __name__)
         response.set_status(421)
         return response.send()
 
@@ -514,7 +511,7 @@ def delete_post(post_id):
         owner_login = encrypt_decrypt(jwt_identity["login"], SECRET_KEY)
 
     except Exception as err:
-        log_status(err)
+        log_status(err, __name__)
         response.set_status(417)
         return response.send()
 
@@ -525,7 +522,7 @@ def delete_post(post_id):
 
     # если ошибка в логике сервера
     except Exception as err:
-        log_status(err)
+        log_status(err, __name__)
         response.set_status(504)
         return response.send()
 
@@ -537,7 +534,7 @@ def handle_comments(post_id):
 
     try:
         all_posts = Post.get_all_posts()
-        posts_id = [post[0] for post in all_posts]
+        posts_id = [post['unique_id'] for post in all_posts]
 
         # если пост с таким id существует
         if post_id in posts_id:
@@ -553,7 +550,7 @@ def handle_comments(post_id):
             try:
                 page, limit = int(page), int(limit)
             except ValueError as err:
-                log_status(err)
+                log_status(err, __name__)
                 page, limit = 1, 5
 
             if 1 > limit or comments_count < limit:
@@ -564,7 +561,7 @@ def handle_comments(post_id):
                 max_page = (comments_count - 1) // limit + 1
             # если постов нет, нет и limit, но одну страницу мы отобразить должны
             except ZeroDivisionError as err:
-                log_status(err)
+                log_status(err, __name__)
                 max_page = 1
 
             # проверяем page на допустимый диапазон
@@ -576,28 +573,30 @@ def handle_comments(post_id):
 
             # пытаемся получить комментарии к посту
             try:
-                comments = Comment.get_comments_by_post(order, page, limit)
+                comments = Comment.get_comments_by_post(post_id, order, page, limit)
 
-                comments = [list(comment) + [{}] for comment in comments]
+                # проверка, авторизован ли пользователь и какие у него доступны операции
                 try:
                     identity = get_jwt_identity()
                     login = encrypt_decrypt(identity["login"], SECRET_KEY)
-                    for comment in comments:
-                        # если он создатель
-                        if comment[1] == login:
-                            comment[-1] |= {
-                                'delete': f'/api/{comment[0]}/delete',
-                                'update': f'/api/{comment[0]}/update'
-                            }
 
+                    for comment in comments:
+                        # модифицируем операции в зависимости от роли пользователя
+                        if comment['owner_login'] == login:
+                            comment['operations'] = {
+                                'delete' : f'/api/{comment['post_id']}/delete_comment',
+                                'update' : f'/api/{comment['post_id']}/update_comment'
+                                }
+                                
                         # если он модератор и это не пост другого модератора
-                        elif (User.is_moderator(login)) and (not User.is_moderator(comment[1])):
-                            comment[-1] |= {
-                                'delete': f'/api/{comment[0]}/delete',
-                                'ban': f'/api/ban'  # тут должен быть эндпоинт бана
-                            }
+                        elif (User.is_moderator(login)) and (not User.is_moderator(comment['owner_login'])):
+                            comment['operations'] = {
+                                'delete' : f'/api/{comment['post_id']}/delete_comment',
+                                'ban' : f'/api/ban_ip'
+                                }
+
                 except Exception as err:
-                    log_status(err)
+                    log_status(err, __name__)
 
                 response.set_data({
                     'filters': {
@@ -613,7 +612,7 @@ def handle_comments(post_id):
 
             # если ошибка в логике сервера
             except Exception as err:
-                log_status(err)
+                log_status(err, __name__)
                 response.set_status(504)
                 return response.send()
 
@@ -624,7 +623,7 @@ def handle_comments(post_id):
 
     # общая ошибка
     except Exception as err:
-        log_status(err)
+        log_status(err, __name__)
         response.set_status(400)
         return response.send()
 
@@ -655,7 +654,7 @@ def create_comment(post_id):
             response.set_status(418)
             return response.send()
     except Exception as err:
-        log_status(err)
+        log_status(err, __name__)
         response.set_status(417)
         return response.send()
 
@@ -665,7 +664,7 @@ def create_comment(post_id):
         Comment.create_comment(unique_id, owner_login, post_id, content)
 
     except Exception as err:
-        log_status(err)
+        log_status(err, __name__)
         response.set_status(504)
         return response.send()
 
@@ -702,7 +701,7 @@ def update_comment(post_id):
             return response.send()
 
     except Exception as err:
-        log_status(err)
+        log_status(err, __name__)
         response.set_status(417)
         return response.send()
 
@@ -712,7 +711,7 @@ def update_comment(post_id):
         return response.send()
 
     except Exception as err:
-        log_status(err)
+        log_status(err, __name__)
         response.set_status(421)
         return response.send()
 
@@ -734,7 +733,7 @@ def delete_comment(post_id):
             return response.send()
 
     except Exception as err:
-        log_status(err)
+        log_status(err, __name__)
         response.set_status(417)
         return response.send()
 
@@ -744,15 +743,15 @@ def delete_comment(post_id):
         return response.send()
 
     except Exception as err:
-        log_status(err)
+        log_status(err, __name__)
         response.set_status(421)
 
 
-@api.route('/edit_user', methods=['PUT'])  # метод редактирования данных пользователя
+@api.route('/edit_user', methods=['PUT'])  # метод редактирования данных пользователя  TESTS
 @jwt_required()
 def edit_userprofile():
     response = Response()
-    encoded_password, encoded_login, access_token = None, None, None  # заготовки для будущего токена
+    encoded_password, encoded_login, access_token = None, None, None # заготовки для будущего токена
 
     try:
         identity = get_jwt_identity()
@@ -776,22 +775,28 @@ def edit_userprofile():
             response.set_status(417)
             response.set_message(validation_error)
             return response.send()
-
+    
         # Проверка на наличие недопустимых слов в именах пользователя
         if not check_bad_words(first_name, middle_name, sur_name):
             response.set_status(418)
             return response.send()
-
+        
         # Обработка данных о персональном фото
-        if pers_photo_data is not None:
-            header, pers_photo_data = pers_photo_data.split(",", 1)
+        
+        # кейс сброса изображения до дефолтного
+        if pers_photo_data == '':
+            pers_photo_data = "sourses/userProfileIcons/default_user_icon.png"
 
+        # кейс других данных
+        elif pers_photo_data is not None:
+            header, pers_photo_data = pers_photo_data.split(",", 1)
+            
             if not is_image_valid(pers_photo_data) or not is_icon_square(pers_photo_data):
                 response.set_status(420)
                 return response.send()
             unique_filename = generate_uuid() + ".png"
             pers_photo_data = save_icon(pers_photo_data, unique_filename)
-
+        
         # проверка, не существует ли новый логин в базе
         if login:
             user = User.find_by_login(login)
@@ -802,41 +807,42 @@ def edit_userprofile():
             encoded_login = encrypt_decrypt(login, SECRET_KEY)
 
     except Exception as err:
-        log_status(err)
+        log_status(err, __name__)
         response.set_status(417)
         return response.send()
 
     try:
         # Обновление данных пользователя в базе данных
         User.update_user(original_login, login, password, first_name, middle_name, sur_name, email, phone_number, pers_photo_data)
-
+        
         try:
+            # временный говнокод для нового токена. вместо этого нужно сделать удаление действующего токена и перенаправить пользователя на /auth
             if password:
                 encoded_password = encrypt_decrypt(password, SECRET_KEY)
-
+            
             if encoded_login and encoded_password:
                 access_token = create_user_jwt_token(encoded_login, encoded_password)
             elif encoded_login:
                 access_token = create_user_jwt_token(encoded_login, original_password)
             elif encoded_password:
                 access_token = create_user_jwt_token(original_login, encoded_password)
-
+            
             response.set_status(205)
             if access_token:
                 response.set_data(({
-                    "session_token": access_token
+                "session_token": access_token
                 }))
             return response.send()
-
+        
         except Exception as err:
-            log_status(err)
+            log_status(err, __name__)
             response.set_status(405)
             return response.send()
 
-    # данных не поступило
+    # данных не поступило (мейби новый статус?)
     except Exception as err:
-        log_status(err)
-        response.set_status(417)
+        log_status(err, __name__)
+        response.set_status(417) 
         return response.send()
 
 
@@ -845,12 +851,12 @@ def edit_userprofile():
 def rate(post_id):
     response = Response()
 
-    try:
+    try: 
         identity = get_jwt_identity()
         login = encrypt_decrypt(identity["login"], SECRET_KEY)
 
         all_posts = Post.get_all_posts()
-        posts_id = [post[0] for post in all_posts]
+        posts_id = [post['unique_id'] for post in all_posts]
 
         # если пост с таким id существует
         if post_id in posts_id:
@@ -860,31 +866,19 @@ def rate(post_id):
 
             try:
                 # перебор доступных action
-                if action in ['like', 'unlike']:
-                    is_successful, message = Post.like_post(login, post_id, action)
-
-                elif action in ['dislike', 'undislike']:
-                    is_successful, message = Post.dislike_post(login, post_id, action)
+                if action in ['like', 'dislike', 'none']:
+                    Post.rate_post(login, post_id, action)
 
                 # неизвестное действие
                 else:
                     response.set_status(412)
                     return response.send()
 
-                if is_successful:
-                    # успешно
-                    response.set_status(200)
-                    return response.send()
-
-                # некорректное действие
-                response.set_data({
-                    "error": message
-                })
-                response.set_status(415)
+                response.set_status(200)
                 return response.send()
-
+            
             except Exception as err:
-                log_status(err)
+                log_status(err, __name__)
                 response.set_status(504)
                 return response.send()
 
@@ -892,11 +886,12 @@ def rate(post_id):
         else:
             response.set_status(404)
             return response.send()
+    
 
     # общая ошибка
     except Exception as err:
-        log_status(err)
-        response.set_status(400)
+        log_status(err, __name__)
+        response.set_status(400) 
         return response.send()
 
 
@@ -904,7 +899,6 @@ def rate(post_id):
 @jwt_required()
 def get_user():
     response = Response()
-
     identity = get_jwt_identity()
     login = encrypt_decrypt(identity["login"], SECRET_KEY)
 
@@ -914,7 +908,7 @@ def get_user():
         return response.send()
 
     except Exception as err:
-        log_status(err)
+        log_status(err, __name__)
         response.set_status(404)
         return response.send()
 
