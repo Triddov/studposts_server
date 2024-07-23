@@ -1,0 +1,829 @@
+##### api/postId/comments [GET]
+
+
+# используемый датасет для таблицы comments:
+
+
+data = [
+        [
+            5,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:55 GMT"
+        ],
+        [
+            4,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:54 GMT"
+        ],
+        [
+            3,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:53 GMT"
+        ],
+        [
+            2,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:52 GMT"
+        ],
+        [
+            1,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:51 GMT"
+        ]
+    ]
+
+
+
+
+
+
+
+
+
+
+# обращение к несуществующему посту
+http://127.0.0.1:5000/api/16/comments
+
+expected = {
+    "message": "Not Found",
+    "status": 404
+}
+
+
+# обращение к нулевому посту
+http://127.0.0.1:5000/api/0/comments
+
+expected = {
+    "message": "Not Found",
+    "status": 404
+}
+
+
+# обращение к отрицательному посту
+http://127.0.0.1:5000/api/-7784/comments
+
+expected = '''<!doctype html>
+<html lang=en>
+<title>404 Not Found</title>
+<h1>Not Found</h1>
+<p>The requested URL was not found on the server. If you entered the URL manually please check your spelling and try
+    again.</p>'''
+
+
+# некорректное обращение к посту
+http://127.0.0.1:5000/api/fdsfdsfsdf/comments
+
+expected = '''<!doctype html>
+<html lang=en>
+<title>404 Not Found</title>
+<h1>Not Found</h1>
+<p>The requested URL was not found on the server. If you entered the URL manually please check your spelling and try
+    again.</p>'''
+
+
+# обращение к посту без комментариев
+http://127.0.0.1:5000/api/1/comments
+
+expected = {
+    "comments": [],
+    "filters": {
+        "orderByDate": "desc"
+    },
+    "limit": 0,
+    "message": "OK",
+    "page": 1,
+    "status": 200,
+    "totalComments": 0
+}
+
+# обращение к посту с комментариями
+http://127.0.0.1:5000/api/5/comments
+
+expected = {
+    "comments": [
+        [
+            5,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:55 GMT"
+        ],
+        [
+            4,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:54 GMT"
+        ],
+        [
+            3,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:53 GMT"
+        ],
+        [
+            2,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:52 GMT"
+        ],
+        [
+            1,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:51 GMT"
+        ]
+    ],
+    "filters": {
+        "orderByDate": "desc"
+    },
+    "limit": 5,
+    "message": "OK",
+    "page": 1,
+    "status": 200,
+    "totalComments": 5
+}
+
+
+# установка пустых полей
+http://127.0.0.1:5000/api/5/comments?limit=&page=&orderByDate=
+
+expected = {
+    "comments": [
+        [
+            5,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:55 GMT"
+        ],
+        [
+            4,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:54 GMT"
+        ],
+        [
+            3,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:53 GMT"
+        ],
+        [
+            2,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:52 GMT"
+        ],
+        [
+            1,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:51 GMT"
+        ]
+    ],
+    "filters": {
+        "orderByDate": "desc"
+    },
+    "limit": 5,
+    "message": "OK",
+    "page": 1,
+    "status": 200,
+    "totalComments": 5
+}
+
+# некорректные поля (нечисловые и не входящие в диапазон сортировки)
+http://127.0.0.1:5000/api/5/comments?limit=ыфвфывфывфв&page=цукцукцук&orderByDate=пвапвп
+
+expected = {
+    "comments": [
+        [
+            5,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:55 GMT"
+        ],
+        [
+            4,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:54 GMT"
+        ],
+        [
+            3,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:53 GMT"
+        ],
+        [
+            2,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:52 GMT"
+        ],
+        [
+            1,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:51 GMT"
+        ]
+    ],
+    "filters": {
+        "orderByDate": "desc"
+    },
+    "limit": 5,
+    "message": "OK",
+    "page": 1,
+    "status": 200,
+    "totalComments": 5
+}
+
+
+# limit = 0
+http://127.0.0.1:5000/api/5/comments?limit=0
+
+expected = {
+    "comments": [
+        [
+            5,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:55 GMT"
+        ],
+        [
+            4,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:54 GMT"
+        ],
+        [
+            3,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:53 GMT"
+        ],
+        [
+            2,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:52 GMT"
+        ],
+        [
+            1,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:51 GMT"
+        ]
+    ],
+    "filters": {
+        "orderByDate": "desc"
+    },
+    "limit": 5,
+    "message": "OK",
+    "page": 1,
+    "status": 200,
+    "totalComments": 5
+}
+
+
+# установка отрицательного limit
+http://127.0.0.1:5000/api/5/comments?limit=-1
+
+expected = {
+    "comments": [
+        [
+            5,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:55 GMT"
+        ],
+        [
+            4,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:54 GMT"
+        ],
+        [
+            3,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:53 GMT"
+        ],
+        [
+            2,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:52 GMT"
+        ],
+        [
+            1,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:51 GMT"
+        ]
+    ],
+    "filters": {
+        "orderByDate": "desc"
+    },
+    "limit": 5,
+    "message": "OK",
+    "page": 1,
+    "status": 200,
+    "totalComments": 5
+}
+
+
+# установка limit большего, чем totalComments
+http://127.0.0.1:5000/api/5/comments?limit=6
+
+expected = {
+    "comments": [
+        [
+            5,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:55 GMT"
+        ],
+        [
+            4,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:54 GMT"
+        ],
+        [
+            3,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:53 GMT"
+        ],
+        [
+            2,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:52 GMT"
+        ],
+        [
+            1,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:51 GMT"
+        ]
+    ],
+    "filters": {
+        "orderByDate": "desc"
+    },
+    "limit": 5,
+    "message": "OK",
+    "page": 1,
+    "status": 200,
+    "totalComments": 5
+}
+
+
+# установка limit=1
+http://127.0.0.1:5000/api/5/comments?limit=1
+
+expected = {
+    "comments": [
+        [
+            5,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:55 GMT"
+        ]
+    ],
+    "filters": {
+        "orderByDate": "desc"
+    },
+    "limit": 1,
+    "message": "OK",
+    "page": 1,
+    "status": 200,
+    "totalComments": 5
+}
+
+
+# установка orderByDate=asc
+http://127.0.0.1:5000/api/5/comments?orderByDate=asc
+
+expected = {
+    "comments": [
+        [
+            1,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:51 GMT"
+        ],
+        [
+            2,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:52 GMT"
+        ],
+        [
+            3,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:53 GMT"
+        ],
+        [
+            4,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:54 GMT"
+        ],
+        [
+            5,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:55 GMT"
+        ]
+    ],
+    "filters": {
+        "orderByDate": "asc"
+    },
+    "limit": 5,
+    "message": "OK",
+    "page": 1,
+    "status": 200,
+    "totalComments": 5
+}
+
+
+# установка page=0
+http://127.0.0.1:5000/api/5/comments?page=0
+
+expected = {
+    "comments": [
+        [
+            5,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:55 GMT"
+        ],
+        [
+            4,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:54 GMT"
+        ],
+        [
+            3,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:53 GMT"
+        ],
+        [
+            2,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:52 GMT"
+        ],
+        [
+            1,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:51 GMT"
+        ]
+    ],
+    "filters": {
+        "orderByDate": "desc"
+    },
+    "limit": 5,
+    "message": "OK",
+    "page": 1,
+    "status": 200,
+    "totalComments": 5
+}
+
+# установка page=2 (выше максимума страниц)
+http://127.0.0.1:5000/api/5/comments?page=2 
+
+expected = {
+    "comments": [
+        [
+            5,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:55 GMT"
+        ],
+        [
+            4,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:54 GMT"
+        ],
+        [
+            3,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:53 GMT"
+        ],
+        [
+            2,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:52 GMT"
+        ],
+        [
+            1,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:51 GMT"
+        ]
+    ],
+    "filters": {
+        "orderByDate": "desc"
+    },
+    "limit": 5,
+    "message": "OK",
+    "page": 1,
+    "status": 200,
+    "totalComments": 5
+}
+
+
+# установка limit=1 и page=5
+http://127.0.0.1:5000/api/5/comments?limit=1&page=5
+
+expected = {
+    "comments": [
+        [
+            1,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:51 GMT"
+        ]
+    ],
+    "filters": {
+        "orderByDate": "desc"
+    },
+    "limit": 1,
+    "message": "OK",
+    "page": 5,
+    "status": 200,
+    "totalComments": 5
+}
+
+
+# установка limit=1 page=5 и orderByDate=asc
+http://127.0.0.1:5000/api/5/comments?limit=1&page=5&orderByDate=asc
+
+expected = {
+    "comments": [
+        [
+            5,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:55 GMT"
+        ]
+    ],
+    "filters": {
+        "orderByDate": "asc"
+    },
+    "limit": 1,
+    "message": "OK",
+    "page": 5,
+    "status": 200,
+    "totalComments": 5
+}
+
+
+# установка limit = 3 и page=2
+http://127.0.0.1:5000/api/5/comments?limit=3&page=2
+
+expected = {
+    "comments": [
+        [
+            2,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:52 GMT"
+        ],
+        [
+            1,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:51 GMT"
+        ]
+    ],
+    "filters": {
+        "orderByDate": "desc"
+    },
+    "limit": 3,
+    "message": "OK",
+    "page": 2,
+    "status": 200,
+    "totalComments": 5
+}
+
+
+# установка limit = 3 и page=3
+http://127.0.0.1:5000/api/5/comments?limit=3&page=3
+
+expected = {
+    "comments": [
+        [
+            5,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:55 GMT"
+        ],
+        [
+            4,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:54 GMT"
+        ],
+        [
+            3,
+            1,
+            5,
+            "эу, пацан",
+            null,
+            null,
+            "Wed, 17 Jul 2024 21:39:53 GMT"
+        ]
+    ],
+    "filters": {
+        "orderByDate": "desc"
+    },
+    "limit": 3,
+    "message": "OK",
+    "page": 1,
+    "status": 200,
+    "totalComments": 5
+}
