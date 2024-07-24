@@ -50,7 +50,7 @@ def token_required(f):  # метод проверки токенов автор�
 
         # если ошибка декодирования
         except Exception as err:
-            log_status(err)
+            log_status(err, __name__)
             response.set_status(406)
             return response.send()
 
@@ -251,7 +251,7 @@ def handle_posts():
         try:
             page, limit = int(page), int(limit)
         except ValueError as err:
-            log_status(err)
+            log_status(err, __name__)
             page, limit = 1, 5
 
         # если limit вне диапазона количества постов
@@ -265,7 +265,7 @@ def handle_posts():
 
         # если постов нет, нет и limit, но одну страницу мы отобразить должны
         except ZeroDivisionError as err:
-            log_status(err)
+            log_status(err, __name__)
             max_page = 1
 
         # проверяем page на допустимый диапазон
@@ -304,7 +304,7 @@ def handle_posts():
                     post['reaction'] = User.get_reaction_at_post(login, post['unique_id'])
 
             except Exception as err:
-                log_status(err)
+                log_status(err, __name__)
                 
             response.set_data({
                 'filters': {
@@ -321,13 +321,13 @@ def handle_posts():
 
         # если ошибка в логике сервера
         except Exception as err:
-            log_status(err)
+            log_status(err, __name__)
             response.set_status(504)
             return response.send()
 
     # общая ошибка
     except Exception as err:
-        log_status(err)
+        log_status(err, __name__)
         response.set_status(400)
         return response.send()
 
@@ -367,7 +367,7 @@ def handle_post(post_id):
             
 
         except Exception as err:
-            log_status(err)
+            log_status(err, __name__)
         
 
         response.set_data({
@@ -376,7 +376,7 @@ def handle_post(post_id):
         return response.send()
 
     except Exception as err:
-        log_status(err)
+        log_status(err, __name__)
         response.set_status(504)
 
 
@@ -411,7 +411,7 @@ def create_post():
 
     # если данные некорректны
     except Exception as err:
-        log_status(err)
+        log_status(err, __name__)
         response.set_status(417)
         return response.send()
 
@@ -436,7 +436,7 @@ def create_post():
 
     # если ошибка в логике сервера
     except Exception as err:
-        log_status(err)
+        log_status(err, __name__)
         response.set_status(421)
         return response.send()
 
@@ -480,7 +480,7 @@ def update_post(post_id):
                 unique_filename = generate_uuid() + ".png"
                 image_data = save_image(image_data, unique_filename)
     except Exception as err:
-        log_status(err)
+        log_status(err, __name__)
         response.set_status(417)
         return response.send()
     # обновляем пост в базе
@@ -490,7 +490,7 @@ def update_post(post_id):
         return response.send()
     # если ошибка в логике сервера
     except Exception as err:
-        log_status(err)
+        log_status(err, __name__)
         response.set_status(421)
         return response.send()
 
@@ -505,7 +505,7 @@ def delete_post(post_id):
         owner_login = encrypt_decrypt(jwt_identity["login"], SECRET_KEY)
 
     except Exception as err:
-        log_status(err)
+        log_status(err, __name__)
         response.set_status(417)
         return response.send()
 
@@ -516,7 +516,7 @@ def delete_post(post_id):
 
     # если ошибка в логике сервера
     except Exception as err:
-        log_status(err)
+        log_status(err, __name__)
         response.set_status(504)
         return response.send()
 
@@ -545,7 +545,7 @@ def handle_comments(post_id):
             try:
                 page, limit = int(page), int(limit)
             except ValueError as err:
-                log_status(err)
+                log_status(err, __name__)
                 page, limit = 1, 5
 
             if 1 > limit or comments_count < limit:
@@ -556,7 +556,7 @@ def handle_comments(post_id):
                 max_page = (comments_count - 1) // limit + 1
             # если постов нет, нет и limit, но одну страницу мы отобразить должны
             except ZeroDivisionError as err:
-                log_status(err)
+                log_status(err, __name__)
                 max_page = 1
 
             # проверяем page на допустимый диапазон
@@ -591,7 +591,7 @@ def handle_comments(post_id):
                                 }
 
                 except Exception as err:
-                    log_status(err)
+                    log_status(err, __name__)
 
 
                 response.set_data({
@@ -608,7 +608,7 @@ def handle_comments(post_id):
 
             # если ошибка в логике сервера
             except Exception as err:
-                log_status(err)
+                log_status(err, __name__)
                 response.set_status(504)
                 return response.send()
 
@@ -619,7 +619,7 @@ def handle_comments(post_id):
 
     # общая ошибка
     except Exception as err:
-        log_status(err)
+        log_status(err, __name__)
         response.set_status(400)
         return response.send()
 
@@ -650,7 +650,7 @@ def create_comment(post_id):
             response.set_status(418)
             return response.send()
     except Exception as err:
-        log_status(err)
+        log_status(err, __name__)
         response.set_status(417)
         return response.send()
 
@@ -660,7 +660,7 @@ def create_comment(post_id):
         Comment.create_comment(unique_id, owner_login, post_id, content)
 
     except Exception as err:
-        log_status(err)
+        log_status(err, __name__)
         response.set_status(504)
         return response.send()
 
@@ -697,7 +697,7 @@ def update_comment(post_id):
             return response.send()
 
     except Exception as err:
-        log_status(err)
+        log_status(err, __name__)
         response.set_status(417)
         return response.send()
 
@@ -707,7 +707,7 @@ def update_comment(post_id):
         return response.send()
 
     except Exception as err:
-        log_status(err)
+        log_status(err, __name__)
         response.set_status(421)
         return response.send()
 
@@ -729,7 +729,7 @@ def delete_comment(post_id):
             return response.send()
 
     except Exception as err:
-        log_status(err)
+        log_status(err, __name__)
         response.set_status(417)
         return response.send()
 
@@ -739,7 +739,7 @@ def delete_comment(post_id):
         return response.send()
 
     except Exception as err:
-        log_status(err)
+        log_status(err, __name__)
         response.set_status(421)
 
 
@@ -806,7 +806,7 @@ def edit_userprofile():
             
             
     except Exception as err:
-        log_status(err)
+        log_status(err, __name__)
         
         response.set_status(417)
         return response.send()
@@ -837,13 +837,13 @@ def edit_userprofile():
             return response.send()
         
         except Exception as err:
-            log_status(err)
+            log_status(err, __name__)
             response.set_status(405)
             return response.send()
 
     # данных не поступило
     except Exception as err:
-        log_status(err)
+        log_status(err, __name__)
         response.set_status(417) 
         return response.send()
 
@@ -882,7 +882,7 @@ def rate(post_id):
                 return response.send()
             
             except Exception as err:
-                log_status(err)
+                log_status(err, __name__)
                 response.set_status(504)
                 return response.send()
 
@@ -895,7 +895,7 @@ def rate(post_id):
 
     # общая ошибка
     except Exception as err:
-        log_status(err)
+        log_status(err, __name__)
         response.set_status(400) 
         return response.send()
 
@@ -913,7 +913,7 @@ def get_user():
         return response.send()
 
     except Exception as err:
-        log_status(err)
+        log_status(err, __name__)
         response.set_status(404)
         return response.send()
 
