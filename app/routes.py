@@ -748,16 +748,16 @@ def delete_comment(post_id):
 @jwt_required()
 def edit_userprofile():
     response = Response()
-    encoded_password, encoded_login, access_token = None, None, None # заготовки для будущего токена
+    encoded_password, access_token = None, None # заготовки для будущего токена
 
     try:
         identity = get_jwt_identity()
         original_login = encrypt_decrypt(identity["login"], SECRET_KEY)
         original_password = encrypt_decrypt(identity["password"], SECRET_KEY)
+        
 
         # Получение данных из запроса
         data = request.get_json()
-        login = data.get("login")
         password = data.get("password")
         first_name = data.get("first_name")
         middle_name = data.get("middle_name")
@@ -765,6 +765,12 @@ def edit_userprofile():
         email = data.get("email")
         phone_number = data.get("phone_number")
         pers_photo_data = data.get("pers_photo_data")
+
+        # проверка на соответствие пароля
+        current_password = data.get('current_password')
+        if current_password != original_password:
+            response.set_status(410)
+            return response.send()
 
         # Валидация данных пользователя
         is_valid, validation_error = check_user_data(data, 'update')
@@ -792,17 +798,7 @@ def edit_userprofile():
                 response.set_status(420)
                 return response.send()
             unique_filename = generate_uuid() + ".png"
-            pers_photo_data = save_icon(pers_photo_data, unique_filename)
-        
-        # проверка, не существует ли новый логин в базе
-        if login:
-            user = User.find_by_login(login)
-            if user:
-                response.set_status(409)
-                return response.send()
-
-            encoded_login = encrypt_decrypt(login, SECRET_KEY)
-        
+            pers_photo_data = save_icon(pers_photo_data, unique_filename)    
             
             
     except Exception as err:
@@ -815,18 +811,12 @@ def edit_userprofile():
     try:
         
         # Обновление данных пользователя в базе данных
-        User.update_user(original_login, login, password, first_name, middle_name, sur_name, email, phone_number, pers_photo_data)
+        User.update_user(original_login, password, first_name, middle_name, sur_name, email, phone_number, pers_photo_data)
         
         try:
-            # временный говнокод для нового токена. вместо этого нужно сделать удаление действующего токена и перенаправить пользователя на /auth
+            # создание нового токена при изменении пароля
             if password:
                 encoded_password = encrypt_decrypt(password, SECRET_KEY)
-            
-            if encoded_login and encoded_password:
-                access_token = create_user_jwt_token(encoded_login, encoded_password)
-            elif encoded_login:
-                access_token = create_user_jwt_token(encoded_login, original_password)
-            elif encoded_password:
                 access_token = create_user_jwt_token(original_login, encoded_password)
             
             response.set_status(205)

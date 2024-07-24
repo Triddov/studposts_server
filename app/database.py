@@ -1,6 +1,8 @@
 import psycopg2
 from dotenv import load_dotenv
 import os
+import base64
+from .validation_data import *
 
 import psycopg2.extras
 
@@ -34,7 +36,7 @@ class User:  # методы работы с таблицей users
             'privileged': user_data[5],
             'email': user_data[6],
             'phoneNumber': user_data[7],
-            'persPhotodata': user_data[8]
+            'persPhotodata': return_base64_image(user_data[8])
         }
         return response
 
@@ -66,13 +68,12 @@ class User:  # методы работы с таблицей users
         return user[0]
 
     @staticmethod
-    def update_user(original_login, login, password, first_name, middle_name, sur_name, 
+    def update_user(original_login, password, first_name, middle_name, sur_name, 
                     email, phone_number, pers_photo_data):
         cur = conn.cursor()
         fields = []
 
         update_fields = {
-            "login": login,
             "password": password,
             "firstName": first_name,
             "middleName": middle_name,
@@ -144,11 +145,24 @@ class Post:  # методы работы с таблицей posts
             "content" : posts[i][3],
             "tags" : posts[i][4],
             "createdAt" : posts[i][5],
-            "imageData" : posts[i][6],
+            "imageData" : return_base64_image(posts[i][6]),
             "viewCount" : posts[i][7],
             "likesCount" : posts[i][8],
-            "dislikesCount" : posts[i][9]
+            "dislikesCount" : posts[i][9],
             }
+
+            query = f"SELECT firstName, middleName, surName, persPhotoData FROM users WHERE login = '{posts[i]['owner_login']}'"
+            cur.execute(query)
+            user_data = cur.fetchall()[0]
+
+            posts[i]['user_data'] = {
+                'firstName' : user_data[0],
+                'middleName' : user_data[1],
+                'surName' : user_data[2],
+                'persPhotoData' : return_base64_image(user_data[3])
+            }
+        
+
         return posts
 
     @staticmethod
@@ -163,11 +177,23 @@ class Post:  # методы работы с таблицей posts
             "content" : post[3],
             "tags" : post[4],
             "createdAt" : post[5],
-            "imageData" : post[6],
+            "imageData" : return_base64_image(post[6]),
             "viewCount" : post[7],
             "likesCount" : post[8],
             "dislikesCount" : post[9]
         }
+        
+        query = f"SELECT firstName, middleName, surName, persPhotoData FROM users WHERE login = '{answer['owner_login']}'"
+        cur.execute(query)
+        user_data = cur.fetchall()[0]
+        
+        answer['user_data'] = {
+                'firstName' : user_data[0],
+                'middleName' : user_data[1],
+                'surName' : user_data[2],
+                'persPhotoData' : return_base64_image(user_data[3])
+            }
+        
         return answer
 
     
@@ -304,6 +330,16 @@ class Comment:  # методы работы с таблицей comments
             "post_id" : comments[i][2],
             "content" : comments[i][3],
             "createdAt" : comments[i][4],
+            }
+
+            query = f"SELECT firstName, middleName, surName, persPhotoData FROM users WHERE login = '{comments[i]['owner_login']}'"
+            cur.execute(query)
+            user_data = cur.fetchall()[0]
+            comments[i]['user_data'] = {
+                'firstName' : user_data[0],
+                'middleName' : user_data[1],
+                'surName' : user_data[2],
+                'persPhotoData' : return_base64_image(user_data[3])
             }
         
         return comments
