@@ -1,0 +1,16 @@
+date:07/24/24 time:15:41:42 error message: 'NoneType' object is not subscriptable in module: app.routes
+date:07/24/24 time:15:54:12 | error message: 'NoneType' object is not subscriptable | in module: app.routes
+date:07/24/24 time:16:03:35 | error message: no results to fetch | in module: app.routes
+date:07/24/24 time:16:06:08 | error message: no results to fetch | in module: app.routes
+date:07/24/24 time:16:16:01 | error message: argument of type 'NoneType' is not iterable | in module: app.routes
+date:07/24/24 time:16:16:12 | error message: argument of type 'NoneType' is not iterable | in module: app.routes
+date:07/24/24 time:16:16:30 | error message: argument of type 'NoneType' is not iterable | in module: app.routes
+date:07/24/24 time:16:16:46 | error message: argument of type 'NoneType' is not iterable | in module: app.routes
+date:07/24/24 time:16:17:37 | error message: argument of type 'NoneType' is not iterable | in module: app.routes
+date:07/24/24 time:16:20:39 | error message: argument of type 'NoneType' is not iterable | in module: app.routes
+date:07/24/24 time:16:22:00 | error message: argument of type 'NoneType' is not iterable | in module: app.routes
+date:07/24/24 time:16:27:42 | error message: argument of type 'NoneType' is not iterable | in module: app.routes
+date:07/24/24 time:16:28:35 | error message: list indices must be integers or slices, not str | in module: app.routes
+date:07/24/24 time:16:32:17 | error message: list indices must be integers or slices, not str | in module: app.routes
+date:07/24/24 time:16:33:24 | error message: list indices must be integers or slices, not str | in module: app.routes
+date:07/24/24 time:16:41:16 | error message: 'NoneType' object is not subscriptable | in module: app.routes

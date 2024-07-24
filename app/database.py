@@ -21,17 +21,6 @@ class User:  # методы работы с таблицей users
             VALUES (%s, %s, %s, %s, %s, FALSE, %s, %s, %s)
         """, (login, password, first_name, middle_name, sur_name, email, phone_number, pers_photo_data))
 
-        user_data = cur.fetchone() 
-
-        response = {}
-
-        # Extracting each field and adding to the response dictionary only if it's not None
-        fields = ['login', 'firstName', 'middleName', 'surName', 'privileged', 'email', 'phoneNumber', 'persPhotodata']
-        for i, field in enumerate(fields):
-            if user_data[i] is not None:
-                response[field] = user_data[i]
-
-        return response
 
     @staticmethod
     def get_user(login):
@@ -183,8 +172,6 @@ class Post:  # методы работы с таблицей posts
         }
         return answer
 
-    
-
     @staticmethod
     def update_post(unique_id, owner_login, **field):
         cur = conn.cursor()
@@ -221,7 +208,6 @@ class Post:  # методы работы с таблицей posts
             cur.execute("DELETE FROM posts WHERE unique_id = %s;", (unique_id,))
         else:
             raise Exception
-
     
     @staticmethod
     def image_already(post_id):
@@ -240,7 +226,6 @@ class Post:  # методы работы с таблицей posts
             return os.path.basename(result[0])
         else:
             raise Exception
-
     
     @staticmethod
     def increment_view(post_id):

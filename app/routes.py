@@ -69,7 +69,6 @@ def check_ban_ip():
         return response.send()
 
 
-
 @api.route('/captcha', methods=['GET'])  # метод генерации и получения капчи
 def get_captcha():
     response = Response()
@@ -78,6 +77,7 @@ def get_captcha():
     captcha_text = generate_captcha()
     encoded_captcha_solution = encrypt_decrypt(captcha_text, SECRET_KEY)
     base64_image = generate_captcha_image(captcha_text)
+    print(captcha_text)
     captcha_created_time = int(time.time())  # время, до которого капча валидна
     token = create_access_token(identity={"solution": encoded_captcha_solution, "created_time": captcha_created_time})
 
@@ -102,7 +102,6 @@ def auth():
         data = request.get_json()
         input_captcha = data.get("input_captcha")
         captcha_solution_token = data.get("captcha_token")
-        
 
         # проверка наличия полей решения капчи
         if not captcha_solution_token or not input_captcha:
@@ -171,10 +170,6 @@ def auth():
                         response.set_status(420)
                         return response.send()
 
-                    # сохранение иконки и возврат ее пути для записи
-                    unique_filename = generate_uuid() + ".png"
-                    pers_photo_data = save_icon(pers_photo_data, unique_filename)
-
             # если данные некорректны
             except Exception as err:
                 log_status(err, __name__)
@@ -187,8 +182,12 @@ def auth():
                     response.set_status(409)
                     return response.send()
 
+                # сохранение иконки и возврат ее пути для записи
+                unique_filename = generate_uuid() + ".png"
+                pers_photo_data = save_icon(pers_photo_data, unique_filename)
+
                 # создание юзера в базе и выдача токена
-                user_data = User.create_user(login, password, first_name, sur_name, middle_name, email, phone_number, pers_photo_data)
+                User.create_user(login, password, first_name, sur_name, middle_name, email, phone_number, pers_photo_data)
 
             # если ошибка в логике сервера
             except Exception as err:
@@ -220,8 +219,7 @@ def auth():
         access_token = create_user_jwt_token(encoded_login, encoded_password)
 
         response.set_data({
-            "session_token": access_token,
-            'user_data' : user_data
+            "session_token": access_token
         })
 
         return response.send()
@@ -279,7 +277,6 @@ def handle_posts():
         # получение постов по запросу
         try:
             posts = Post.get_all_posts(order, page, limit, search)
-
 
             # проверка, авторизован ли пользователь и какие у него доступны операции
             try:
@@ -747,11 +744,11 @@ def delete_comment(post_id):
         response.set_status(421)
 
 
-@api.route('/edit_user', methods=['PUT'])  # метод редактирования данных пользователя  TESTS
+@api.route('/edit_user', methods=['PUT'])  # метод редактирования данных пользователя
 @jwt_required()
 def edit_userprofile():
     response = Response()
-    encoded_password, encoded_login, access_token = None, None, None # заготовки для будущего токена
+    encoded_password, encoded_login, access_token = None, None, None  # заготовки для будущего токена
 
     try:
         identity = get_jwt_identity()
@@ -784,7 +781,7 @@ def edit_userprofile():
         # Обработка данных о персональном фото
         
         # кейс сброса изображения до дефолтного
-        if pers_photo_data == '':
+        if pers_photo_data is None or pers_photo_data == "":
             pers_photo_data = "sourses/userProfileIcons/default_user_icon.png"
 
         # кейс других данных
