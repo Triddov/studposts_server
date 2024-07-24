@@ -87,7 +87,7 @@ def check_user_data(data, action = 'register'):
             if field not in data:
                 return False, f"Missing required field: {field}"
 
-            if not data[field] or data[field]:
+            if not data[field]:
                 return False, f"{field} should not be empty"
     
     # проверка всех полей на содержание пробельных символов

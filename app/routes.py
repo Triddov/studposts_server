@@ -4,7 +4,7 @@ from .database import *
 from .generate_captcha import *
 from .generate_token import *
 from .validation_data import *
-from .server_exception import Response
+from .server_exception import Response, log_status
 from dotenv import load_dotenv
 from functools import wraps
 import time
@@ -49,7 +49,8 @@ def token_required(f):  # метод проверки токенов автор�
                 return response.send()
 
         # если ошибка декодирования
-        except:
+        except Exception as err:
+            log_status(err)
             response.set_status(406)
             return response.send()
 
@@ -102,7 +103,6 @@ def auth():
         data = request.get_json()
         input_captcha = data.get("input_captcha")
         captcha_solution_token = data.get("captcha_token")
-        
 
         # проверка наличия полей решения капчи
         if not captcha_solution_token or not input_captcha:
@@ -115,7 +115,8 @@ def auth():
             captcha_solution = encrypt_decrypt(decoded_captcha_token['sub']['solution'], SECRET_KEY)
             captcha_created_time = decoded_captcha_token['sub']['created_time']
 
-        except:
+        except Exception as err:
+            log_status(err, __name__)
             response.set_status(413)
             return response.send()
 
@@ -170,12 +171,9 @@ def auth():
                         response.set_status(420)
                         return response.send()
 
-                    # сохранение иконки и возврат ее пути для записи
-                    unique_filename = generate_uuid() + ".png"
-                    pers_photo_data = save_icon(pers_photo_data, unique_filename)
-
             # если данные некорректны
-            except Exception:
+            except Exception as err:
+                log_status(err, __name__)
                 response.set_status(417)
                 return response.send()
 
@@ -185,11 +183,16 @@ def auth():
                     response.set_status(409)
                     return response.send()
 
+                # сохранение иконки и возврат ее пути для записи
+                unique_filename = generate_uuid() + ".png"
+                pers_photo_data = save_icon(pers_photo_data, unique_filename)
+
                 # создание юзера в базе и выдача токена
-                user_data = User.create_user(login, password, first_name, sur_name, middle_name, email, phone_number, pers_photo_data)
+                User.create_user(login, password, first_name, sur_name, middle_name, email, phone_number, pers_photo_data)
 
             # если ошибка в логике сервера
-            except Exception:
+            except Exception as err:
+                log_status(err, __name__)
                 response.set_status(504)
                 return response.send()
 
@@ -200,7 +203,8 @@ def auth():
                 user_data = User.find_by_login(login)
 
             # если ошибка в логике сервера
-            except Exception:
+            except Exception as err:
+                log_status(err, __name__)
                 response.set_status(504)
                 return response.send()
 
@@ -216,14 +220,14 @@ def auth():
         access_token = create_user_jwt_token(encoded_login, encoded_password)
 
         response.set_data({
-            "session_token": access_token,
-            'user_data' : user_data
+            "session_token": access_token
         })
 
         return response.send()
 
     # общая ошибка
-    except Exception:
+    except Exception as err:
+        log_status(err, __name__)
         response.set_status(400)
         return response.send()
 
@@ -246,7 +250,8 @@ def handle_posts():
         # корректные преобразования значений запроса
         try:
             page, limit = int(page), int(limit)
-        except ValueError:
+        except ValueError as err:
+            log_status(err)
             page, limit = 1, 5
 
         # если limit вне диапазона количества постов
@@ -259,7 +264,8 @@ def handle_posts():
             max_page = (posts_count - 1) // limit + 1
 
         # если постов нет, нет и limit, но одну страницу мы отобразить должны
-        except ZeroDivisionError:
+        except ZeroDivisionError as err:
+            log_status(err)
             max_page = 1
 
         # проверяем page на допустимый диапазон
@@ -297,8 +303,8 @@ def handle_posts():
                     
                     post['reaction'] = User.get_reaction_at_post(login, post['unique_id'])
 
-            except Exception:
-                pass
+            except Exception as err:
+                log_status(err)
                 
             response.set_data({
                 'filters': {
@@ -314,12 +320,14 @@ def handle_posts():
             return response.send()
 
         # если ошибка в логике сервера
-        except Exception:
+        except Exception as err:
+            log_status(err)
             response.set_status(504)
             return response.send()
 
     # общая ошибка
-    except:
+    except Exception as err:
+        log_status(err)
         response.set_status(400)
         return response.send()
 
@@ -358,8 +366,8 @@ def handle_post(post_id):
             post['reaction'] = User.get_reaction_at_post(login, post['unique_id'])
             
 
-        except Exception:
-            pass
+        except Exception as err:
+            log_status(err)
         
 
         response.set_data({
@@ -367,7 +375,8 @@ def handle_post(post_id):
             })  
         return response.send()
 
-    except Exception:
+    except Exception as err:
+        log_status(err)
         response.set_status(504)
 
 
@@ -401,7 +410,8 @@ def create_post():
             return response.send()
 
     # если данные некорректны
-    except Exception:
+    except Exception as err:
+        log_status(err)
         response.set_status(417)
         return response.send()
 
@@ -425,7 +435,8 @@ def create_post():
         return response.send()
 
     # если ошибка в логике сервера
-    except Exception:
+    except Exception as err:
+        log_status(err)
         response.set_status(421)
         return response.send()
 
@@ -468,7 +479,8 @@ def update_post(post_id):
             else:
                 unique_filename = generate_uuid() + ".png"
                 image_data = save_image(image_data, unique_filename)
-    except Exception:
+    except Exception as err:
+        log_status(err)
         response.set_status(417)
         return response.send()
     # обновляем пост в базе
@@ -477,7 +489,8 @@ def update_post(post_id):
         response.set_status(205)
         return response.send()
     # если ошибка в логике сервера
-    except Exception:
+    except Exception as err:
+        log_status(err)
         response.set_status(421)
         return response.send()
 
@@ -491,7 +504,8 @@ def delete_post(post_id):
         jwt_identity = get_jwt_identity()
         owner_login = encrypt_decrypt(jwt_identity["login"], SECRET_KEY)
 
-    except Exception:
+    except Exception as err:
+        log_status(err)
         response.set_status(417)
         return response.send()
 
@@ -501,7 +515,8 @@ def delete_post(post_id):
         return response.send()
 
     # если ошибка в логике сервера
-    except Exception:
+    except Exception as err:
+        log_status(err)
         response.set_status(504)
         return response.send()
 
@@ -529,7 +544,8 @@ def handle_comments(post_id):
             # корректные преобразования значений запроса
             try:
                 page, limit = int(page), int(limit)
-            except ValueError:
+            except ValueError as err:
+                log_status(err)
                 page, limit = 1, 5
 
             if 1 > limit or comments_count < limit:
@@ -539,7 +555,8 @@ def handle_comments(post_id):
             try:
                 max_page = (comments_count - 1) // limit + 1
             # если постов нет, нет и limit, но одну страницу мы отобразить должны
-            except ZeroDivisionError:
+            except ZeroDivisionError as err:
+                log_status(err)
                 max_page = 1
 
             # проверяем page на допустимый диапазон
@@ -573,8 +590,8 @@ def handle_comments(post_id):
                                 'ban' : f'/api/ban_ip'
                                 }
 
-                except Exception:
-                    pass
+                except Exception as err:
+                    log_status(err)
 
 
                 response.set_data({
@@ -590,7 +607,8 @@ def handle_comments(post_id):
                 return response.send()
 
             # если ошибка в логике сервера
-            except:
+            except Exception as err:
+                log_status(err)
                 response.set_status(504)
                 return response.send()
 
@@ -600,7 +618,8 @@ def handle_comments(post_id):
             return response.send()
 
     # общая ошибка
-    except Exception:
+    except Exception as err:
+        log_status(err)
         response.set_status(400)
         return response.send()
 
@@ -630,7 +649,8 @@ def create_comment(post_id):
         if not check_bad_words(content):
             response.set_status(418)
             return response.send()
-    except:
+    except Exception as err:
+        log_status(err)
         response.set_status(417)
         return response.send()
 
@@ -639,7 +659,8 @@ def create_comment(post_id):
         # Создание комментария в базе данных
         Comment.create_comment(unique_id, owner_login, post_id, content)
 
-    except Exception:
+    except Exception as err:
+        log_status(err)
         response.set_status(504)
         return response.send()
 
@@ -675,7 +696,8 @@ def update_comment(post_id):
             response.set_status(418)
             return response.send()
 
-    except Exception:
+    except Exception as err:
+        log_status(err)
         response.set_status(417)
         return response.send()
 
@@ -684,7 +706,8 @@ def update_comment(post_id):
         response.set_status(205)
         return response.send()
 
-    except Exception:
+    except Exception as err:
+        log_status(err)
         response.set_status(421)
         return response.send()
 
@@ -705,7 +728,8 @@ def delete_comment(post_id):
             response.set_status(419)
             return response.send()
 
-    except Exception:
+    except Exception as err:
+        log_status(err)
         response.set_status(417)
         return response.send()
 
@@ -714,12 +738,13 @@ def delete_comment(post_id):
         response.set_status(206)
         return response.send()
 
-    except Exception:
+    except Exception as err:
+        log_status(err)
         response.set_status(421)
 
 
 
-@api.route('/edit_user', methods=['PUT'])  # метод редактирования данных пользователя  TESTS
+@api.route('/edit_user', methods=['PUT'])  # метод редактирования данных пользователя
 @jwt_required()
 def edit_userprofile():
     response = Response()
@@ -740,7 +765,6 @@ def edit_userprofile():
         email = data.get("email")
         phone_number = data.get("phone_number")
         pers_photo_data = data.get("pers_photo_data")
-        print(data)
 
         # Валидация данных пользователя
         is_valid, validation_error = check_user_data(data, 'update')
@@ -757,7 +781,7 @@ def edit_userprofile():
         # Обработка данных о персональном фото
         
         # кейс сброса изображения до дефолтного
-        if pers_photo_data == '':
+        if pers_photo_data is None or pers_photo_data == "":
             pers_photo_data = "sourses/userProfileIcons/default_user_icon.png"
 
         # кейс других данных
@@ -781,7 +805,8 @@ def edit_userprofile():
         
             
             
-    except Exception:
+    except Exception as err:
+        log_status(err)
         
         response.set_status(417)
         return response.send()
@@ -811,12 +836,14 @@ def edit_userprofile():
                 }))
             return response.send()
         
-        except:
+        except Exception as err:
+            log_status(err)
             response.set_status(405)
             return response.send()
 
-    # данных не поступило (мейби новый статус?)
-    except Exception:
+    # данных не поступило
+    except Exception as err:
+        log_status(err)
         response.set_status(417) 
         return response.send()
 
@@ -854,7 +881,8 @@ def rate(post_id):
                 response.set_status(200)
                 return response.send()
             
-            except:
+            except Exception as err:
+                log_status(err)
                 response.set_status(504)
                 return response.send()
 
@@ -866,7 +894,8 @@ def rate(post_id):
     
 
     # общая ошибка
-    except:
+    except Exception as err:
+        log_status(err)
         response.set_status(400) 
         return response.send()
 
@@ -883,7 +912,8 @@ def get_user():
         response.set_data({"user_data": user_data})
         return response.send()
 
-    except Exception:
+    except Exception as err:
+        log_status(err)
         response.set_status(404)
         return response.send()
 

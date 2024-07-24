@@ -21,18 +21,6 @@ class User:  # методы работы с таблицей users
             VALUES (%s, %s, %s, %s, %s, FALSE, %s, %s, %s)
         """, (login, password, first_name, middle_name, sur_name, email, phone_number, pers_photo_data))
 
-        user_data = cur.fetchone() 
-
-        response = {}
-
-        # Extracting each field and adding to the response dictionary only if it's not None
-        fields = ['login', 'firstName', 'middleName', 'surName', 'privileged', 'email', 'phoneNumber', 'persPhotodata']
-        for i, field in enumerate(fields):
-            if user_data[i] is not None:
-                response[field] = user_data[i]
-
-        return response
-
     @staticmethod
     def get_user(login):
         cur = conn.cursor()
