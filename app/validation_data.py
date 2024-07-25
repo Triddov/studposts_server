@@ -2,6 +2,7 @@ from PIL import Image
 from io import BytesIO
 from dotenv import load_dotenv
 import base64
+import dns.resolver
 import os
 import re
 
@@ -94,7 +95,7 @@ def check_user_data(data, action='register'):
             return False, f"{field} should not contain spaces"
 
     # поля, для которых есть значения минимальной длины
-    min_length_fields = ['first_name', 'sur_name', 'middle_name']
+    min_length_fields = ['login', 'password', 'first_name', 'sur_name', 'middle_name']
     min_length = 2
 
     # проверка минимальной длины полей
@@ -109,14 +110,25 @@ def check_user_data(data, action='register'):
             return False, f"{field} exceeds maximum length of {max_length} characters"
 
     # проверка email на валидность
-    if ('email' in data) and (data['email']) and ('@' not in data['email']):
-        return False, "Invalid email format"
+    email_pattern = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
+    if 'email' in data:
+        if not re.match(email_pattern, data['email']):
+            return False, f"Invalid email address: {data['email']}"
+
+        domain = data['email'].split('@')[1]
+        try:
+            dns.resolver.resolve(domain, 'MX')
+        except dns.resolver.NXDOMAIN as err:
+            return False, f"Invalid email format: {err}"
+        except dns.resolver.NoAnswer as err:
+            return False, f"Invalid email format: {err}"
+        except dns.resolver.Timeout as err:
+            return False, f"Invalid email format: {err}"
 
     # проверка российского номера телефона
-    phone_pattern = re.compile(r'^(?:\+7|8)?\d{10}$')
-    if 'phone_number' in data and data['phone_number']:
-        if not phone_pattern.match(data['phone_number']):
-            return False, "Invalid phone number format"
+    phone_pattern = r'^(\+7|8)?\d{10}$'
+    if 'phone_number' in data and not re.match(phone_pattern, data['phone_number']):
+        return False, "Invalid phone number format"
 
     # проверка на отсутствие русских букв в логине и пароле
     non_russian_pattern = re.compile(r'^[^\u0400-\u04FF]*$')
@@ -190,6 +202,31 @@ def is_icon_square(base64_image: str) -> bool:  # проверка иконки 
     width, height = image.size
 
     return width == height
+
+
+def crop_to_square(image_base64):
+    # Декодируем изображение из base64
+    image_data = base64.b64decode(image_base64)
+    img = Image.open(BytesIO(image_data))
+
+    width, height = img.size
+
+    # Найдем минимальную сторону и координаты для обрезки
+    min_side = min(width, height)
+    left = (width - min_side) // 2
+    top = (height - min_side) // 2
+    right = left + min_side
+    bottom = top + min_side
+
+    # Обрезаем изображение
+    img_cropped = img.crop((left, top, right, bottom))
+
+    # Конвертируем обрезанное изображение обратно в base64
+    buffered = BytesIO()
+    img_cropped.save(buffered, format="PNG")
+    cropped_base64 = base64.b64encode(buffered.getvalue()).decode('utf-8')
+
+    return cropped_base64
 
 
 def check_image_aspect_ratio(image_base64: str) -> bool:  # проверка соотношения сторон изображения

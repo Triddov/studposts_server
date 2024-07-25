@@ -18,3 +18,16 @@ date:07/24/24 time:16:56:13 | error message:  | in module: app.routes
 date:07/24/24 time:16:57:03 | error message:  | in module: app.routes
 date:07/24/24 time:16:58:08 | error message:  | in module: app.routes
 date:07/24/24 time:16:58:18 | error message:  | in module: app.routes
+date:07/25/24 time:23:10:39 | error message: argument should be a bytes-like object or ASCII string, not 'NoneType' | in module: app.routes
+date:07/25/24 time:23:12:14 | error message: argument should be a bytes-like object or ASCII string, not 'NoneType' | in module: app.routes
+date:07/25/24 time:23:24:41 | error message: 'email' | in module: app.routes
+date:07/25/24 time:23:25:23 | error message: 'email' | in module: app.routes
+date:07/25/24 time:23:33:02 | error message: '^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$' | in module: app.routes
+date:07/25/24 time:23:43:44 | error message: list index out of range | in module: app.routes
+date:07/26/24 time:00:41:49 | error message: [Errno 2] No such file or directory: 'sourses/userProfileIcons/ac31e371-38fd-4b26-ba7f-3797c5ed8aae.png' | in module: app.routes
+date:07/26/24 time:00:44:14 | error message: [Errno 2] No such file or directory: 'sourses/userProfileIcons/ac31e371-38fd-4b26-ba7f-3797c5ed8aae.png' | in module: app.routes
+date:07/26/24 time:00:57:14 | error message: integer division or modulo by zero | in module: app.routes
+date:07/26/24 time:00:57:14 | error message: 'NoneType' object is not subscriptable | in module: app.routes
+date:07/26/24 time:01:01:53 | error message: integer division or modulo by zero | in module: app.routes
+date:07/26/24 time:01:02:40 | error message: [Errno 2] No such file or directory: 'sourses/userProfileIcons/ye-image.jpg' | in module: app.routes
+date:07/26/24 time:01:20:11 | error message: integer division or modulo by zero | in module: app.routes

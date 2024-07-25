@@ -134,8 +134,6 @@ def auth():
         login = data.get('login')
         password = data.get('password')
 
-        user_data = {}
-
         # логика регистрации
         if action == 'REGISTER':
             try:
@@ -165,9 +163,12 @@ def auth():
                     header, pers_photo_data = pers_photo_data.split(",", 1)
 
                     # проверка иконки на наличие, валидность и "квадратность"
-                    if not is_image_valid(pers_photo_data) or not is_icon_square(pers_photo_data):
+                    if not is_image_valid(pers_photo_data):
                         response.set_status(420)
                         return response.send()
+
+                    if not is_icon_square(pers_photo_data):
+                        pers_photo_data = crop_to_square(pers_photo_data)
 
             # если данные некорректны
             except Exception as err:
@@ -182,8 +183,11 @@ def auth():
                     return response.send()
 
                 # сохранение иконки и возврат ее пути для записи
-                unique_filename = generate_uuid() + ".png"
-                pers_photo_data = save_icon(pers_photo_data, unique_filename)
+                if pers_photo_data is not None:
+                    unique_filename = generate_uuid() + ".png"
+                    pers_photo_data = save_icon(pers_photo_data, unique_filename)
+                else:
+                    pers_photo_data = "sourses/userProfileIcons/default_user_icon.png"
 
                 # создание юзера в базе и выдача токена
                 User.create_user(login, password, first_name, sur_name, middle_name, email, phone_number,
@@ -228,6 +232,24 @@ def auth():
     except Exception as err:
         log_status(err, __name__)
         response.set_status(400)
+        return response.send()
+
+
+@api.route('/get_user', methods=['GET'])
+@jwt_required()
+def get_user():
+    response = Response()
+    identity = get_jwt_identity()
+    login = encrypt_decrypt(identity["login"], SECRET_KEY)
+
+    try:
+        user_data = User.get_user(login)
+        response.set_data({"user_data": user_data})
+        return response.send()
+
+    except Exception as err:
+        log_status(err, __name__)
+        response.set_status(404)
         return response.send()
 
 
@@ -361,7 +383,6 @@ def handle_post(post_id):
             # добавляем поле с реакцией пользователя на пост
             post['reaction'] = User.get_reaction_at_post(login, post['unique_id'])
 
-
         except Exception as err:
             log_status(err, __name__)
 
@@ -443,30 +464,37 @@ def update_post(post_id):
     try:
         identity = get_jwt_identity()
         owner_login = encrypt_decrypt(identity["login"], SECRET_KEY)
+
         if not Post.get_post_by_id(post_id):
             response.set_status(419)
             return response.send()
+
         data = request.get_json()
         title = data.get("title")
         content = data.get("content")
         tags = data.get("tags")
         image_data = data.get("image_data")
+
         # валидация полей
         is_valid, validation_error = check_post_data(data)
         if not is_valid:
             response.set_status(417)
             response.set_message(validation_error)
             return response.send()
+
         # проверка на плохие слова
         if not check_bad_words(title, content, tags):
             response.set_status(418)
             return response.send()
+
         if image_data is not None:
             header, image_data = image_data.split(",", 1)
+
             # проверка иконки на наличие и валидность
             if not is_image_valid(image_data) or not check_image_aspect_ratio(image_data):
                 response.set_status(420)
                 return response.send()
+
             # сохранение изображения и возврат ее пути для записи(или перезаписи, если она есть уже)
             if Post.image_already(post_id):
                 unique_filename = Post.image_filename(post_id)
@@ -474,15 +502,18 @@ def update_post(post_id):
             else:
                 unique_filename = generate_uuid() + ".png"
                 image_data = save_image(image_data, unique_filename)
+
     except Exception as err:
         log_status(err, __name__)
         response.set_status(417)
         return response.send()
+
     # обновляем пост в базе
     try:
         Post.update_post(post_id, owner_login, title=title, content=content, tags=tags, imagedata=image_data)
         response.set_status(205)
         return response.send()
+
     # если ошибка в логике сервера
     except Exception as err:
         log_status(err, __name__)
@@ -791,7 +822,6 @@ def edit_userprofile():
             unique_filename = generate_uuid() + ".png"
             pers_photo_data = save_icon(pers_photo_data, unique_filename)
 
-
     except Exception as err:
         log_status(err, __name__)
 
@@ -799,7 +829,6 @@ def edit_userprofile():
         return response.send()
 
     try:
-
         # Обновление данных пользователя в базе данных
         User.update_user(original_login, password, first_name, middle_name, sur_name, email, phone_number,
                          pers_photo_data)
@@ -879,24 +908,6 @@ def rate(post_id):
         return response.send()
 
 
-@api.route('/get_user', methods=['GET'])
-@jwt_required()
-def get_user():
-    response = Response()
-    identity = get_jwt_identity()
-    login = encrypt_decrypt(identity["login"], SECRET_KEY)
-
-    try:
-        user_data = User.get_user(login)
-        response.set_data({"user_data": user_data})
-        return response.send()
-
-    except Exception as err:
-        log_status(err, __name__)
-        response.set_status(404)
-        return response.send()
-
-
 @api.route('/ban_ip', methods=['POST'])
 def ban_ip():
     response = Response()
@@ -924,6 +935,5 @@ def get_rates(post_id):
     response.set_data({"likes_count": likes_count,
                        "dislikes_count": dislikes_count})
     return response.send()
-
 
 

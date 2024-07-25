@@ -1,7 +1,5 @@
-import psycopg2
 from dotenv import load_dotenv
 import os
-import base64
 from .validation_data import return_base64_image
 
 import psycopg2.extras
@@ -32,11 +30,11 @@ class User:  # методы работы с таблицей users
             'login': user_data[0],
             'firstName': user_data[2],
             'surName': user_data[3],
-            'middleName': user_data[4],
+            'middleName': user_data[4] if user_data[4] is not None else None,
             'privileged': user_data[5],
-            'email': user_data[6],
-            'phoneNumber': user_data[7],
-            'persPhotodata': return_base64_image(user_data[8])
+            'email': user_data[6] if user_data[6] is not None else None,
+            'phoneNumber': user_data[7] if user_data[7] is not None else None,
+            'persPhotodata': return_base64_image(user_data[8]) if user_data[8] is not None else None
         }
         return response
 
@@ -45,17 +43,18 @@ class User:  # методы работы с таблицей users
         cur = conn.cursor()
         cur.execute("SELECT * FROM users WHERE login = %s;", (login,))
         user_data = cur.fetchone()
+
         if user_data:
             response = {
                 'login': user_data[0],
                 'password': user_data[1],
                 'firstName': user_data[2],
                 'surName': user_data[3],
-                'middleName': user_data[4],
                 'privileged': user_data[5],
-                'email': user_data[6],
-                'phoneNumber': user_data[7],
-                'persPhotodata': user_data[8]
+                'middleName': user_data[4] if user_data[4] is not None else None,
+                'email': user_data[6] if user_data[6] is not None else None,
+                'phoneNumber': user_data[7] if user_data[7] is not None else None,
+                'persPhotodata': user_data[8] if user_data[8] is not None else None
             }
             return response
         else:

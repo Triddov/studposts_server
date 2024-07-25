@@ -9,7 +9,7 @@
         privileged BOOLEAN DEFAULT FALSE,
         email VARCHAR(36),
         phoneNumber VARCHAR(20),
-        persPhotoData VARCHAR(255) DEFAULT 'sourses/userProfileIcons/default_user_icon.png' NOT NULL
+        persPhotoData VARCHAR(255) DEFAULT 'sources/userProfileIcons/default_user_icon.png' NOT NULL
     );
 
     CREATE TABLE IF NOT EXISTS posts (
@@ -38,6 +38,8 @@
         ON UPDATE CASCADE
         ON DELETE CASCADE,
         FOREIGN KEY (post_id) REFERENCES posts (unique_id)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
     );
 
     CREATE TABLE IF NOT EXISTS likes (
@@ -47,14 +49,19 @@
         ON UPDATE CASCADE
         ON DELETE CASCADE,
         FOREIGN KEY (post_id) REFERENCES posts (unique_id)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
     );
 
     CREATE TABLE IF NOT EXISTS dislikes (
         owner_login VARCHAR(255) NOT NULL,
         post_id VARCHAR(50) NOT NULL,
         FOREIGN KEY (owner_login) REFERENCES users (login)
-        ON UPDATE CASCADE,
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
         FOREIGN KEY (post_id) REFERENCES posts (unique_id)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
     );
 
     CREATE OR REPLACE FUNCTION changeLikesCount()
@@ -109,7 +116,10 @@
 
 
 INSERT INTO users (login, password, firstName, middleName, surName, privileged, persphotodata)
-VALUES ('dima', 'qwerty12345', 'Дмитрий', 'Иванович', 'Путин', TRUE, '/dif_image.jpg');
+VALUES ('dima', 'qwerty12345', 'Дмитрий', 'Иванович', 'Путин', TRUE, 'sourses/userProfileIcons/dima-image.jpg');
 
 INSERT INTO users (login, password, firstName, middleName, surName, privileged, email, phoneNumber, persphotodata)
-VALUES ('step', 'qwerty09876', 'Степан', 'Иванович', 'Путин', TRUE, 'akinin.stepan7@gmail.com', '+71987464539', '/my_image.jpg');
+VALUES ('step', 'qwerty09876', 'Степан', 'Иванович', 'Путин', TRUE, 'akinin.stepan7@gmail.com', '+71987464539', 'sourses/userProfileIcons/stepa-image.jpg');
+
+INSERT INTO users (login, password, firstName, middleName, surName, privileged, email, persphotodata)
+VALUES ('ye', 'ye123456', 'Канье', 'Иванович', 'Уэст', TRUE, 'ye@gmail.com', 'sourses/userProfileIcons/ye-image.jpg');
