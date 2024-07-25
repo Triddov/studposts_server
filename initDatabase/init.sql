@@ -25,6 +25,7 @@
         dislikesCount INTEGER DEFAULT 0,
         FOREIGN KEY (owner_login) REFERENCES users (login)
         ON UPDATE CASCADE
+        ON DELETE CASCADE
     );
 
     CREATE TABLE IF NOT EXISTS comments (
@@ -34,7 +35,8 @@
         content VARCHAR(5000) NOT NULL,
         createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (owner_login) REFERENCES users (login)
-        ON UPDATE CASCADE,
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
         FOREIGN KEY (post_id) REFERENCES posts (unique_id)
     );
 
@@ -42,7 +44,8 @@
         owner_login VARCHAR(255) NOT NULL,
         post_id VARCHAR(50) NOT NULL,
         FOREIGN KEY (owner_login) REFERENCES users (login)
-        ON UPDATE CASCADE,
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
         FOREIGN KEY (post_id) REFERENCES posts (unique_id)
     );
 
@@ -106,7 +109,7 @@
 
 
 INSERT INTO users (login, password, firstName, middleName, surName, privileged, persphotodata)
-VALUES ('dima', 'qwerty123', 'Дмитрий', 'Иванович', 'Путин', TRUE, '/dif_image.jpg');
+VALUES ('dima', 'qwerty12345', 'Дмитрий', 'Иванович', 'Путин', TRUE, '/dif_image.jpg');
 
 INSERT INTO users (login, password, firstName, middleName, surName, privileged, email, phoneNumber, persphotodata)
-VALUES ('step', 'qwerty', 'Степан', 'Иванович', 'Путин', TRUE, 'akinin.stepan7@gmail.com', '+71987464539', '/my_image.jpg');
+VALUES ('step', 'qwerty09876', 'Степан', 'Иванович', 'Путин', TRUE, 'akinin.stepan7@gmail.com', '+71987464539', '/my_image.jpg');

@@ -5,7 +5,6 @@ import base64
 import os
 import re
 
-
 load_dotenv()
 
 UPLOAD_FOLDER_ICONS = os.getenv('UPLOAD_FOLDER_ICONS')
@@ -74,7 +73,6 @@ def load_nginx_blacklist(filepath):
 
 
 def check_user_data(data, action='register'):
-    
     # поля, которые пользователь может менять и устанавливать в принципе
     allowed_fields = ['login', 'password', 'first_name', 'sur_name', 'middle_name', 'email', 'phone_number']
 
@@ -89,7 +87,7 @@ def check_user_data(data, action='register'):
 
             if not data[field]:
                 return False, f"{field} should not be empty"
-    
+
     # проверка всех полей на содержание пробельных символов
     for field in allowed_fields:
         if field in data and ' ' in data[field]:
@@ -232,3 +230,11 @@ def save_image(image_base64, file_name):
 
     # Возвращаем путь к изображению с правильными слэшами для текущей ОС
     return image_path.replace('\\', '/')
+
+
+def return_base64_image(path):
+    if path is None:
+        return None
+    with open(path, "rb") as image_file:
+        image = base64.b64encode(image_file.read())
+    return image.decode('utf-8')

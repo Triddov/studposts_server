@@ -4,14 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="313496f0-9e1b-4b22-820e-d983be4c79e6" name="Changes" comment="release (with bugs ?)">
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_7_17_2024_3_05_AM_[Changes]/shelved.patch" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_7_17_2024_3_05_AM__Changes_.xml" beforeDir="false" />
+    <list default="true" id="313496f0-9e1b-4b22-820e-d983be4c79e6" name="Changes" comment="release (with bugs..)">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/database.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/routes.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/server_exception.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/server_exception.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/validation_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/validation_data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/initDatabase/init.sql" beforeDir="false" afterPath="$PROJECT_DIR$/initDatabase/init.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/logs.txt" beforeDir="false" afterPath="$PROJECT_DIR$/logs.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -167,7 +166,8 @@
       <workItem from="1721682239478" duration="638000" />
       <workItem from="1721761523847" duration="3234000" />
       <workItem from="1721824001226" duration="545000" />
-      <workItem from="1721824651858" duration="3935000" />
+      <workItem from="1721824651858" duration="9930000" />
+      <workItem from="1721906207449" duration="3124000" />
     </task>
     <task id="LOCAL-00001" summary="second commit">
       <option name="closed" value="true" />
@@ -329,7 +329,15 @@
       <option name="project" value="LOCAL" />
       <updated>1721764772549</updated>
     </task>
-    <option name="localTasksCounter" value="21" />
+    <task id="LOCAL-00021" summary="release (with bugs..)">
+      <option name="closed" value="true" />
+      <created>1721828608008</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1721828608008</updated>
+    </task>
+    <option name="localTasksCounter" value="22" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -371,14 +379,15 @@
     <MESSAGE value="unimportent" />
     <MESSAGE value="logs" />
     <MESSAGE value="release (with bugs ?)" />
-    <option name="LAST_COMMIT_MESSAGE" value="release (with bugs ?)" />
+    <MESSAGE value="release (with bugs..)" />
+    <option name="LAST_COMMIT_MESSAGE" value="release (with bugs..)" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/studposts_server$generate_token.coverage" NAME="generate_token Coverage Results" MODIFIED="1721410314757" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
     <SUITE FILE_PATH="coverage/studposts_server$validation_data.coverage" NAME="validation_data Coverage Results" MODIFIED="1721213133023" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
     <SUITE FILE_PATH="coverage/studposts_server$routes.coverage" NAME="routes Coverage Results" MODIFIED="1721410408064" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
     <SUITE FILE_PATH="coverage/studposts_server$generate_captcha.coverage" NAME="generate_captcha Coverage Results" MODIFIED="1721761624557" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
-    <SUITE FILE_PATH="coverage/studposts_server$run.coverage" NAME="run Coverage Results" MODIFIED="1721827935617" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/studposts_server$run.coverage" NAME="run Coverage Results" MODIFIED="1721906277526" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/studposts_server$database.coverage" NAME="database Coverage Results" MODIFIED="1721404436276" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
   </component>
 </project>

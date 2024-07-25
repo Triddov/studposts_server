@@ -14,3 +14,7 @@ date:07/24/24 time:16:28:35 | error message: list indices must be integers or sl
 date:07/24/24 time:16:32:17 | error message: list indices must be integers or slices, not str | in module: app.routes
 date:07/24/24 time:16:33:24 | error message: list indices must be integers or slices, not str | in module: app.routes
 date:07/24/24 time:16:41:16 | error message: 'NoneType' object is not subscriptable | in module: app.routes
+date:07/24/24 time:16:56:13 | error message:  | in module: app.routes
+date:07/24/24 time:16:57:03 | error message:  | in module: app.routes
+date:07/24/24 time:16:58:08 | error message:  | in module: app.routes
+date:07/24/24 time:16:58:18 | error message:  | in module: app.routes

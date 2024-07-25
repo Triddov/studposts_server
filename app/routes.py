@@ -16,7 +16,6 @@ SECRET_KEY = os.getenv('JWT_SECRET_KEY')
 TIME_CAPTCHA_LIMIT = int(os.getenv('CAPTCHA_EXPIRATION_MINUTES')) * 60  # в секундах
 AUTHORIZATION_LIMIT = int(os.getenv('AUTHORIZATION_LIMIT')) * 60  # в секундах
 
-
 nginx_blacklist_path = 'nginx_blacklist.conf'  # путь из корня проекта к списку забаненных по ip
 nginx_banned_ips = load_nginx_blacklist(nginx_blacklist_path)
 
@@ -65,7 +64,7 @@ def check_ban_ip():
 
     ip = request.remote_addr
     if ip in nginx_banned_ips:
-        response.set_status(403)   # abort(403)
+        response.set_status(403)  # abort(403)
         return response.send()
 
 
@@ -77,7 +76,7 @@ def get_captcha():
     captcha_text = generate_captcha()
     encoded_captcha_solution = encrypt_decrypt(captcha_text, SECRET_KEY)
     base64_image = generate_captcha_image(captcha_text)
-    print(captcha_text)
+    print("Текст капчи: " + captcha_text)
     captcha_created_time = int(time.time())  # время, до которого капча валидна
     token = create_access_token(identity={"solution": encoded_captcha_solution, "created_time": captcha_created_time})
 
@@ -98,7 +97,7 @@ def auth():
         if action != "REGISTER" and action != "LOGIN":
             response.set_status(415)
             return response.send()
-        
+
         data = request.get_json()
         input_captcha = data.get("input_captcha")
         captcha_solution_token = data.get("captcha_token")
@@ -187,7 +186,8 @@ def auth():
                 pers_photo_data = save_icon(pers_photo_data, unique_filename)
 
                 # создание юзера в базе и выдача токена
-                User.create_user(login, password, first_name, sur_name, middle_name, email, phone_number, pers_photo_data)
+                User.create_user(login, password, first_name, sur_name, middle_name, email, phone_number,
+                                 pers_photo_data)
 
             # если ошибка в логике сервера
             except Exception as err:
@@ -282,28 +282,28 @@ def handle_posts():
             try:
                 identity = get_jwt_identity()
                 login = encrypt_decrypt(identity["login"], SECRET_KEY)
-                
+
                 # модифицируем операции в зависимости от роли пользователя
                 for post in posts:
                     # если он создатель
                     if post['owner_login'] == login:
                         post['operations'] = {
-                            'delete' : f'/api/{post['unique_id']}/delete',
-                            'update' : f'/api/{post['unique_id']}/update'
-                            }
-                    
+                            'delete': f'/api/{post['unique_id']}/delete',
+                            'update': f'/api/{post['unique_id']}/update'
+                        }
+
                     # если он модератор и это не пост другого модератора
                     elif (User.is_moderator(login)) and (not User.is_moderator(post['owner_login'])):
                         post['operations'] = {
-                            'delete' : f'/api/{post['unique_id']}/delete',
-                            'ban' : f'/api/ban_ip'
-                            }
-                    
+                            'delete': f'/api/{post['unique_id']}/delete',
+                            'ban': f'/api/ban_ip'
+                        }
+
                     post['reaction'] = User.get_reaction_at_post(login, post['unique_id'])
 
             except Exception as err:
                 log_status(err, __name__)
-                
+
             response.set_data({
                 'filters': {
                     'orderByDate': order,
@@ -339,7 +339,7 @@ def handle_post(post_id):
         Post.increment_view(post_id)
         post = Post.get_post_by_id(post_id)
 
-         # проверка, авторизован ли пользователь и какие у него доступны операции
+        # проверка, авторизован ли пользователь и какие у него доступны операции
         try:
             identity = get_jwt_identity()
             login = encrypt_decrypt(identity["login"], SECRET_KEY)
@@ -347,26 +347,27 @@ def handle_post(post_id):
             # модифицируем операции в зависимости от роли пользователя
             if post['owner_login'] == login:
                 post['operations'] = {
-                    'delete' : f'/api/{post['unique_id']}/delete',
-                    'update' : f'/api/{post['unique_id']}/update'
-                    }
-                    
+                    'delete': f'/api/{post['unique_id']}/delete',
+                    'update': f'/api/{post['unique_id']}/update'
+                }
+
             # если он модератор и это не пост другого модератора
             elif (User.is_moderator(login)) and (not User.is_moderator(post['owner_login'])):
                 post['operations'] = {
-                    'delete' : f'/api/{post['unique_id']}/delete',
-                    'ban' : f'/api/ban_ip'
-                    }
+                    'delete': f'/api/{post['unique_id']}/delete',
+                    'ban': f'/api/ban_ip'
+                }
 
             # добавляем поле с реакцией пользователя на пост
             post['reaction'] = User.get_reaction_at_post(login, post['unique_id'])
+
 
         except Exception as err:
             log_status(err, __name__)
 
         response.set_data({
             'post': post
-            })  
+        })
         return response.send()
 
     except Exception as err:
@@ -442,55 +443,46 @@ def update_post(post_id):
     try:
         identity = get_jwt_identity()
         owner_login = encrypt_decrypt(identity["login"], SECRET_KEY)
-
         if not Post.get_post_by_id(post_id):
             response.set_status(419)
             return response.send()
-
         data = request.get_json()
         title = data.get("title")
         content = data.get("content")
         tags = data.get("tags")
         image_data = data.get("image_data")
-
         # валидация полей
         is_valid, validation_error = check_post_data(data)
         if not is_valid:
             response.set_status(417)
             response.set_message(validation_error)
             return response.send()
-
         # проверка на плохие слова
         if not check_bad_words(title, content, tags):
             response.set_status(418)
             return response.send()
-
         if image_data is not None:
             header, image_data = image_data.split(",", 1)
             # проверка иконки на наличие и валидность
             if not is_image_valid(image_data) or not check_image_aspect_ratio(image_data):
                 response.set_status(420)
                 return response.send()
-
             # сохранение изображения и возврат ее пути для записи(или перезаписи, если она есть уже)
             if Post.image_already(post_id):
                 unique_filename = Post.image_filename(post_id)
-                os.remove("sourses/userPostImages"+unique_filename)
+                os.remove("sourses/userPostImages" + unique_filename)
             else:
                 unique_filename = generate_uuid() + ".png"
                 image_data = save_image(image_data, unique_filename)
-
     except Exception as err:
         log_status(err, __name__)
         response.set_status(417)
         return response.send()
-
     # обновляем пост в базе
     try:
         Post.update_post(post_id, owner_login, title=title, content=content, tags=tags, imagedata=image_data)
         response.set_status(205)
         return response.send()
-
     # если ошибка в логике сервера
     except Exception as err:
         log_status(err, __name__)
@@ -581,16 +573,16 @@ def handle_comments(post_id):
                         # модифицируем операции в зависимости от роли пользователя
                         if comment['owner_login'] == login:
                             comment['operations'] = {
-                                'delete' : f'/api/{comment['post_id']}/delete_comment',
-                                'update' : f'/api/{comment['post_id']}/update_comment'
-                                }
-                                
+                                'delete': f'/api/{comment['post_id']}/delete_comment',
+                                'update': f'/api/{comment['post_id']}/update_comment'
+                            }
+
                         # если он модератор и это не пост другого модератора
                         elif (User.is_moderator(login)) and (not User.is_moderator(comment['owner_login'])):
                             comment['operations'] = {
-                                'delete' : f'/api/{comment['post_id']}/delete_comment',
-                                'ban' : f'/api/ban_ip'
-                                }
+                                'delete': f'/api/{comment['post_id']}/delete_comment',
+                                'ban': f'/api/ban_ip'
+                            }
 
                 except Exception as err:
                     log_status(err, __name__)
@@ -748,7 +740,7 @@ def delete_comment(post_id):
 @jwt_required()
 def edit_userprofile():
     response = Response()
-    encoded_password, encoded_login, access_token = None, None, None  # заготовки для будущего токена
+    encoded_password, access_token = None, None  # заготовки для будущего токена
 
     try:
         identity = get_jwt_identity()
@@ -757,7 +749,6 @@ def edit_userprofile():
 
         # Получение данных из запроса
         data = request.get_json()
-        login = data.get("login")
         password = data.get("password")
         first_name = data.get("first_name")
         middle_name = data.get("middle_name")
@@ -766,20 +757,26 @@ def edit_userprofile():
         phone_number = data.get("phone_number")
         pers_photo_data = data.get("pers_photo_data")
 
+        # проверка на соответствие пароля
+        current_password = data.get('current_password')
+        if current_password != original_password:
+            response.set_status(410)
+            return response.send()
+
         # Валидация данных пользователя
         is_valid, validation_error = check_user_data(data, 'update')
         if not is_valid:
             response.set_status(417)
             response.set_message(validation_error)
             return response.send()
-    
+
         # Проверка на наличие недопустимых слов в именах пользователя
         if not check_bad_words(first_name, middle_name, sur_name):
             response.set_status(418)
             return response.send()
-        
+
         # Обработка данных о персональном фото
-        
+
         # кейс сброса изображения до дефолтного
         if pers_photo_data is None or pers_photo_data == "":
             pers_photo_data = "sourses/userProfileIcons/default_user_icon.png"
@@ -787,59 +784,48 @@ def edit_userprofile():
         # кейс других данных
         elif pers_photo_data is not None:
             header, pers_photo_data = pers_photo_data.split(",", 1)
-            
+
             if not is_image_valid(pers_photo_data) or not is_icon_square(pers_photo_data):
                 response.set_status(420)
                 return response.send()
             unique_filename = generate_uuid() + ".png"
             pers_photo_data = save_icon(pers_photo_data, unique_filename)
-        
-        # проверка, не существует ли новый логин в базе
-        if login:
-            user = User.find_by_login(login)
-            if user:
-                response.set_status(409)
-                return response.send()
 
-            encoded_login = encrypt_decrypt(login, SECRET_KEY)
 
     except Exception as err:
         log_status(err, __name__)
+
         response.set_status(417)
         return response.send()
 
     try:
+
         # Обновление данных пользователя в базе данных
-        User.update_user(original_login, login, password, first_name, middle_name, sur_name, email, phone_number, pers_photo_data)
-        
+        User.update_user(original_login, password, first_name, middle_name, sur_name, email, phone_number,
+                         pers_photo_data)
+
         try:
-            # временный говнокод для нового токена. вместо этого нужно сделать удаление действующего токена и перенаправить пользователя на /auth
+            # создание нового токена при изменении пароля
             if password:
                 encoded_password = encrypt_decrypt(password, SECRET_KEY)
-            
-            if encoded_login and encoded_password:
-                access_token = create_user_jwt_token(encoded_login, encoded_password)
-            elif encoded_login:
-                access_token = create_user_jwt_token(encoded_login, original_password)
-            elif encoded_password:
                 access_token = create_user_jwt_token(original_login, encoded_password)
-            
+
             response.set_status(205)
             if access_token:
                 response.set_data(({
-                "session_token": access_token
+                    "session_token": access_token
                 }))
             return response.send()
-        
+
         except Exception as err:
             log_status(err, __name__)
             response.set_status(405)
             return response.send()
 
-    # данных не поступило (мейби новый статус?)
+    # данных не поступило
     except Exception as err:
         log_status(err, __name__)
-        response.set_status(417) 
+        response.set_status(417)
         return response.send()
 
 
@@ -848,7 +834,7 @@ def edit_userprofile():
 def rate(post_id):
     response = Response()
 
-    try: 
+    try:
         identity = get_jwt_identity()
         login = encrypt_decrypt(identity["login"], SECRET_KEY)
 
@@ -873,22 +859,23 @@ def rate(post_id):
 
                 response.set_status(200)
                 return response.send()
-            
+
             except Exception as err:
                 log_status(err, __name__)
                 response.set_status(504)
                 return response.send()
 
+
         # ошибка "не найдено"
         else:
             response.set_status(404)
             return response.send()
-    
+
 
     # общая ошибка
     except Exception as err:
         log_status(err, __name__)
-        response.set_status(400) 
+        response.set_status(400)
         return response.send()
 
 
@@ -926,3 +913,17 @@ def ban_ip():
     response.set_status(400)
     response.set_message("Invalid IP address")
     return response.send()
+
+
+@api.route('/<post_id>/get_rates', methods=['GET'])
+def get_rates(post_id):
+    response = Response()
+
+    likes_count, dislikes_count = Rate.get_rate(post_id)
+
+    response.set_data({"likes_count": likes_count,
+                       "dislikes_count": dislikes_count})
+    return response.send()
+
+
+
