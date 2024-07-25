@@ -36,7 +36,7 @@ class User:  # методы работы с таблицей users
             'privileged': user_data[5],
             'email': user_data[6],
             'phoneNumber': user_data[7],
-            'persPhotodata': return_base64_image(user_data[8])
+            'persPhotodata': user_data[8]
         }
         return response
 
@@ -145,7 +145,7 @@ class Post:  # методы работы с таблицей posts
             "content" : posts[i][3],
             "tags" : posts[i][4],
             "createdAt" : posts[i][5],
-            "imageData" : return_base64_image(posts[i][6]),
+            "imageData" : posts[i][6],
             "viewCount" : posts[i][7],
             "likesCount" : posts[i][8],
             "dislikesCount" : posts[i][9],
@@ -159,7 +159,7 @@ class Post:  # методы работы с таблицей posts
                 'firstName' : user_data[0],
                 'middleName' : user_data[1],
                 'surName' : user_data[2],
-                'persPhotoData' : return_base64_image(user_data[3])
+                'persPhotoData' : user_data[3]
             }
         
 
@@ -177,7 +177,7 @@ class Post:  # методы работы с таблицей posts
             "content" : post[3],
             "tags" : post[4],
             "createdAt" : post[5],
-            "imageData" : return_base64_image(post[6]),
+            "imageData" : post[6],
             "viewCount" : post[7],
             "likesCount" : post[8],
             "dislikesCount" : post[9]
@@ -191,7 +191,7 @@ class Post:  # методы работы с таблицей posts
                 'firstName' : user_data[0],
                 'middleName' : user_data[1],
                 'surName' : user_data[2],
-                'persPhotoData' : return_base64_image(user_data[3])
+                'persPhotoData' : user_data[3]
             }
         
         return answer
@@ -339,7 +339,7 @@ class Comment:  # методы работы с таблицей comments
                 'firstName' : user_data[0],
                 'middleName' : user_data[1],
                 'surName' : user_data[2],
-                'persPhotoData' : return_base64_image(user_data[3])
+                'persPhotoData' : user_data[3]
             }
         
         return comments
@@ -381,3 +381,17 @@ class Comment:  # методы работы с таблицей comments
             cur.execute("DELETE FROM comments WHERE unique_id = %s;", (comment_id,))
         else:
             raise Exception
+
+
+
+class Rate:
+    @staticmethod
+    def get_rate(post_id):
+        cur = conn.cursor()
+        cur.execute("SELECT count(*) FROM likes WHERE post_id = %s;", (post_id, ))
+        likes_count = cur.fetchone()[0]
+
+        cur.execute("SELECT count(*) FROM dislikes WHERE post_id = %s;", (post_id, ))
+        dislikes_count = cur.fetchone()[0]
+
+        return likes_count, dislikes_count

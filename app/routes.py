@@ -1,4 +1,5 @@
 from flask import Blueprint, request
+import flask
 from flask_jwt_extended import get_jwt_identity, JWTManager, jwt_required, decode_token
 from .database import *
 from .generate_captcha import *
@@ -22,6 +23,12 @@ nginx_banned_ips = load_nginx_blacklist(nginx_blacklist_path)
 
 api = Blueprint('api', __name__)  # добавляет api во всех раутах
 jwt = JWTManager()  # объект генерации токенов
+
+
+@api.route('/static/<path:filename>')
+def serve_resources(filename):
+    return flask.send_from_directory('../static', filename)
+
 
 
 def token_required(f):  # метод проверки токенов авторизации
@@ -475,7 +482,7 @@ def update_post(post_id):
             # сохранение изображения и возврат ее пути для записи(или перезаписи, если она есть уже)
             if Post.image_already(post_id):
                 unique_filename = Post.image_filename(post_id)
-                os.remove("sourses/userPostImages"+unique_filename)
+                os.remove("static/userPostImages"+unique_filename)
             else:
                 unique_filename = generate_uuid() + ".png"
                 image_data = save_image(image_data, unique_filename)
@@ -788,7 +795,7 @@ def edit_userprofile():
         
         # кейс сброса изображения до дефолтного
         if pers_photo_data is None or pers_photo_data == "":
-            pers_photo_data = "sourses/userProfileIcons/default_user_icon.png"
+            pers_photo_data = "static/userProfileIcons/default_user_icon.png"
 
         # кейс других данных
         elif pers_photo_data is not None:
@@ -923,4 +930,23 @@ def ban_ip():
 
     response.set_status(400)
     response.set_message("Invalid IP address")
+    return response.send()
+
+
+@api.route('/sources')
+def fuhnc():
+    pass
+
+
+@api.route('/<post_id>/get_rates', methods=['GET'])
+def get_rates(post_id):
+    response = Response()
+
+    likes_count, dislikes_count = Rate.get_rate(post_id)
+
+    response.set_data({
+        "likes_count": likes_count,
+        "dislikes_count": dislikes_count
+        })
+    
     return response.send()
