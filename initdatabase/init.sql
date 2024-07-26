@@ -62,8 +62,6 @@
                 SET likesCount = (SELECT COUNT(*) FROM likes WHERE post_id = OLD.post_id)
                 WHERE unique_id = OLD.post_id;
                 
-                DELETE FROM dislikes WHERE post_id = OLD.post_id and owner_login = OLD.owner_login;
-                
                 
             ELSIF (TG_OP = 'INSERT') THEN
                 UPDATE posts
