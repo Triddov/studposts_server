@@ -68,6 +68,24 @@ def check_ban_ip():
         return response.send()
 
 
+@api.route('/ban_ip', methods=['POST'])
+def ban_ip():
+    response = Response()
+
+    ip_address = request.form.get('ip_address')
+    if ip_address:
+        with open(nginx_blacklist_path, 'a') as ban_list:
+            ban_list.write(f"deny {ip_address};\n")
+
+        nginx_banned_ips.add(ip_address)
+        response.set_message(f"IP {ip_address} has been banned")
+        return response.send()
+
+    response.set_status(400)
+    response.set_message("Invalid IP address")
+    return response.send()
+
+
 @api.route('/sources/<path:filename>', methods=["GET"])
 def serve_resources(filename):
     return send_from_directory('../sources', filename)
@@ -899,12 +917,10 @@ def rate(post_id):
                 response.set_status(504)
                 return response.send()
 
-
         # ошибка "не найдено"
         else:
             response.set_status(404)
             return response.send()
-
 
     # общая ошибка
     except Exception as err:
@@ -913,32 +929,18 @@ def rate(post_id):
         return response.send()
 
 
-@api.route('/ban_ip', methods=['POST'])
-def ban_ip():
-    response = Response()
-
-    ip_address = request.form.get('ip_address')
-    if ip_address:
-        with open(nginx_blacklist_path, 'a') as ban_list:
-            ban_list.write(f"deny {ip_address};\n")
-
-        nginx_banned_ips.add(ip_address)
-        response.set_message(f"IP {ip_address} has been banned")
-        return response.send()
-
-    response.set_status(400)
-    response.set_message("Invalid IP address")
-    return response.send()
-
-
 @api.route('/<post_id>/get_rates', methods=['GET'])
+@jwt_required()
 def get_rates(post_id):
     response = Response()
+    post = Post.get_post_by_id(post_id)
+
+    identity = get_jwt_identity()
+    login = encrypt_decrypt(identity["login"], SECRET_KEY)
 
     likes_count, dislikes_count = Rate.get_rate(post_id)
-
+    reaction = User.get_reaction_at_post(login, post["unique_id"])
     response.set_data({"likes_count": likes_count,
-                       "dislikes_count": dislikes_count})
+                       "dislikes_count": dislikes_count,
+                       "reaction": reaction})
     return response.send()
-
-

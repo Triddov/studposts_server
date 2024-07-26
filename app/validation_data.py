@@ -267,4 +267,3 @@ def save_image(image_base64, file_name):
 
     # Возвращаем путь к изображению с правильными слэшами для текущей ОС
     return image_path.replace('\\', '/')
-
