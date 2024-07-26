@@ -1,4 +1,4 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, send_from_directory
 from flask_jwt_extended import get_jwt_identity, JWTManager, jwt_required, decode_token
 from .database import *
 from .generate_captcha import *
@@ -66,6 +66,11 @@ def check_ban_ip():
     if ip in nginx_banned_ips:
         response.set_status(403)  # abort(403)
         return response.send()
+
+
+@api.route('/sources/<path:filename>', methods=["GET"])
+def serve_resources(filename):
+    return send_from_directory('../sources', filename)
 
 
 @api.route('/captcha', methods=['GET'])  # метод генерации и получения капчи
@@ -187,7 +192,7 @@ def auth():
                     unique_filename = generate_uuid() + ".png"
                     pers_photo_data = save_icon(pers_photo_data, unique_filename)
                 else:
-                    pers_photo_data = "sourses/userProfileIcons/default_user_icon.png"
+                    pers_photo_data = "sources/userProfileIcons/default_user_icon.png"
 
                 # создание юзера в базе и выдача токена
                 User.create_user(login, password, first_name, sur_name, middle_name, email, phone_number,
@@ -498,7 +503,7 @@ def update_post(post_id):
             # сохранение изображения и возврат ее пути для записи(или перезаписи, если она есть уже)
             if Post.image_already(post_id):
                 unique_filename = Post.image_filename(post_id)
-                os.remove("sourses/userPostImages" + unique_filename)
+                os.remove("sources/userPostImages" + unique_filename)
             else:
                 unique_filename = generate_uuid() + ".png"
                 image_data = save_image(image_data, unique_filename)
@@ -810,7 +815,7 @@ def edit_userprofile():
 
         # кейс сброса изображения до дефолтного
         if pers_photo_data is None or pers_photo_data == "":
-            pers_photo_data = "sourses/userProfileIcons/default_user_icon.png"
+            pers_photo_data = "sources/userProfileIcons/default_user_icon.png"
 
         # кейс других данных
         elif pers_photo_data is not None:

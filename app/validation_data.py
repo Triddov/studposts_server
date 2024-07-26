@@ -268,10 +268,3 @@ def save_image(image_base64, file_name):
     # Возвращаем путь к изображению с правильными слэшами для текущей ОС
     return image_path.replace('\\', '/')
 
-
-def return_base64_image(path):
-    if path is None:
-        return None
-    with open(path, "rb") as image_file:
-        image = base64.b64encode(image_file.read())
-    return image.decode('utf-8')

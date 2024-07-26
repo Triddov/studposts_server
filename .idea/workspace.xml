@@ -4,32 +4,19 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="313496f0-9e1b-4b22-820e-d983be4c79e6" name="Changes" comment="mda">
-      <change afterPath="$PROJECT_DIR$/sourses/userProfileIcons/dima-image.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/sourses/userProfileIcons/stepa-image.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/sourses/userProfileIcons/ye-image.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/55085044-d2b3-48df-a310-db6dbb5d45c4.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/55085044-d2b3-48df-a310-db6dbb5d45c4.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/55085044-d2b3-48df-a310-db6dbb5d45c4/storage_v2/_src_/database/STUDPOSTS.A3EaMQ/schema/public.abK9xQ.meta" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/55085044-d2b3-48df-a310-db6dbb5d45c4/storage_v2/_src_/database/STUDPOSTS.A3EaMQ/schema/public.abK9xQ.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/55085044-d2b3-48df-a310-db6dbb5d45c4/storage_v2/_src_/database/STUDPOSTS.A3EaMQ/schema/public.abK9xQ.zip" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/55085044-d2b3-48df-a310-db6dbb5d45c4/storage_v2/_src_/database/STUDPOSTS.A3EaMQ/schema/public.abK9xQ.zip" afterDir="false" />
+    <list default="true" id="313496f0-9e1b-4b22-820e-d983be4c79e6" name="Changes" comment="third stable version">
+      <change beforePath="$PROJECT_DIR$/.env" beforeDir="false" afterPath="$PROJECT_DIR$/.env" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/database.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/generate_captcha.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/generate_captcha.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/routes.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/validation_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/validation_data.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/initDatabase/init.sql" beforeDir="false" afterPath="$PROJECT_DIR$/initDatabase/init.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/logs.txt" beforeDir="false" afterPath="$PROJECT_DIR$/logs.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sourses/userPostImages/22cd2ab1-ec73-47f8-a46b-a099d8d42860.jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/sourses/userPostImages/58a7f033-88b4-42eb-873d-93f648d77848.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/sourses/userPostImages/64b46156-a023-4f44-a135-b64ac90682ad.jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/sourses/userPostImages/6ec0b822-9ee3-4208-981b-811abafa3d90.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/sourses/userProfileIcons/77370f09-862b-4009-a13a-dcf3f979291e.jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/sourses/userProfileIcons/838d9dfc-4895-4d0c-8c9f-a4df1dced74f.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/sourses/userProfileIcons/ac31e371-38fd-4b26-ba7f-3797c5ed8aae.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/sourses/userProfileIcons/bd3a9e65-7fee-42c1-adcf-0004c81d3324.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/sourses/userProfileIcons/ce08eeff-f546-4ecf-8aa8-ad32eb509d23.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/sourses/userProfileIcons/f55611c5-7528-43f0-be5e-4c55e77d035d.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/unitTests/user-create(auth).txt" beforeDir="false" afterPath="$PROJECT_DIR$/unitTests/user-create(auth).txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sourses/userPostImages/fb88f64b-8909-4ff0-8a97-b6514ae43573.png" beforeDir="false" afterPath="$PROJECT_DIR$/sources/userPostImages/fb88f64b-8909-4ff0-8a97-b6514ae43573.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sourses/userProfileIcons/2540cc91-b804-4e52-a7a9-5a6d11719d31.png" beforeDir="false" afterPath="$PROJECT_DIR$/sources/userProfileIcons/2540cc91-b804-4e52-a7a9-5a6d11719d31.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sourses/userProfileIcons/default_user_icon.png" beforeDir="false" afterPath="$PROJECT_DIR$/sources/userProfileIcons/default_user_icon.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sourses/userProfileIcons/dima-image.png" beforeDir="false" afterPath="$PROJECT_DIR$/sources/userProfileIcons/dima-image.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sourses/userProfileIcons/stepa-image.png" beforeDir="false" afterPath="$PROJECT_DIR$/sources/userProfileIcons/stepa-image.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sourses/userProfileIcons/ye-image.png" beforeDir="false" afterPath="$PROJECT_DIR$/sources/userProfileIcons/ye-image.png" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -91,46 +78,46 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Python.__init__.executor": "Run",
-    "Python.badwords_checker.executor": "Run",
-    "Python.banned_words_checker.executor": "Run",
-    "Python.base64_test.executor": "Run",
-    "Python.captcha.executor": "Run",
-    "Python.captcha_test.executor": "Run",
-    "Python.check_data.executor": "Run",
-    "Python.database.executor": "Run",
-    "Python.generate_captcha.executor": "Run",
-    "Python.generate_token.executor": "Run",
-    "Python.image_test.executor": "Run",
-    "Python.routes.executor": "Run",
-    "Python.run.executor": "Run",
-    "Python.server_exception.executor": "Run",
-    "Python.validation_data.executor": "Run",
-    "Python.хуй.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "database.data.extractors.current.export.id": "SQL Inserts",
-    "database.data.extractors.current.id": "SQL Inserts",
-    "git-widget-placeholder": "stepan",
-    "ignore.virus.scanning.warn.message": "true",
-    "last_opened_file_path": "C:/Users/akini/PycharmProjects/studposts_server/sourses/userProfileIcons",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "settings.qodana",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python.__init__.executor&quot;: &quot;Run&quot;,
+    &quot;Python.badwords_checker.executor&quot;: &quot;Run&quot;,
+    &quot;Python.banned_words_checker.executor&quot;: &quot;Run&quot;,
+    &quot;Python.base64_test.executor&quot;: &quot;Run&quot;,
+    &quot;Python.captcha.executor&quot;: &quot;Run&quot;,
+    &quot;Python.captcha_test.executor&quot;: &quot;Run&quot;,
+    &quot;Python.check_data.executor&quot;: &quot;Run&quot;,
+    &quot;Python.database.executor&quot;: &quot;Run&quot;,
+    &quot;Python.generate_captcha.executor&quot;: &quot;Run&quot;,
+    &quot;Python.generate_token.executor&quot;: &quot;Run&quot;,
+    &quot;Python.image_test.executor&quot;: &quot;Run&quot;,
+    &quot;Python.routes.executor&quot;: &quot;Run&quot;,
+    &quot;Python.run.executor&quot;: &quot;Run&quot;,
+    &quot;Python.server_exception.executor&quot;: &quot;Run&quot;,
+    &quot;Python.validation_data.executor&quot;: &quot;Run&quot;,
+    &quot;Python.хуй.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;database.data.extractors.current.export.id&quot;: &quot;SQL Inserts&quot;,
+    &quot;database.data.extractors.current.id&quot;: &quot;SQL Inserts&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;stepan&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/akini/PycharmProjects/studposts_server/sourses/userProfileIcons&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;settings.qodana&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   },
-  "keyToStringList": {
-    "DatabaseDriversLRU": [
-      "postgresql",
-      "redis"
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;postgresql&quot;,
+      &quot;redis&quot;
     ]
   }
-}]]></component>
+}</component>
   <component name="PyConsoleOptionsProvider">
     <option name="myPythonConsoleState">
       <console-settings module-name="studposts_server" is-module-sdk="true">
@@ -194,7 +181,8 @@
       <workItem from="1721824651858" duration="9930000" />
       <workItem from="1721906207449" duration="3188000" />
       <workItem from="1721909595337" duration="20000" />
-      <workItem from="1721935600390" duration="13152000" />
+      <workItem from="1721935600390" duration="13220000" />
+      <workItem from="1721982992219" duration="2667000" />
     </task>
     <task id="LOCAL-00001" summary="second commit">
       <option name="closed" value="true" />
@@ -372,7 +360,15 @@
       <option name="project" value="LOCAL" />
       <updated>1721909381639</updated>
     </task>
-    <option name="localTasksCounter" value="23" />
+    <task id="LOCAL-00023" summary="third stable version">
+      <option name="closed" value="true" />
+      <created>1721948832048</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1721948832048</updated>
+    </task>
+    <option name="localTasksCounter" value="24" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -407,7 +403,6 @@
     <MESSAGE value="9th commit" />
     <MESSAGE value="10th commit" />
     <MESSAGE value="11th commit" />
-    <MESSAGE value="third stable version" />
     <MESSAGE value="11th commit (pre-release)" />
     <MESSAGE value="12th commit (pre-release)" />
     <MESSAGE value="14th commit" />
@@ -416,49 +411,50 @@
     <MESSAGE value="release (with bugs ?)" />
     <MESSAGE value="release (with bugs..)" />
     <MESSAGE value="mda" />
-    <option name="LAST_COMMIT_MESSAGE" value="mda" />
+    <MESSAGE value="third stable version" />
+    <option name="LAST_COMMIT_MESSAGE" value="third stable version" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/app/routes.py</url>
-          <line>551</line>
+          <line>556</line>
           <option name="timeStamp" value="7" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/app/routes.py</url>
-          <line>652</line>
+          <line>657</line>
           <option name="timeStamp" value="8" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/app/routes.py</url>
-          <line>696</line>
+          <line>701</line>
           <option name="timeStamp" value="9" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/app/routes.py</url>
-          <line>740</line>
+          <line>745</line>
           <option name="timeStamp" value="11" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/app/routes.py</url>
-          <line>862</line>
+          <line>867</line>
           <option name="timeStamp" value="12" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/app/routes.py</url>
-          <line>929</line>
+          <line>934</line>
           <option name="timeStamp" value="16" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/app/routes.py</url>
-          <line>911</line>
+          <line>916</line>
           <option name="timeStamp" value="17" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/app/routes.py</url>
-          <line>771</line>
+          <line>776</line>
           <option name="timeStamp" value="19" />
         </line-breakpoint>
       </breakpoints>
