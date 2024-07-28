@@ -31,3 +31,18 @@ date:07/26/24 time:00:57:14 | error message: 'NoneType' object is not subscripta
 date:07/26/24 time:01:01:53 | error message: integer division or modulo by zero | in module: app.routes
 date:07/26/24 time:01:02:40 | error message: [Errno 2] No such file or directory: 'sources/userProfileIcons/ye-image.jpg' | in module: app.routes
 date:07/26/24 time:01:20:11 | error message: integer division or modulo by zero | in module: app.routes
+date:07/29/24 time:01:09:09 | error message: [WinError 2] The system cannot find the file specified: 'sources/userPostImagesccd69877-c261-410d-83e7-02caec75f0a9.png' | in module: app.routes
+date:07/29/24 time:01:17:29 | error message: ОШИБКА:  значение не умещается в тип character varying(255)
+ | in module: app.routes
+date:07/29/24 time:01:20:08 | error message: [WinError 2] The system cannot find the file specified: 'sources/userPostImages/ccd69877-c261-410d-83e7-02caec75f0a9.png' | in module: app.routes
+date:07/29/24 time:01:22:18 | error message: [WinError 2] The system cannot find the file specified: 'sources/userPostImages/ccd69877-c261-410d-83e7-02caec75f0a9.png' | in module: app.routes
+date:07/29/24 time:01:22:43 | error message: [WinError 5] Access is denied: 'sources/userPostImages/' | in module: app.routes
+date:07/29/24 time:01:24:39 | error message: [WinError 5] Access is denied: 'sources/userPostImages/' | in module: app.routes
+date:07/29/24 time:01:24:48 | error message: [WinError 5] Access is denied: 'sources/userPostImages/' | in module: app.routes
+date:07/29/24 time:01:25:09 | error message: [WinError 5] Access is denied: 'sources/userPostImages/' | in module: app.routes
+date:07/29/24 time:01:25:37 | error message: [WinError 5] Access is denied: 'sources/userPostImages/' | in module: app.routes
+date:07/29/24 time:01:25:54 | error message: [WinError 5] Access is denied: 'sources/userPostImages/' | in module: app.routes
+date:07/29/24 time:01:26:19 | error message: [WinError 5] Access is denied: 'sources/userPostImages/' | in module: app.routes
+date:07/29/24 time:01:26:56 | error message: [WinError 5] Access is denied: 'sources/userPostImages/' | in module: app.routes
+date:07/29/24 time:01:27:25 | error message: [WinError 5] Access is denied: 'sources/userPostImages/' | in module: app.routes
+date:07/29/24 time:01:27:55 | error message: [WinError 123] The filename, directory name, or volume label syntax is incorrect: 'sources/userPostImages/<null>' | in module: app.routes

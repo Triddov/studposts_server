@@ -99,7 +99,6 @@ def get_captcha():
     captcha_text = generate_captcha()
     encoded_captcha_solution = encrypt_decrypt(captcha_text, SECRET_KEY)
     base64_image = generate_captcha_image(captcha_text)
-    print("Текст капчи: " + captcha_text)
     captcha_created_time = int(time.time())  # время, до которого капча валидна
     token = create_access_token(identity={"solution": encoded_captcha_solution, "created_time": captcha_created_time})
 
@@ -517,14 +516,14 @@ def update_post(post_id):
             if not is_image_valid(image_data) or not check_image_aspect_ratio(image_data):
                 response.set_status(420)
                 return response.send()
-
-            # сохранение изображения и возврат ее пути для записи(или перезаписи, если она есть уже)
+            # сохранение изображения и возврат его пути для записи(или перезаписи, если она есть уже)
             if Post.image_already(post_id):
                 unique_filename = Post.image_filename(post_id)
-                os.remove("sources/userPostImages" + unique_filename)
+                os.remove("sources/userPostImages/" + unique_filename)
             else:
                 unique_filename = generate_uuid() + ".png"
-                image_data = save_image(image_data, unique_filename)
+
+            image_data = save_image(image_data, unique_filename)
 
     except Exception as err:
         log_status(err, __name__)
@@ -540,7 +539,7 @@ def update_post(post_id):
     # если ошибка в логике сервера
     except Exception as err:
         log_status(err, __name__)
-        response.set_status(421)
+        response.set_status(504)
         return response.send()
 
 
