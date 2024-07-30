@@ -16,7 +16,7 @@ SECRET_KEY = os.getenv('JWT_SECRET_KEY')
 TIME_CAPTCHA_LIMIT = int(os.getenv('CAPTCHA_EXPIRATION_MINUTES')) * 60  # в секундах
 AUTHORIZATION_LIMIT = int(os.getenv('AUTHORIZATION_LIMIT')) * 60  # в секундах
 
-nginx_blacklist_path = 'nginx_blacklist.conf'  # путь из корня проекта к списку забаненных по ip
+nginx_blacklist_path = "blacklist.conf"  # путь из корня проекта к списку забаненных по ip
 nginx_banned_ips = load_nginx_blacklist(nginx_blacklist_path)
 
 api = Blueprint('api', __name__)  # добавляет api во всех раутах
@@ -86,7 +86,7 @@ def ban_ip():
     return response.send()
 
 
-@api.route('/sources/<path:filename>', methods=["GET"])
+@api.route('/sources/<path:filename>', methods=['GET'])
 def serve_resources(filename):
     return send_from_directory('../sources', filename)
 
@@ -99,7 +99,6 @@ def get_captcha():
     captcha_text = generate_captcha()
     encoded_captcha_solution = encrypt_decrypt(captcha_text, SECRET_KEY)
     base64_image = generate_captcha_image(captcha_text)
-    print(captcha_text)
     captcha_created_time = int(time.time())  # время, до которого капча валидна
     token = create_access_token(identity={"solution": encoded_captcha_solution, "created_time": captcha_created_time})
 
@@ -276,7 +275,7 @@ def get_user():
         return response.send()
 
 
-@api.route('/home', methods=['GET'])  # метод получения всех постов
+@api.route('/allposts', methods=['GET'])  # метод получения всех постов
 @jwt_required(True)
 def handle_posts():
     response = Response()
@@ -333,15 +332,15 @@ def handle_posts():
                     # если он создатель
                     if post['owner_login'] == login:
                         post['operations'] = {
-                            'delete': f'/api/{post['unique_id']}/delete',
-                            'update': f'/api/{post['unique_id']}/update'
+                            'delete': f"/api/deletePost/{post['unique_id']}",
+                            'update': f"/api/updatePost/{post['unique_id']}"
                         }
 
                     # если он модератор и это не пост другого модератора
                     elif (User.is_moderator(login)) and (not User.is_moderator(post['owner_login'])):
                         post['operations'] = {
-                            'delete': f'/api/{post['unique_id']}/delete',
-                            'ban': f'/api/ban_ip'
+                            'delete': f"/api/deletePost/{post['unique_id']}",
+                            'ban': f"/api/ban_ip"
                         }
 
                     post['reaction'] = User.get_reaction_at_post(login, post['unique_id'])
@@ -375,7 +374,7 @@ def handle_posts():
         return response.send()
 
 
-@api.route('/<post_id>', methods=['GET'])  # метод получения одного поста(с обновлением просмотров)
+@api.route('/post/<post_id>', methods=['GET'])  # метод получения одного поста(с обновлением просмотров)
 @jwt_required(True)
 def handle_post(post_id):
     response = Response()
@@ -392,15 +391,15 @@ def handle_post(post_id):
             # модифицируем операции в зависимости от роли пользователя
             if post['owner_login'] == login:
                 post['operations'] = {
-                    'delete': f'/api/{post['unique_id']}/delete',
-                    'update': f'/api/{post['unique_id']}/update'
+                    'delete': f"/api/deletePost/{post['unique_id']}",
+                    'update': f"/api/updatePost/{post['unique_id']}"
                 }
 
             # если он модератор и это не пост другого модератора
             elif (User.is_moderator(login)) and (not User.is_moderator(post['owner_login'])):
                 post['operations'] = {
-                    'delete': f'/api/{post['unique_id']}/delete',
-                    'ban': f'/api/ban_ip'
+                    'delete': f"/api/deletePost/{post['unique_id']}",
+                    'ban': f"/api/ban_ip"
                 }
 
             # добавляем поле с реакцией пользователя на пост
@@ -419,7 +418,7 @@ def handle_post(post_id):
         response.set_status(504)
 
 
-@api.route('/home/create_post', methods=['POST'])  # метод создания нового поста
+@api.route('/create_post', methods=['POST'])  # метод создания нового поста
 @jwt_required()
 def create_post():
     response = Response()
@@ -456,7 +455,6 @@ def create_post():
 
     # запись нового поста
     try:
-
         if image_data is not None:
             header, image_data = image_data.split(",", 1)
 
@@ -484,7 +482,7 @@ def create_post():
         return response.send()
 
 
-@api.route('/<post_id>/update', methods=['PUT'])  # метод редактирования поста
+@api.route('/updatePost/<post_id>', methods=['PUT'])  # метод редактирования поста
 @jwt_required()
 def update_post(post_id):
     response = Response()
@@ -521,6 +519,7 @@ def update_post(post_id):
             if not is_image_valid(image_data) or not check_image_aspect_ratio(image_data):
                 response.set_status(420)
                 return response.send()
+
             # сохранение изображения и возврат его пути для записи(или перезаписи, если она есть уже)
             if Post.image_already(post_id):
                 unique_filename = Post.image_filename(post_id)
@@ -548,7 +547,7 @@ def update_post(post_id):
         return response.send()
 
 
-@api.route('/<post_id>/delete/', methods=['DELETE'])  # метод удаления поста
+@api.route('/deletePost/<post_id>', methods=['DELETE'])  # метод удаления поста
 @jwt_required()
 def delete_post(post_id):
     response = Response()
@@ -574,7 +573,7 @@ def delete_post(post_id):
         return response.send()
 
 
-@api.route('<post_id>/comments', methods=['GET'])  # метод получения комментов к посту
+@api.route('/comments/<post_id>', methods=['GET'])  # метод получения комментов к посту
 @jwt_required(True)
 def handle_comments(post_id):
     response = Response()
@@ -631,15 +630,15 @@ def handle_comments(post_id):
                         # модифицируем операции в зависимости от роли пользователя
                         if comment['owner_login'] == login:
                             comment['operations'] = {
-                                'delete': f'/api/{comment['post_id']}/delete_comment',
-                                'update': f'/api/{comment['post_id']}/update_comment'
+                                'delete': f"/api/delete_comment/{comment['post_id']}",
+                                'update': f"/api/update_comment/{comment['post_id']}"
                             }
 
                         # если он модератор и это не пост другого модератора
                         elif (User.is_moderator(login)) and (not User.is_moderator(comment['owner_login'])):
                             comment['operations'] = {
-                                'delete': f'/api/{comment['post_id']}/delete_comment',
-                                'ban': f'/api/ban_ip'
+                                'delete': f"/api/delete_comment/{comment['post_id']}",
+                                'ban': f"/api/ban_ip"
                             }
 
                 except Exception as err:
@@ -675,7 +674,7 @@ def handle_comments(post_id):
         return response.send()
 
 
-@api.route('/<post_id>/add_comment', methods=['POST'])  # метод создания коммента
+@api.route('/add_comment/<post_id>', methods=['POST'])  # метод создания коммента
 @jwt_required()
 def create_comment(post_id):
     response = Response()
@@ -719,7 +718,7 @@ def create_comment(post_id):
     return response.send()
 
 
-@api.route('/<post_id>/update_comment', methods=['PUT'])  # метод редактирования коммента
+@api.route('/update_comment/<post_id>', methods=['PUT'])  # метод редактирования коммента
 @jwt_required()
 def update_comment(post_id):
     response = Response()
@@ -763,7 +762,7 @@ def update_comment(post_id):
         return response.send()
 
 
-@api.route('/<post_id>/delete_comment', methods=['DELETE'])  # метод удаления коммента
+@api.route('/delete_comment/<post_id>', methods=['DELETE'])  # метод удаления коммента
 @jwt_required()
 def delete_comment(post_id):
     response = Response()
@@ -885,7 +884,7 @@ def edit_userprofile():
         return response.send()
 
 
-@api.route('/<post_id>/rate/', methods=['PUT'])  # метод лайков/дизлайков под постом
+@api.route('/rate/<post_id>', methods=['PUT'])  # метод лайков/дизлайков под постом
 @jwt_required()
 def rate(post_id):
     response = Response()
@@ -933,7 +932,7 @@ def rate(post_id):
         return response.send()
 
 
-@api.route('/<post_id>/get_rates', methods=['GET'])
+@api.route('/get_rates/<post_id>', methods=['GET'])
 @jwt_required()
 def get_rates(post_id):
     response = Response()
