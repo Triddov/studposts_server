@@ -46,3 +46,7 @@ date:07/29/24 time:01:26:19 | error message: [WinError 5] Access is denied: 'sou
 date:07/29/24 time:01:26:56 | error message: [WinError 5] Access is denied: 'sources/userPostImages/' | in module: app.routes
 date:07/29/24 time:01:27:25 | error message: [WinError 5] Access is denied: 'sources/userPostImages/' | in module: app.routes
 date:07/29/24 time:01:27:55 | error message: [WinError 123] The filename, directory name, or volume label syntax is incorrect: 'sources/userPostImages/<null>' | in module: app.routes
+date:07/30/24 time:22:25:19 | error message: 'NoneType' object is not subscriptable | in module: app.routes
+date:07/30/24 time:22:27:35 | error message: Incorrect padding | in module: app.routes
+date:07/30/24 time:22:28:03 | error message: Incorrect padding | in module: app.routes
+date:07/30/24 time:22:28:18 | error message: Incorrect padding | in module: app.routes

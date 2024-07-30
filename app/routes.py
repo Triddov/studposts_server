@@ -99,6 +99,7 @@ def get_captcha():
     captcha_text = generate_captcha()
     encoded_captcha_solution = encrypt_decrypt(captcha_text, SECRET_KEY)
     base64_image = generate_captcha_image(captcha_text)
+    print(captcha_text)
     captcha_created_time = int(time.time())  # время, до которого капча валидна
     token = create_access_token(identity={"solution": encoded_captcha_solution, "created_time": captcha_created_time})
 
@@ -455,6 +456,7 @@ def create_post():
 
     # запись нового поста
     try:
+
         if image_data is not None:
             header, image_data = image_data.split(",", 1)
 
@@ -466,6 +468,9 @@ def create_post():
             # сохранение иконки и возврат ее пути для записи
             unique_filename = generate_uuid() + ".png"
             image_data = save_image(image_data, unique_filename)
+
+        else:
+            image_data = "sources/userProfileIcons/default_post_image.png"
 
         unique_id = generate_uuid()
         Post.create_post(unique_id, owner_login, title, content, tags, image_data)
