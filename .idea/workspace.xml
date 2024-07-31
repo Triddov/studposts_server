@@ -4,107 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="313496f0-9e1b-4b22-820e-d983be4c79e6" name="Changes" comment="update post_create (image default)">
-      <change afterPath="$PROJECT_DIR$/Vue/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/README.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/babel.config.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/jsconfig.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/package-lock.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/package.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/public/favicon.ico" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/public/index.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/App.vue" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/PhotoBlocks/change.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/PhotoBlocks/delete.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/PhotoBlocks/inputpicture.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/aboutus/Albert.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/aboutus/Denis.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/aboutus/Dmitry.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/aboutus/Sergey.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/aboutus/Stepan.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/aboutus/discord.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/aboutus/telegram.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/aboutus/vk.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/header/dropout.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/header/ncfu.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/header/search.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/header/studposts.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/header/usericon.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/info/error.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/info/errorsite.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/info/errorsitepart.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/info/info-icon.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/info/load.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/info/xsymbol.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/main/addpost.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/main/background.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/main/backgroundpost.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/main/backgroundpost.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/main/check.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/main/data.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/main/dislike.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/main/dropout.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/main/info.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/main/infocom.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/main/like.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/main/ncfu.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/main/rostelecom.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/main/usericon.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/main/userposts.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/main/view.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/operations/blockuser.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/operations/delete.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/operations/edit.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/operations/options.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/post/data.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/post/dislike.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/post/dislike_after.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/post/dislike_before.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/post/like.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/post/like_after.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/post/like_before.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/post/loadsmall.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/post/userposts.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/post/view.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/post/wait.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/question/info.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/regist_auth/capcha.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/regist_auth/info.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/regist_auth/login.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/regist_auth/mail.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/regist_auth/password.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/regist_auth/phone.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/regist_auth/profile_anim.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/regist_auth/redPass.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/assets/regist_auth/usericon.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/components/AboutUs/AboutUs.vue" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/components/Auth_Regist/Authorization.vue" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/components/Auth_Regist/Registration.vue" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/components/Info/Error.vue" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/components/Info/Info.vue" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/components/Info/Load.vue" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/components/Main.vue" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/components/Posts/CreatePost.vue" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/components/Posts/EditPost.vue" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/components/Posts/Post.vue" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/components/Posts/Posts.vue" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/components/Profile/Profile.vue" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/components/UI/MyButton.vue" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/components/UI/MyCheckbox.vue" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/components/UI/MyInput.vue" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/components/UI/MySelect.vue" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/components/UI/MyTextarea.vue" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/components/UI/Operation.vue" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/components/UI/Question.vue" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/components/UI/index.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/main.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/src/router/router.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Vue/vue.config.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/nginx.conf" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
+    <list default="true" id="313496f0-9e1b-4b22-820e-d983be4c79e6" name="Changes" comment="release version (I hope)">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/routes.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/nginx_blacklist.conf" beforeDir="false" afterPath="$PROJECT_DIR$/blacklist.conf" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -166,46 +68,46 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Python.__init__.executor": "Run",
-    "Python.badwords_checker.executor": "Run",
-    "Python.banned_words_checker.executor": "Run",
-    "Python.base64_test.executor": "Run",
-    "Python.captcha.executor": "Run",
-    "Python.captcha_test.executor": "Run",
-    "Python.check_data.executor": "Run",
-    "Python.database.executor": "Run",
-    "Python.generate_captcha.executor": "Run",
-    "Python.generate_token.executor": "Run",
-    "Python.image_test.executor": "Run",
-    "Python.routes.executor": "Run",
-    "Python.run.executor": "Run",
-    "Python.server_exception.executor": "Run",
-    "Python.validation_data.executor": "Run",
-    "Python.хуй.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "database.data.extractors.current.export.id": "SQL Inserts",
-    "database.data.extractors.current.id": "SQL Inserts",
-    "git-widget-placeholder": "stepan",
-    "ignore.virus.scanning.warn.message": "true",
-    "last_opened_file_path": "C:/Users/akini/PycharmProjects/studposts_server",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "settings.qodana",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python.__init__.executor&quot;: &quot;Run&quot;,
+    &quot;Python.badwords_checker.executor&quot;: &quot;Run&quot;,
+    &quot;Python.banned_words_checker.executor&quot;: &quot;Run&quot;,
+    &quot;Python.base64_test.executor&quot;: &quot;Run&quot;,
+    &quot;Python.captcha.executor&quot;: &quot;Run&quot;,
+    &quot;Python.captcha_test.executor&quot;: &quot;Run&quot;,
+    &quot;Python.check_data.executor&quot;: &quot;Run&quot;,
+    &quot;Python.database.executor&quot;: &quot;Run&quot;,
+    &quot;Python.generate_captcha.executor&quot;: &quot;Run&quot;,
+    &quot;Python.generate_token.executor&quot;: &quot;Run&quot;,
+    &quot;Python.image_test.executor&quot;: &quot;Run&quot;,
+    &quot;Python.routes.executor&quot;: &quot;Run&quot;,
+    &quot;Python.run.executor&quot;: &quot;Run&quot;,
+    &quot;Python.server_exception.executor&quot;: &quot;Run&quot;,
+    &quot;Python.validation_data.executor&quot;: &quot;Run&quot;,
+    &quot;Python.хуй.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;database.data.extractors.current.export.id&quot;: &quot;SQL Inserts&quot;,
+    &quot;database.data.extractors.current.id&quot;: &quot;SQL Inserts&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;stepan&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/akini/PycharmProjects/studposts_server&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;settings.qodana&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   },
-  "keyToStringList": {
-    "DatabaseDriversLRU": [
-      "postgresql",
-      "redis"
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;postgresql&quot;,
+      &quot;redis&quot;
     ]
   }
-}]]></component>
+}</component>
   <component name="PyConsoleOptionsProvider">
     <option name="myPythonConsoleState">
       <console-settings module-name="studposts_server" is-module-sdk="true">
@@ -279,7 +181,8 @@
       <workItem from="1722203744503" duration="2558000" />
       <workItem from="1722360285547" duration="5000" />
       <workItem from="1722366953894" duration="1050000" />
-      <workItem from="1722378046402" duration="1565000" />
+      <workItem from="1722378046402" duration="2193000" />
+      <workItem from="1722411351273" duration="938000" />
     </task>
     <task id="LOCAL-00001" summary="second commit">
       <option name="closed" value="true" />
@@ -497,7 +400,15 @@
       <option name="project" value="LOCAL" />
       <updated>1722367847644</updated>
     </task>
-    <option name="localTasksCounter" value="28" />
+    <task id="LOCAL-00028" summary="release version (I hope)">
+      <option name="closed" value="true" />
+      <created>1722379986209</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1722379986209</updated>
+    </task>
+    <option name="localTasksCounter" value="29" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -519,7 +430,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="second commit" />
     <MESSAGE value="third commit" />
     <MESSAGE value="4th commit" />
     <MESSAGE value="5th commit" />
@@ -544,7 +454,8 @@
     <MESSAGE value="release" />
     <MESSAGE value="update post_update (image bug)" />
     <MESSAGE value="update post_create (image default)" />
-    <option name="LAST_COMMIT_MESSAGE" value="update post_create (image default)" />
+    <MESSAGE value="release version (I hope)" />
+    <option name="LAST_COMMIT_MESSAGE" value="release version (I hope)" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/studposts_server$generate_token.coverage" NAME="generate_token Coverage Results" MODIFIED="1721410314757" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
@@ -553,7 +464,7 @@
     <SUITE FILE_PATH="coverage/studposts_server$routes.coverage" NAME="routes Coverage Results" MODIFIED="1721410408064" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
     <SUITE FILE_PATH="coverage/studposts_server$generate_captcha.coverage" NAME="generate_captcha Coverage Results" MODIFIED="1721761624557" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
     <SUITE FILE_PATH="coverage/studposts_server$image_test.coverage" NAME="image_test Coverage Results" MODIFIED="1721942927989" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
-    <SUITE FILE_PATH="coverage/studposts_server$run.coverage" NAME="run Coverage Results" MODIFIED="1722367464271" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/studposts_server$run.coverage" NAME="run Coverage Results" MODIFIED="1722379854877" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/studposts_server$captcha_test.coverage" NAME="captcha_test Coverage Results" MODIFIED="1721937996980" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
     <SUITE FILE_PATH="coverage/studposts_server$database.coverage" NAME="database Coverage Results" MODIFIED="1721404436276" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
   </component>

@@ -842,9 +842,13 @@ def edit_userprofile():
         elif pers_photo_data is not None:
             header, pers_photo_data = pers_photo_data.split(",", 1)
 
-            if not is_image_valid(pers_photo_data) or not is_icon_square(pers_photo_data):
+            if not is_image_valid(pers_photo_data):
                 response.set_status(420)
                 return response.send()
+
+            if not is_icon_square(pers_photo_data):
+                pers_photo_data = crop_to_square(pers_photo_data)
+
             unique_filename = generate_uuid() + ".png"
             pers_photo_data = save_icon(pers_photo_data, unique_filename)
 
