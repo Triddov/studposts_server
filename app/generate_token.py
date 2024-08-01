@@ -39,4 +39,3 @@ def encrypt_decrypt(text: str, key: str) -> str:  # шифрование и де
     # Преобразуем зашифрованный байтовый массив обратно в строку и возвращаем результат
     encrypted_text = encrypted_bytes.decode('utf-8')
     return encrypted_text
-

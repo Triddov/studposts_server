@@ -31,11 +31,10 @@ class Response:  # класс ответов, ошибок и сообщений
     def send(self):
         # данные и сообщение
         response_body = self.data
-        self.headers["Message"] = self.message
         self.data["message"] = self.message
         self.data["status"] = self.status
         # выполнение запроса
-        response = make_response(jsonify(response_body), self.status)
+        response = make_response(jsonify(response_body), 200) #self.status
         for key, value in self.headers.items():
             response.headers[key] = value
         return response

@@ -1,8 +1,5 @@
-import psycopg2
 from dotenv import load_dotenv
 import os
-import base64
-from .validation_data import *
 
 import psycopg2.extras
 
@@ -32,35 +29,44 @@ class User:  # методы работы с таблицей users
             'login': user_data[0],
             'firstName': user_data[2],
             'surName': user_data[3],
-            'middleName': user_data[4],
+            'middleName': user_data[4] if user_data[4] is not None else None,
             'privileged': user_data[5],
-            'email': user_data[6],
-            'phoneNumber': user_data[7],
-            'persPhotodata': user_data[8]
+            'email': user_data[6] if user_data[6] is not None else None,
+            'phoneNumber': user_data[7] if user_data[7] is not None else None,
+            'persPhotodata': user_data[8] if user_data[8] is not None else None
         }
         return response
+
+    @staticmethod
+    def get_icon(login):
+        cur = conn.cursor()
+        cur.execute("SELECT persphotodata FROM users WHERE login = %s", (login,))
+        user_icon = cur.fetchone()
+        return user_icon
 
     @staticmethod
     def find_by_login(login):
         cur = conn.cursor()
         cur.execute("SELECT * FROM users WHERE login = %s;", (login,))
         user_data = cur.fetchone()
+
         if user_data:
             response = {
                 'login': user_data[0],
                 'password': user_data[1],
                 'firstName': user_data[2],
                 'surName': user_data[3],
-                'middleName': user_data[4],
                 'privileged': user_data[5],
-                'email': user_data[6],
-                'phoneNumber': user_data[7],
-                'persPhotodata': user_data[8]
+                'middleName': user_data[4] if user_data[4] is not None else None,
+                'email': user_data[6] if user_data[6] is not None else None,
+                'phoneNumber': user_data[7] if user_data[7] is not None else None,
+                'persPhotodata': user_data[8] if user_data[8] is not None else None
             }
             return response
         else:
             return False
-    
+
+    @staticmethod
     def is_moderator(login):
         cur = conn.cursor()
         cur.execute("SELECT privileged FROM users WHERE login = %s;", (login,))
@@ -68,7 +74,7 @@ class User:  # методы работы с таблицей users
         return user[0]
 
     @staticmethod
-    def update_user(original_login, password, first_name, middle_name, sur_name, 
+    def update_user(original_login, password, first_name, middle_name, sur_name,
                     email, phone_number, pers_photo_data):
         cur = conn.cursor()
         fields = []
@@ -82,22 +88,21 @@ class User:  # методы работы с таблицей users
             "phoneNumber": phone_number,
             "persPhotoData": pers_photo_data
         }
-        
+
         for field, value in update_fields.items():
             if value == '':
                 fields.append(f"{field} = NULL")
             elif value:
                 fields.append(f"{field} = '{value}'")
-        
+
         if fields:
-            
+
             query = f"UPDATE users SET {', '.join(fields)} WHERE login = '{original_login}';"
             cur.execute(query)
-            
-        
+
         else:
-            raise Exception # данных не поступило
-    
+            raise Exception  # данных не поступило
+
     @staticmethod
     def get_reaction_at_post(login, post_id):
         cur = conn.cursor()
@@ -118,7 +123,8 @@ class Post:  # методы работы с таблицей posts
     def create_post(unique_id, owner_login, title, content, tags, image_data):
         cur = conn.cursor()
         cur.execute("""INSERT INTO posts (unique_id, owner_login, title, content, tags, createdAt, imageData, viewCount, likesCount, dislikesCount)
-            VALUES (%s, %s, %s, %s, %s, NOW(), %s, 0, 0, 0)""", (unique_id, owner_login, title, content, tags, image_data))
+            VALUES (%s, %s, %s, %s, %s, NOW(), %s, 0, 0, 0)""",
+                    (unique_id, owner_login, title, content, tags, image_data))
 
     @staticmethod
     def get_all_posts(order='desc', page=1, limit=0, search=None):
@@ -139,16 +145,16 @@ class Post:  # методы работы с таблицей posts
         posts = list(cur.fetchall())
         for i in range(len(posts)):
             posts[i] = {
-            "unique_id" : posts[i][0],
-            "owner_login" : posts[i][1],
-            "title" : posts[i][2],
-            "content" : posts[i][3],
-            "tags" : posts[i][4],
-            "createdAt" : posts[i][5],
-            "imageData" : posts[i][6],
-            "viewCount" : posts[i][7],
-            "likesCount" : posts[i][8],
-            "dislikesCount" : posts[i][9],
+                "unique_id": posts[i][0],
+                "owner_login": posts[i][1],
+                "title": posts[i][2],
+                "content": posts[i][3],
+                "tags": posts[i][4],
+                "createdAt": posts[i][5],
+                "imageData": posts[i][6],
+                "viewCount": posts[i][7],
+                "likesCount": posts[i][8],
+                "dislikesCount": posts[i][9],
             }
 
             query = f"SELECT firstName, middleName, surName, persPhotoData FROM users WHERE login = '{posts[i]['owner_login']}'"
@@ -156,12 +162,11 @@ class Post:  # методы работы с таблицей posts
             user_data = cur.fetchall()[0]
 
             posts[i]['user_data'] = {
-                'firstName' : user_data[0],
-                'middleName' : user_data[1],
-                'surName' : user_data[2],
-                'persPhotoData' : user_data[3]
+                'firstName': user_data[0],
+                'middleName': user_data[1],
+                'surName': user_data[2],
+                'persPhotoData': user_data[3]
             }
-        
 
         return posts
 
@@ -171,32 +176,30 @@ class Post:  # методы работы с таблицей posts
         cur.execute("SELECT * FROM posts WHERE unique_id = %s;", (unique_id,))
         post = cur.fetchone()
         answer = {
-            "unique_id" : post[0],
-            "owner_login" : post[1],
-            "title" : post[2],
-            "content" : post[3],
-            "tags" : post[4],
-            "createdAt" : post[5],
-            "imageData" : post[6],
-            "viewCount" : post[7],
-            "likesCount" : post[8],
-            "dislikesCount" : post[9]
+            "unique_id": post[0],
+            "owner_login": post[1],
+            "title": post[2],
+            "content": post[3],
+            "tags": post[4],
+            "createdAt": post[5],
+            "imageData": post[6],
+            "viewCount": post[7],
+            "likesCount": post[8],
+            "dislikesCount": post[9]
         }
-        
+
         query = f"SELECT firstName, middleName, surName, persPhotoData FROM users WHERE login = '{answer['owner_login']}'"
         cur.execute(query)
         user_data = cur.fetchall()[0]
-        
-        answer['user_data'] = {
-                'firstName' : user_data[0],
-                'middleName' : user_data[1],
-                'surName' : user_data[2],
-                'persPhotoData' : user_data[3]
-            }
-        
-        return answer
 
-    
+        answer['user_data'] = {
+            'firstName': user_data[0],
+            'middleName': user_data[1],
+            'surName': user_data[2],
+            'persPhotoData': user_data[3]
+        }
+
+        return answer
 
     @staticmethod
     def update_post(unique_id, owner_login, **field):
@@ -235,13 +238,12 @@ class Post:  # методы работы с таблицей posts
         else:
             raise Exception
 
-    
     @staticmethod
-    def image_already(post_id):
+    def get_image(post_id):
         cur = conn.cursor()
         cur.execute("SELECT imagedata FROM posts WHERE unique_id = %s;", (post_id,))
-        already_exists = cur.fetchone()
-        return True if already_exists else False
+        image_data = cur.fetchone()
+        return image_data
 
     @staticmethod
     def image_filename(post_id):
@@ -254,7 +256,6 @@ class Post:  # методы работы с таблицей posts
         else:
             raise Exception
 
-    
     @staticmethod
     def increment_view(post_id):
         cur = conn.cursor()
@@ -263,14 +264,14 @@ class Post:  # методы работы с таблицей posts
     @staticmethod
     def rate_post(login, post_id, action):
         cur = conn.cursor()
-        
+
         if action == 'like':
             cur.execute(f"SELECT * FROM likes WHERE post_id = '{post_id}' and owner_login = '{login}';")
             if not cur.fetchone():
                 # при вставке в likes/dislikes срабатывает sql триггер, увеличивающий кол-во реакций посту
-                # и автоматически убирает противоположную реакцию 
+                # и автоматически убирает противоположную реакцию
                 cur.execute(f"INSERT INTO likes (owner_login, post_id) VALUES ('{login}', '{post_id}');")
-        
+
         elif action == 'dislike':
             cur.execute(f"SELECT * FROM dislikes WHERE post_id = '{post_id}' and owner_login = '{login}';")
             if not cur.fetchone():
@@ -279,12 +280,6 @@ class Post:  # методы работы с таблицей posts
         elif action == 'none':
             cur.execute(f"DELETE FROM likes WHERE post_id = '{post_id}' and owner_login = '{login}';")
             cur.execute(f"DELETE FROM dislikes WHERE post_id = '{post_id}' and owner_login = '{login}';")
-    
-    
-
-            
-    
-    
 
 
 class Comment:  # методы работы с таблицей comments
@@ -325,23 +320,23 @@ class Comment:  # методы работы с таблицей comments
 
         for i in range(len(comments)):
             comments[i] = {
-            "unique_id" : comments[i][0],
-            "owner_login" : comments[i][1],
-            "post_id" : comments[i][2],
-            "content" : comments[i][3],
-            "createdAt" : comments[i][4],
+                "unique_id": comments[i][0],
+                "owner_login": comments[i][1],
+                "post_id": comments[i][2],
+                "content": comments[i][3],
+                "createdAt": comments[i][4],
             }
 
             query = f"SELECT firstName, middleName, surName, persPhotoData FROM users WHERE login = '{comments[i]['owner_login']}'"
             cur.execute(query)
             user_data = cur.fetchall()[0]
             comments[i]['user_data'] = {
-                'firstName' : user_data[0],
-                'middleName' : user_data[1],
-                'surName' : user_data[2],
-                'persPhotoData' : user_data[3]
+                'firstName': user_data[0],
+                'middleName': user_data[1],
+                'surName': user_data[2],
+                'persPhotoData': user_data[3]
             }
-        
+
         return comments
 
     @staticmethod
@@ -369,7 +364,6 @@ class Comment:  # методы работы с таблицей comments
 
     @staticmethod
     def delete_comment(comment_id, owner_login):
-
         cur = conn.cursor()
         cur.execute("SELECT owner_login FROM comments WHERE unique_id = %s", (comment_id,))
         user = cur.fetchone()
@@ -381,7 +375,6 @@ class Comment:  # методы работы с таблицей comments
             cur.execute("DELETE FROM comments WHERE unique_id = %s;", (comment_id,))
         else:
             raise Exception
-
 
 
 class Rate:

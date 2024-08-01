@@ -11,7 +11,7 @@ jwt = JWTManager()
 
 
 def create_app():
-    app = Flask(__name__, static_folder='static')
+    app = Flask(__name__)
 
     cors = CORS(app)
     app.config['CORS_HEADERS'] = 'Content-Type'
