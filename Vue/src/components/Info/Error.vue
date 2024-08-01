@@ -1,8 +1,6 @@
 <template>
     <div class="error">
-        <div class="icon">
-            <img src="@/assets/info/errorsitepart.svg"/>
-        </div>
+        <img src="@/assets/info/warning.svg"/>
         <div>
             <div class="title">ERROR</div>
             <div class="group">
@@ -43,17 +41,10 @@ export default {
         background-color: white;
     }
 
-    .icon
+    img
     {
-        width: 14vw;
-        height: 23vh;
-        margin-right: 20px;
-        background-image: url('@/assets/info/errorsite.svg');
-        background-size: 100% 100%;
-        background-repeat: no-repeat;
-        display: flex;
-        justify-content: center;
-        align-items: center;
+        width: 16vw;
+        height: 25vh;
     }
 
     .title

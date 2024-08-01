@@ -1,7 +1,7 @@
 <template>
     <div class="operation">
         <div class="operations">
-            <div class="operations_block" @click="$router.push(`/home/editpost/${this.id}`)" v-if="isPost && operation.update">
+            <div class="operations_block" @click="$router.push(`/editpost/${this.id}`)" v-if="isPost && operation.update">
                 <img src="@/assets/operations/edit.svg"/> Изменить
             </div>
             <div class="operations_block" @click="deletePost" v-if="isPost && operation.delete">
@@ -21,6 +21,10 @@
 </template>
 
 <script>
+
+import MakeRequest from '../../API/Request.js'
+import { BASE_URL } from '../../BaseURL.js'
+
 export default {
     name: "my-operation",
     props:
@@ -35,78 +39,74 @@ export default {
     {
         async deletePost()
         {
-            const response = await fetch(`${process.env.VUE_APP_BASE_URL}/api/deletePost/${this.id}`, {
-                method: "DELETE",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": document.cookie.split('session_token=')[1]	
-                },
-            })
-            if(!response)
-            {
-                alert("Error")
+            try{
+                const url = `${BASE_URL}/api/deletePost/${this.id}`;
+                const params = {
+                    method: "DELETE",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": document.cookie.split('session_token=')[1]	
+                    }
+                }
+
+                await MakeRequest(url, params);
+
+            //обработка ошибок
+            }catch(err){
+                this.$emit('error', err.status, err.message)
             }
-            const data = await response.json()
-            if(/2../.test(String(data.status)))
-            {
-                this.$emit('remove')
-                this.$router.push('/home')
-            }
-            else
-            {
-                alert(data.message)
-            }
+
+            this.$emit('remove')
+            this.$router.push('/home')
         },
 
         async deleteComment()
         {
-            console.log(this.id)
-            const response = await fetch(`${process.env.VUE_APP_BASE_URL}/api/delete_comment/${this.$route.params.id}`, {
-                method: "DELETE",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": document.cookie.split('session_token=')[1]	
-                },
-                body: JSON.stringify({
-                    comment_id: this.id
-                })
-            })
-            if(!response)
-            {
-                alert("Error")
+            try{
+                const url = `${BASE_URL}/api/delete_comment/${this.$route.params.id}`;
+                const params = {
+                    method: "DELETE",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": document.cookie.split('session_token=')[1]	
+                    },
+                    body: JSON.stringify({
+                        comment_id: this.id
+                    })
+                }
+
+                await MakeRequest(url, params);
+
+            //обработка ошибок
+            }catch(err){
+                this.$emit('error', "Ошибка", 'Соединение потерянно')
+                return;
             }
-            const data = await response.json()
-            if(/2../.test(String(data.status)))
-            {
-                this.$emit('remove')
-            }
-            else
-            {
-                alert(data.message)
-            }
+
+            this.$emit('remove')
         },
 
         async banIP()
         {
-            const response = await fetch(`${process.env.VUE_APP_BASE_URL}/api/ban_ip`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            })
-            if(!response)
-            {
-                alert("Error")
+            let response;
+            try{
+                const url = `${BASE_URL}/api/ban_ip`;
+                const params = {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    }
+                }
+
+                response = await MakeRequest(url, params);
+
+            //обработка ошибок
+            }catch(err){
+                response = err;
             }
-            const data = await response.json()
-            if(/2../.test(String(data.status)))
-            {
-                alert(data.message)
-            }
-            else
-            {
-                alert(data.message)
-            }
+
+            //Я хуй знает зачем тебе тут возвращать ошибку в случае успеха
+            this.$emit('error', response.status, response.message)
         }
     }
 }

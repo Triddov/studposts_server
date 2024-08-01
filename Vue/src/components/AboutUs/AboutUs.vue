@@ -37,7 +37,7 @@
                                 <li>Системная безопасность</li>
                             </ul>
                             <div class="participant-contact">
-                                <img src="@/assets/aboutus/vk.svg"/> <a>VK</a> <span>&</span> <img src="@/assets/aboutus/telegram.svg"/> <a>Telegram</a>
+                                <img src="@/assets/aboutus/vk.svg"/> <a href="https://vk.com/id506279907">VK</a> <span>&</span> <img src="@/assets/aboutus/telegram.svg"/> <a href="https://t.me/Albert_zero2">Telegram</a>
                             </div>
                         </div>
                     </div>
@@ -65,7 +65,7 @@
                                 <li>Тестирование и отладка </li>
                             </ul>
                             <div class="participant-contact">
-                                <img src="@/assets/aboutus/vk.svg"/> <a>VK</a> <span>&</span> <img src="@/assets/aboutus/telegram.svg"/> <a>Telegram</a>
+                                <img src="@/assets/aboutus/vk.svg"/> <a href="https://vk.com/triddov">VK</a> <span>&</span> <img src="@/assets/aboutus/telegram.svg"/> <a href="https://t.me/triddov">Telegram</a>
                             </div>
                         </div>
                     </div>
@@ -97,7 +97,7 @@
                                 <li>Архитектура базы данных <span>•</span> Тестирование и отладка</li>
                             </ul>
                             <div class="participant-contact">
-                                <img src="@/assets/aboutus/discord.svg"/> <a>Discord</a> <span>&</span> <img src="@/assets/aboutus/telegram.svg"/> <a>Telegram</a>
+                                <img src="@/assets/aboutus/discord.svg"/> <a href="https://discord.com/users/689013763285712982">Discord</a> <span>&</span> <img src="@/assets/aboutus/telegram.svg"/> <a href="https://t.me/Serzh_Frei">Telegram</a>
                             </div>
                         </div>
                     </div>
@@ -124,7 +124,7 @@
                                 <li>Тестирование и отладка</li>
                             </ul>
                             <div class="participant-contact">
-                                <img src="@/assets/aboutus/vk.svg"/> <a>VK</a> <span>&</span> <img src="@/assets/aboutus/telegram.svg"/> <a>Telegram</a>
+                                <img src="@/assets/aboutus/vk.svg"/> <a href="https://vk.com/inspectorgoose">VK</a> <span>&</span> <img src="@/assets/aboutus/telegram.svg"/> <a href="https://t.me/goose_inspector">Telegram</a>
                             </div>
                         </div>
                     </div>
@@ -154,7 +154,7 @@
                                 <li>Архитектура базы данных</li>
                             </ul>
                             <div class="participant-contact">
-                                <img src="@/assets/aboutus/vk.svg"/> <a>VK</a> <span>&</span> <img src="@/assets/aboutus/telegram.svg"/> <a>Telegram</a>
+                                <img src="@/assets/aboutus/vk.svg"/> <a href="https://vk.com/iamdenisochka">VK</a> <span>&</span> <img src="@/assets/aboutus/telegram.svg"/> <a href="https://t.me/deniskaost">Telegram</a>
                             </div>
                         </div>
                     </div>
@@ -194,7 +194,7 @@
                 <li>Оркестрация контейнеров с Kubernetes дистрибуцией K3S.
                 Создание и управление компонентов POD c использованием deployment, secret, service, configmap, statefullset. Управление кластером с использованием kubectl на мастер-ноде, декларативная запись yml, обеспечение доступности external services. Избыточность компонентов кластера, работе кластера в режиме балансировки нагрузки;
                 </li>
-                <li>>Настройка Nginx для защиты от DoS, DDoS, XHR, CSRF, MITM, Buffer Overflow, SQL Injection атак, а также реализация обратного проксирования веб-сервера. Балансировка нагрузки, сборка
+                <li>Настройка Nginx для защиты от DoS, DDoS, XHR, CSRF, MITM, Buffer Overflow, SQL Injection атак, а также реализация обратного проксирования веб-сервера. Балансировка нагрузки, сборка
                 nignx с использвоанием исходного кода и статичных модулей. Конфигурация nginx для использования HTTP v3 протокола. Кэширование, сжатие с использованием gzip;
                 </li>
                 <li>Установка и создание SSL сертификата с помощью Let's Encrypt,обеспечение защиты пользовательских данных;</li>
@@ -225,6 +225,12 @@ export default {
 </script>
 
 <style scoped>
+
+    a
+    {
+        text-decoration: none;
+    }
+
     .aboutus
     {
         width: 80%;

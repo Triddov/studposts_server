@@ -3,14 +3,14 @@
     <div class="posts">
         <div class="addPost">
             <h1>
-                Делитесь своими идеями, мыслями и историями, о чем вы сейчас думаете ?
+                Делитесь своими идеями, мыслями и историями - всем, о чем сейчас думаете
             </h1>
             <my-button class="addButton" @click="$router.push('/createpost')"><Vue3Lottie :animationData="animButton"/></my-button>
             <h2>
                 Добавить публикацию
             </h2>
         </div>
-       <PartPost v-for="post in posts" :key="post.unique_id" :post="post" @remove="removePost"></PartPost>
+       <PartPost v-for="post in posts" :key="post.unique_id" :post="post" @remove="removePost" @error="errorOperation"></PartPost>
 
         <my-button class="morePost" @click="getNewPost">
             <span v-if="!loadMore">Еще посты</span><Vue3Lottie :animationData="animLoad" v-else></Vue3Lottie>
@@ -29,6 +29,8 @@ import animButton from '@/assets/main/data.json'
 import PartPost from '@/components/Posts/Parts/PartPost.vue';
 import animLoad from '@/assets/post/loadsmall.json'
 import Info from '../Info/Info.vue'
+import MakeRequest from '../../API/Request.js'
+import { BASE_URL } from '../../BaseURL.js'
 
 export default {
     name: 'posts-block',
@@ -38,7 +40,7 @@ export default {
         Footer,
         PartPost,
         Info
-    },  
+    },
     data()
     {
         return {
@@ -62,25 +64,32 @@ export default {
             if(!sessionStorage.getItem('filter'))
             {
                 sessionStorage.setItem('filter', this.filter)
-            }   
-            this.loadMore = true
-            const response = await fetch(`${process.env.VUE_APP_BASE_URL}/api/allposts?limit=2&page=${this.page}&search=${this.search}&orderByDate=${sessionStorage.getItem('filter')}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    "Authorization": document.cookie.split('session_token=')[1]	
-                }
-            })
-            if(!response)
-            {
-                this.status_error = "Ошибка"
-                this.title_error = "Запрос не прошел"
-                this.isInfo = true
-                this.isError = true
-                return
             }
+            this.loadMore = true
+            let response;
+            try{
+                const url = `${BASE_URL}/api/allposts?limit=5&page=${this.page}&search=${this.search}&orderByDate=${sessionStorage.getItem('filter')}`;
+                const params = {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        "Authorization": document.cookie.split('session_token=')[1]
+                    }
+                }
+
+                response = await MakeRequest(url, params);
+
+            //обработка ошибок
+            }catch(err){
+                this.title_error = err.message;
+                this.status_error = err.status;
+                this.isInfo = true;
+                this.isError = true;
+                return;
+            }
+
+            const data = response;
             this.page+=1
-            const data = await response.json()
             this.totalPosts = data.totalPosts
             this.posts = data.posts;
             this.loadMore = false
@@ -91,28 +100,33 @@ export default {
             if(!sessionStorage.getItem('filter'))
             {
                 sessionStorage.setItem('filter', this.filter)
-            }  
+            }
             this.loadMore = true
-            if(Math.ceil(this.totalPosts / 2) >= this.page)
+            if(Math.ceil(this.totalPosts / 5) >= this.page)
             {
-                const response = await fetch(`${process.env.VUE_APP_BASE_URL}/api/allposts?limit=2&page=${this.page}&search=${this.search}&orderByDate=${sessionStorage.getItem('filter')}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    "Authorization": document.cookie.split('session_token=')[1]	
-                }
-                })
-                if(!response)
-                {
-                    this.status_error = "Ошибка"
-                    this.title_error = "Запрос не прошел"
-                    this.isInfo = true
-                    this.isError = true
-                    return
+                let response;
+                try{
+                    const url = `${BASE_URL}/api/allposts?limit=5&page=${this.page}&search=${this.search}&orderByDate=${sessionStorage.getItem('filter')}`;
+                    const params = {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            "Authorization": document.cookie.split('session_token=')[1]
+                        }
+                    }
+
+                    response = await MakeRequest(url, params);
+
+                //обработка ошибок
+                }catch(err){
+                    this.title_error = err.message;
+                    this.status_error = err.status;
+                    this.isInfo = true;
+                    this.isError = true;
+                    return;
                 }
                 this.page+=1
-                const data = await response.json()
-
+                const data = response;
                 data.posts.forEach( post => {
                     this.posts.push(post)
                 })
@@ -122,7 +136,7 @@ export default {
             else
             {
                 this.loadMore = false
-                this.status_error = "Веимение"
+                this.status_error = "Внимание"
                 this.title_error = "Постов не осталось"
                 this.isInfo = true
                 this.isError = false
@@ -132,7 +146,7 @@ export default {
         removePost(post)
         {
             this.loadMore = false
-            this.status_error = "Веимение"
+            this.status_error = "Внимание"
             this.title_error = "Публикация удалена"
             this.isInfo = true
             this.isError = false
@@ -154,6 +168,14 @@ export default {
             this.posts = []
             this.page = 1
             this.startPosts()
+        },
+
+        errorOperation(status, message)
+        {
+        this.status_error = status
+        this.title_error = message
+        this.isInfo = true
+        this.isError = false
         }
     },
 
@@ -194,7 +216,7 @@ export default {
         font-size: 1.7em;
         margin-top: 3%;
         text-align: left;
-   } 
+   }
 
    .addPost> h2
    {
@@ -221,4 +243,3 @@ export default {
 
 
 </style>
-    

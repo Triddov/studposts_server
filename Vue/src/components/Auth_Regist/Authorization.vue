@@ -7,14 +7,14 @@
         <div class="params">
             <div class="enterparams">
                 <div class="title">
-                    Параметры ввода <my-question>Введите свой логин и пароль</my-question>
+                    Параметры ввода <my-question>Ваш логин и пароль</my-question>
                 </div>
                 <div class="input_block"><span class="symbol_input symbol_input__login"></span><my-input limit="50" placeholder="Логин" v-model="login" class="input-profile"></my-input></div>
-                <div class="input_block"><span class="symbol_input symbol_input__password"></span> <my-input limit="50" placeholder="Придумайте пароль" v-model="password" class="input-profile" type="password"></my-input></div>
+                <div class="input_block"><span class="symbol_input symbol_input__password"></span> <my-input limit="50" placeholder="Пароль" v-model="password" class="input-profile" type="password"></my-input></div>
             </div>
             <div class="captcha">
                 <div class="title">
-                    Решите задачу <my-question>Введите символы, которые видите на картинке</my-question> 
+                    Решите задачу <my-question>Введите символы с картинки (буквы заглавные)</my-question>
                 </div>
                 <img ref="captcha__img"/>
                 <div class="input_block"> <span class="symbol_input symbol_input__captcha"></span><my-input limit="6" placeholder="Текст на картинке"  class="input-profile" v-model="captcha"></my-input></div>
@@ -34,6 +34,8 @@
 import Info from '../Info/Info.vue'
 import Header from '../Parts/Header.vue'
 import Footer from '../Parts/Footer.vue'
+import MakeRequest from '../../API/Request.js'
+import { BASE_URL } from '../../BaseURL.js'
 
 export default {
     name: 'reg-block',
@@ -41,7 +43,7 @@ export default {
         Header,
         Footer,
         Info
-    },  
+    },
 
     data()
     {
@@ -61,10 +63,22 @@ export default {
     {
         async getCaptcha()
         {
-            const response = await fetch(`${process.env.VUE_APP_BASE_URL}/api/captcha`)
-            const data = await response.json()
-            this.$refs.captcha__img.src = "data:image/png;base64," + data.captcha_image
-            this.captcha_token = data.captcha_token
+            let response;
+            try{
+                const url = `${BASE_URL}/api/captcha`;
+                response = await MakeRequest(url);
+
+            //обработка ошибок
+            }catch(err){
+                this.title_error = err.message;
+                this.status_error = err.status;
+                this.isInfo = true;
+                this.isError = true;
+                return;
+            }
+
+            this.$refs.captcha__img.src = "data:image/png;base64," + response.captcha_image
+            this.captcha_token = response.captcha_token
         },
 
         async authorization()
@@ -77,38 +91,43 @@ export default {
                 this.isError = true
                 return
             }
-            const response = await fetch(`${process.env.VUE_APP_BASE_URL}/api/auth`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Target-Action': 'LOGIN'
-                },
-                body: JSON.stringify({
-                login: this.login,
-                password: this.password,
-                captcha_token: this.captcha_token,
-                input_captcha: this.captcha
-                })
-            })
-            const resData = await response.json()
-            console.log(resData)
-            if(!response)
-            {
-                this.status_error = "Ошибка"
-                this.title_error = "Сервер недоступен"
-                this.isInfo = true
-                this.isError = true
-                return
+
+            let response;
+            try{
+                const url = `${BASE_URL}/api/auth`;
+                const params = {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Target-Action': 'LOGIN'
+                    },
+                    body: JSON.stringify({
+                        login: this.login,
+                        password: this.password,
+                        captcha_token: this.captcha_token,
+                        input_captcha: this.captcha
+                    })
+                }
+
+                response = await MakeRequest(url, params);
+
+            //обработка ошибок
+            }catch(err){
+                this.title_error = err.message;
+                this.status_error = err.status;
+                this.isInfo = true;
+                this.isError = true;
+                return;
             }
-            if(/2../.test(String(resData.status)))
+            if(/2../.test(String(response.status)))
             {
-                document.cookie = `session_token=Bearer ${resData.session_token}; path=/; expires=${new Date(Date.now() + 1000 * 60 * 60 * 2).toUTCString()}`
+                document.cookie = `session_token=Bearer ${response.session_token}; path=/; expires=${new Date(Date.now() + 1000 * 60 * 60 * 2).toUTCString()}`
                 this.$router.push('/home')
             }
             else
             {
                 this.status_error = "Ошибка"
-                this.title_error = resData.message
+                this.title_error = response.message
                 this.isInfo = true
                 this.isError = true
             }
@@ -298,4 +317,3 @@ export default {
 
 
 </style>
-    

@@ -8,16 +8,16 @@
             <div class="photoAndCaptcha">
                 <div class="photo-reg">
                     <div class="title">
-                        Изображение профиля <my-question>Вставьте свою иконку (опционально), картинка должна быть квадратной</my-question>
+                        Изображение профиля <my-question>Покажите себя миру!</my-question>
                     </div>
                     <div class="input-registr-picture-container">
                         <AddPhoto v-model="userPhoto" :isProfile="true" v-show="!userPhoto"></AddPhoto>
-                        <Photo v-show="userPhoto" :picture="userPhoto" :blocked="true"></Photo>
+                        <Photo v-show="userPhoto" :picture="userPhoto"></Photo>
                     </div>
                 </div>
                 <div class="captcha">
                     <div class="title">
-                        Решите задачу <my-question>Введите символы, которые видите на картинке</my-question>
+                        Решите задачу <my-question>Введите символы с картинки (буквы заглавные)</my-question>
                     </div>
                     <img ref="captcha__img"/>
                     <div class="input_block"><span class="symbol_input symbol_input__captcha"></span><my-input limit="6" placeholder="Текст на картинке" class="input-profile" v-model="captcha" :class="{input_profile_error: spaceCheck(captcha)}"></my-input></div>
@@ -26,7 +26,7 @@
             <div class="params">
                 <div class="aboutme">
                     <div class="title">
-                        Обо мне <my-question>Введите данные о себе без пробелов (отчество при наличии)</my-question>
+                        Обо мне <my-question>Введите данные о себе без пробелов</my-question>
                     </div>
                     <div class="input_block"><span class="symbol_input symbol_input__user"></span><my-input limit="50" placeholder="Имя" class="input-profile" v-model="first_name" :class="{input_profile_error: spaceCheck(first_name)}"></my-input></div>
                     <div class="input_block"><span class="symbol_input symbol_input__user"></span><my-input limit="50" placeholder="Фамилия" class="input-profile" v-model="sur_name" :class="{input_profile_error: spaceCheck(sur_name)}"></my-input></div>
@@ -34,15 +34,15 @@
                 </div>
                 <div class="enterparams">
                     <div class="title">
-                        Параметры ввода <my-question>Придумайте логин и пароль без пробелов и повторите придуманный пароль</my-question>
+                        Параметры ввода <my-question>Придумайте логин и пароль без пробелов и русских символов</my-question>
                     </div>
                     <div class="input_block"><span class="symbol_input symbol_input__login"></span><my-input limit="50" placeholder="Логин" class="input-profile" v-model="login" :class="{input_profile_error: spaceCheck(login)}"></my-input></div>
-                    <div class="input_block"><span class="symbol_input symbol_input__password"></span> <my-input limit="50" placeholder="Придумайте пароль" class="input-profile" type="password" v-model="password" :class="{input_profile_error: spaceCheck(password)}"></my-input></div>
-                    <div class="input_block"><span class="symbol_input symbol_input__password"></span><my-input limit="50" placeholder="Повторите пароль" class="input-profile" type="password" v-model="password_repeat" :class="{input_profile_error: spaceCheck(password_repeat)}"></my-input></div> 
+                    <div class="input_block"><span class="symbol_input symbol_input__password"></span> <my-input limit="50" placeholder="Пароль (не менее 8 символов)" class="input-profile" type="password" v-model="password" :class="{input_profile_error: spaceCheck(password)}"></my-input></div>
+                    <div class="input_block"><span class="symbol_input symbol_input__password"></span><my-input limit="50" placeholder="Повторите пароль" class="input-profile" type="password" v-model="password_repeat" :class="{input_profile_error: spaceCheck(password_repeat)}"></my-input></div>
                 </div>
                 <div class="optional">
                     <div class="title">
-                        Связь со мной (не обязательно) <my-question>Введите почту и номер телефона без специальных символов (только первый +)</my-question>
+                        Связь со мной (не обязательно) <my-question>Формат номера +7XXXXXXXXXX</my-question>
                     </div>
                     <div class="input_block"><span class="symbol_input symbol_input__mail"></span><my-input limit="100" placeholder="Почта" class="input-profile" v-model="email" :class="{input_profile_error: spaceCheck(email)}"></my-input></div>
                     <div class="input_block"><span class="symbol_input symbol_input__phone"></span><my-input limit="12" placeholder="Номер телефона" class="input-profile" v-model="phone" :class="{input_profile_error: spaceCheck(phone)}"></my-input></div>
@@ -51,8 +51,8 @@
         </div>
         <div class="agree">
             <div>
-                Я ознакомился(-лась) с <router-link>политикой конфеденциальности, </router-link><br>
-                также согласен(-на) с <router-link>правилами поведения на платформе</router-link>
+                Я ознакомился(-лась) с <router-link to="/policy">политикой конфеденциальности, </router-link><br>
+                также согласен(-на) с <router-link to="/rules">правилами поведения на платформе</router-link>
             </div>
             <my-checkbox class="registr_checkbox" @click="checkbox = !checkbox" :checkbox="checkbox"></my-checkbox>
         </div>
@@ -72,6 +72,8 @@ import Header from '../Parts/Header.vue'
 import Footer from '../Parts/Footer.vue'
 import AddPhoto from '../Parts/AddPhoto.vue'
 import Photo from '../Parts/Photo.vue'
+import MakeRequest from '../../API/Request.js'
+import { BASE_URL } from '../../BaseURL.js'
 
 export default {
     name: 'reg-block',
@@ -81,7 +83,7 @@ export default {
         Info,
         Footer,
         Photo
-    }, 
+    },
     data()
     {
         return {
@@ -108,14 +110,26 @@ export default {
     {
         async getCaptcha()
         {
-            const response = await fetch(`${process.env.VUE_APP_BASE_URL}/api/captcha`)
-            const data = await response.json()
-            this.$refs.captcha__img.src = "data:image/png;base64," + data.captcha_image
-            this.captcha_token = data.captcha_token
+            let response;
+            try{
+                const url = `${BASE_URL}/api/captcha`;
+                response = await MakeRequest(url);
+
+            //обработка ошибок
+            }catch(err){
+                this.title_error = err.message;
+                this.status_error = err.status;
+                this.isInfo = true;
+                this.isError = true;
+                return;
+            }
+
+            this.$refs.captcha__img.src = "data:image/png;base64," + response.captcha_image
+            this.captcha_token = response.captcha_token
         },
 
         loadPicture(event)
-        {   
+        {
             let file = event.target.files[0];
             let pictureProfile = this.$refs.pictureProfile;
             if(file)
@@ -150,7 +164,7 @@ export default {
             if(this.password.length < 8)
             {
                 this.status_error = "Ошибка"
-                this.title_error = "Слишком короткий пароль"
+                this.title_error = "Пароль должен быть не менее 8 символов"
                 this.isInfo = true
                 this.isError = true
                 return
@@ -158,7 +172,7 @@ export default {
             if(this.password != this.password_repeat)
             {
                 this.status_error = "Ошибка"
-                this.title_error = "Пароли не совпадают"
+                this.title_error = "Введите пароли корректно"
                 this.isInfo = true
                 this.isError = true
                 return
@@ -185,7 +199,6 @@ export default {
             }
             for(let key in data)
             {
-                console.log(key)
                 if(key == "pers_photo_data")
                 {
                     data[key] = this.userPhoto || null
@@ -196,24 +209,29 @@ export default {
                     delete data [key]
                 }
             }
-            const response = await fetch(`${process.env.VUE_APP_BASE_URL}/api/auth`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Target-Action': 'REGISTER'
-                },
-                body: JSON.stringify(data)
-            })
-            const resData = await response.json()
-            console.log(resData)
-            if(!response)
-            {
-                this.status_error = "Ошибка"
-                this.title_error = "Запрос не прошел"
-                this.isInfo = true
-                this.isError = true
-                return
+
+            let response;
+            try{
+                const url = `${BASE_URL}/api/auth`;
+                const params = {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Target-Action': 'REGISTER'
+                    },
+                    body: JSON.stringify(data)
+                }
+                response = await MakeRequest(url, params);
+
+            //обработка ошибок
+            }catch(err){
+                this.title_error = err.message;
+                this.status_error = err.status;
+                this.isInfo = true;
+                this.isError = true;
+                return;
             }
+            const resData = response;
             if(/2../.test(String(resData.status)))
             {
                 document.cookie = `session_token=Bearer ${resData.session_token}; path=/; expires=${new Date(Date.now() + 1000 * 60 * 60 * 2).toUTCString()}`
@@ -240,7 +258,7 @@ export default {
             {
                 return true
             }
-            return false 
+            return false
         }
     },
 
@@ -287,7 +305,7 @@ export default {
         padding-top: 4%;
         border-top: 1px solid #E7E7E7;
     }
-        
+
     .container_params .title
     {
         color: #515151;
@@ -483,4 +501,3 @@ export default {
     }
 
 </style>
-    
