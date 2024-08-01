@@ -1,0 +1,24 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:12
+    environment:
+      POSTGRES_DB: STUDPOSTS
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: qwerty09876
+    volumes:
+      - ./initDatabase/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - db-data:/var/lib/postgresql/data
+    restart: always
+
+  studposts-back-app:
+    image: studposts-back:1.0
+    ports:
+    - "5000:5000"
+    environment:
+      DATABASE_URL: postgresql://postgres:qwerty09876@postgres/STUDPOSTS
+    restart: always
+
+volumes:
+  db-data:
