@@ -38,6 +38,13 @@ class User:  # методы работы с таблицей users
         return response
 
     @staticmethod
+    def get_icon(login):
+        cur = conn.cursor()
+        cur.execute("SELECT persphotodata FROM users WHERE login = %s", (login,))
+        user_icon = cur.fetchone()
+        return user_icon
+
+    @staticmethod
     def find_by_login(login):
         cur = conn.cursor()
         cur.execute("SELECT * FROM users WHERE login = %s;", (login,))
@@ -232,11 +239,11 @@ class Post:  # методы работы с таблицей posts
             raise Exception
 
     @staticmethod
-    def image_already(post_id):
+    def get_image(post_id):
         cur = conn.cursor()
         cur.execute("SELECT imagedata FROM posts WHERE unique_id = %s;", (post_id,))
-        already_exists = cur.fetchone()
-        return True if already_exists else False
+        image_data = cur.fetchone()
+        return image_data
 
     @staticmethod
     def image_filename(post_id):

@@ -64,7 +64,7 @@ def check_ban_ip():
 
     ip = request.remote_addr
     if ip in nginx_banned_ips:
-        response.set_status(403)  # abort(403)
+        response.set_status(403)
         return response.send()
 
 
@@ -72,7 +72,7 @@ def check_ban_ip():
 def ban_ip():
     response = Response()
 
-    ip_address = request.form.get('ip_address')
+    ip_address = request.remote_addr
     if ip_address:
         with open(nginx_blacklist_path, 'a') as ban_list:
             ban_list.write(f"deny {ip_address};\n")
@@ -468,7 +468,7 @@ def create_post():
             image_data = save_image(image_data, unique_filename)
 
         else:
-            image_data = "sources/userProfileIcons/default_post_image.png"
+            image_data = "sources/userPostImages/default_post_image.png"
 
         unique_id = generate_uuid()
         Post.create_post(unique_id, owner_login, title, content, tags, image_data)
@@ -512,21 +512,26 @@ def update_post(post_id):
             response.set_status(418)
             return response.send()
 
-        if image_data is not None:
-            header, image_data = image_data.split(",", 1)
+        if image_data == "alreadyExist":
+            image_data = Post.get_image(post_id)[0]
 
-            # проверка иконки на наличие и валидность
-            if not is_image_valid(image_data) or not check_image_aspect_ratio(image_data):
+        elif image_data is None:
+            if Post.get_image(post_id)[0] != 'sources/userPostImages/default_post_image.png':
+                os.remove("./" + Post.get_image(post_id)[0])
+
+            image_data = "sources/userPostImages/default_post_image.png"
+
+        # кейс других данных
+        elif image_data is not None:
+            if Post.get_image(post_id)[0] != 'sources/userPostImages/default_post_image.png':
+                os.remove("./" + Post.get_image(post_id)[0])
+
+            header, image_data = image_data.split(",", 1)
+            if not is_image_valid(image_data):
                 response.set_status(420)
                 return response.send()
 
-            # сохранение изображения и возврат его пути для записи(или перезаписи, если она есть уже)
-            if Post.image_already(post_id):
-                unique_filename = Post.image_filename(post_id)
-                os.remove("sources/userPostImages/" + unique_filename)
-            else:
-                unique_filename = generate_uuid() + ".png"
-
+            unique_filename = generate_uuid() + ".png"
             image_data = save_image(image_data, unique_filename)
 
     except Exception as err:
@@ -555,6 +560,9 @@ def delete_post(post_id):
     try:
         jwt_identity = get_jwt_identity()
         owner_login = encrypt_decrypt(jwt_identity["login"], SECRET_KEY)
+
+        if Post.get_image(post_id)[0] != 'sources/userPostImages/default_post_image.png':
+            os.remove("./" + Post.get_image(post_id)[0])
 
     except Exception as err:
         log_status(err, __name__)
@@ -834,12 +842,21 @@ def edit_userprofile():
 
         # Обработка данных о персональном фото
 
+        if pers_photo_data == "alreadyExist":
+            pers_photo_data = User.get_icon(original_login)[0]
+
         # кейс сброса изображения до дефолтного
-        if pers_photo_data is None or pers_photo_data == "":
+        elif pers_photo_data is None:
+            if User.get_icon(original_login)[0] != "sources/userProfileIcons/default_user_icon.png":
+                os.remove("./" + User.get_icon(original_login)[0])
+
             pers_photo_data = "sources/userProfileIcons/default_user_icon.png"
 
         # кейс других данных
         elif pers_photo_data is not None:
+            if User.get_icon(original_login)[0] != "sources/userProfileIcons/default_user_icon.png":
+                os.remove("./" + User.get_icon(original_login)[0])
+
             header, pers_photo_data = pers_photo_data.split(",", 1)
 
             if not is_image_valid(pers_photo_data):

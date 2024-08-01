@@ -114,10 +114,10 @@
 
 
 INSERT INTO users (login, password, firstName, middleName, surName, privileged, persphotodata)
-VALUES ('dima', 'qwerty12345', 'Дмитрий', 'Иванович', 'Путин', TRUE, 'sources/userProfileIcons/dima-image.png');
+VALUES ('dima', 'dima123456', 'Дмитрий', 'Иванович', 'Путин', TRUE, 'sources/userProfileIcons/default_user_icon.png');
 
 INSERT INTO users (login, password, firstName, middleName, surName, privileged, email, phoneNumber, persphotodata)
-VALUES ('step', 'qwerty09876', 'Степан', 'Иванович', 'Путин', TRUE, 'akinin.stepan7@gmail.com', '+71987464539', 'sources/userProfileIcons/stepa-image.png');
+VALUES ('step', 'qwerty09876', 'Степан', 'Иванович', 'Путин', TRUE, 'akinin.stepan7@gmail.com', '+71987464539', 'sources/userProfileIcons/default_user_icon.png');
 
 INSERT INTO users (login, password, firstName, middleName, surName, privileged, email, persphotodata)
-VALUES ('ye', 'ye123456', 'Канье', 'Иванович', 'Уэст', TRUE, 'ye@gmail.com', 'sources/userProfileIcons/ye-image.png');
+VALUES ('ye', 'ye123456', 'Канье', 'Иванович', 'Уэст', TRUE, 'ye@gmail.com', 'sources/userProfileIcons/default_user_icon.png');

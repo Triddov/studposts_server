@@ -1,7 +1,0 @@
-##### /<post_id>/add_comment [POST]
-
-# correct request
-
-{
-    "content": "Стопудова! ага",
-}
