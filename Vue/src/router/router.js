@@ -10,6 +10,8 @@ import Post from '@/components/Posts/Post.vue'
 import AboutUs from '@/components/AboutUs/AboutUs.vue'
 import Error from '@/components/Info/Error.vue'
 import Load from '@/components/Info/Load.vue'
+import Policy from '@/components/Agree/Policy.vue'
+import Rules from '@/components/Agree/Rules.vue'
 
 const routes = [
     {
@@ -43,6 +45,14 @@ const routes = [
       component: AboutUs
     },
     {
+      path: '/policy',
+      component: Policy
+    },
+    {
+      path: '/rules',
+      component: Rules
+    },
+    {
       path: '/auth',
       component: Authorization,
     },
@@ -60,7 +70,7 @@ const routes = [
     },
     {
       path: '/:catchAll(.*)',
-      component: Error
+      redirect: '/error'
     }
   ];
 

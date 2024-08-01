@@ -1,5 +1,5 @@
 <template>
-    <textarea :value="modelValue" @input="Input"></textarea>
+    <textarea :value="modelValue" @input="Input"  ref="input"></textarea>
 </template>
 
 <script>
@@ -7,12 +7,20 @@
 export default {
     name: 'my-textarea',
     props:{
-        modelValue: String, Number
+        modelValue: [String, Number],
+        limit: Number
     },
     methods:
     {
         Input(event)
         {
+            if(this.limit)
+            {
+                if(this.$refs.input.value.length > this.limit)
+                {
+                    this.$refs.input.value = this.$refs.input.value.substr(0, this.limit)
+                }
+            }
             this.$emit('update:modelValue', event.target.value)
         }
     }
@@ -20,9 +28,13 @@ export default {
 </script>
 
 <style scoped>
+    textarea
+    {
+      resize: none;
+    }
 
     .textarea-createpost
-    {       
+    {
         width: 100%;
         min-width: 100%;
         height: 100%;
@@ -32,7 +44,7 @@ export default {
         border: none;
         font-size: 1.6em;
         padding: 1em;
-    } 
+    }
 
     .textarea-createpost::placeholder
     {
@@ -40,7 +52,7 @@ export default {
     }
 
     .textarea-editpost
-    {       
+    {
         width: 100%;
         min-width: 100%;
         height: 100%;
@@ -50,7 +62,7 @@ export default {
         border: none;
         font-size: 1.6em;
         padding: 1em;
-    } 
+    }
 
     .textarea-editpost::placeholder
     {
@@ -67,4 +79,3 @@ export default {
     }
 
 </style>
-    

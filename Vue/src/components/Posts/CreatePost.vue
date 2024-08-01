@@ -13,10 +13,10 @@
             </div>
             <div class="entercontent">
                 <div class="title">
-                    Добавьте содержание для публикации <my-question>Поделитесь с людьми своими мыслями в поле содержания</my-question>
+                    Добавьте содержание для публикации <my-question>Поделитесь своими мыслями!</my-question>
                 </div>
                 <img />
-                <div class="input_block"><my-textarea placeholder="Отпуск это прежде всего ответственная задача..." class="textarea-createpost" v-model="content" @input="saveStorage"></my-textarea></div>
+                <div class="input_block"><my-textarea :limit="5000" placeholder="Отпуск - это прежде всего ответственная задача..." class="textarea-createpost" v-model="content" @input="saveStorage"></my-textarea></div>
             </div>
             <div class="entertags">
                 <div class="title">
@@ -47,6 +47,8 @@ import Footer from '../Parts/Footer.vue'
 import AddPhoto from '../Parts/AddPhoto.vue'
 import Photo from '../Parts/Photo.vue'
 import Info from '../Info/Info.vue'
+import MakeRequest from '../../API/Request.js'
+import { BASE_URL } from '../../BaseURL.js'
 
 export default {
     name: 'create-post',
@@ -56,7 +58,7 @@ export default {
         AddPhoto,
         Photo,
         Info
-    },  
+    },
     data()
     {
         return {
@@ -84,28 +86,35 @@ export default {
                 this.isError = true
                 return
             }
-            const response = await fetch(`${process.env.VUE_APP_BASE_URL}/api/create_post`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": document.cookie.split('session_token=')[1]	
-                },
-                body: JSON.stringify({
-                    title: this.title,
-                    content: this.content,
-                    tags: this.tags,
-                    image_data: this.userPhoto || null
-                })
-            })
-            if(!response)
-            {
-                this.status_error = "Ошибка"
-                this.title_error = "Запрос не прошел"
-                this.isInfo = true
-                this.isError = true
+
+            let response;
+            try{
+                const url = `${BASE_URL}/api/create_post`;
+                const params = {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": document.cookie.split('session_token=')[1]
+                    },
+                    body: JSON.stringify({
+                        title: this.title,
+                        content: this.content,
+                        tags: this.tags,
+                        image_data: this.userPhoto || null
+                    })
+                }
+
+                response = await MakeRequest(url, params);
+
+            //обработка ошибок
+            }catch(err){
+                this.title_error = err.message;
+                this.status_error = err.status;
+                this.isInfo = true;
+                this.isError = true;
+                return;
             }
-            const data = await response.json()
-            if(/2../.test(String(data.status)))
+            if(/2../.test(String(response.status)))
             {
                 localStorage.removeItem('post_info')
                 this.$router.push('/home')
@@ -113,7 +122,7 @@ export default {
             else
             {
                 this.status_error = "Ошибка"
-                this.title_error = data.message
+                this.title_error = response.message
                 this.isInfo = true
                 this.isError = true
             }
@@ -260,4 +269,3 @@ export default {
     }
 
 </style>
-    

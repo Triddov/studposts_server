@@ -1,8 +1,8 @@
 <template>
-    <Header></Header>
+    <Header :isProfile="true"></Header>
     <div class="post">
         <div class="postinfo">
-            <Date :pdate="this.date" v-if="this.date"></Date><my-operation :id="this.$route.params.id" :isPost="true" :operation="this.post.operations" v-if="this.post.operations"></my-operation>
+            <Date :pdate="this.date" v-if="this.date"></Date><my-operation :id="this.$route.params.id" :isPost="true" :operation="this.post.operations" v-if="this.post.operations" @error="errorOperation"></my-operation>
         </div>
         <h1 class="posttitle">
             <span>"</span>{{this.post.title}}<span>"</span>
@@ -23,7 +23,7 @@
             {{this.post.content}}
         </div>
         <div class="rates">
-                <span class="info__icon_char info__icon_char_view"></span> {{this.post.viewCount}} / <span class="info__icon_char info__icon_char_like" :class="{info__icon_char_like: this.post.reaction != 'like', info__icon_char_like_action: this.post.reaction == 'like'}" @click="like" ref="like"></span><Vue3Lottie :animationData="animLikes" style="display: none" ref="anim"></Vue3Lottie> {{this.post.likesCount}} / <span class="info__icon_char info__icon_char_dislike" :class="{info__icon_char_dislike: this.post.reaction != 'dislike', info__icon_char_dislike_action: this.post.reaction == 'dislike'}" @click="dislike" ref="dislike"></span> {{this.post.dislikesCount}}
+                <span class="info__icon_char info__icon_char_view"></span> {{this.post.viewCount}} / <span class="info__icon_char" :class="{ info__icon_char_like: this.post.reaction != 'like', info__icon_char_like_action: this.post.reaction == 'like'}" @click="like" ref="like"><Vue3Lottie :animationData="animLikes" width="30px" height="30px" :loop="false" :class="{like_anim_action: this.post.reaction == 'like', like_anim: this.post.reaction != 'like'}" ref="anim"></Vue3Lottie></span> {{this.post.likesCount}} / <span class="info__icon_char info__icon_char_dislike" :class="{info__icon_char_dislike: this.post.reaction != 'dislike', info__icon_char_dislike_action: this.post.reaction == 'dislike'}" @click="dislike" ref="dislike"></span> {{this.post.dislikesCount}}
         </div>
     </div>
     <div class="sort">
@@ -39,7 +39,7 @@
         </div>
     </div>
     <div class="comments-list">
-        <Comment v-for="comment in comments" :key="comment.unique_id" :comment="comment" @remove="removeComment" @reply="replyComment"></Comment>
+        <Comment v-for="comment in comments" :key="comment.unique_id" :comment="comment" @remove="removeComment" @reply="replyComment" @error="errorComment"></Comment>
     </div>
     <my-button class="more-comments" @click="getNewComments"><span v-if="!loadMore">Еще комментарии</span><Vue3Lottie :animationData="animLoad" v-else></Vue3Lottie></my-button>
     <Info :status="status_error" :title="title_error" v-model="isInfo" v-if="isInfo" :class="{Error: isError, Atent: !isError}"></Info>
@@ -56,6 +56,8 @@ import { Vue3Lottie } from 'vue3-lottie'
 import animLikes from '@/assets/post/data.json'
 import animLoad from '@/assets/post/loadsmall.json'
 import Info from '@/components/Info/Info.vue'
+import MakeRequest from '../../API/Request.js'
+import { BASE_URL } from '../../BaseURL.js'
 
 export default {
     name: "post-block",
@@ -90,33 +92,37 @@ export default {
         }
     },
 
-    methods: 
+    methods:
     {
         async getPostInfo()
         {
-            const response = await fetch(`${process.env.VUE_APP_BASE_URL}/api/post/${this.$route.params.id}`,
-                {
+
+            let response;
+            try{
+                const url = `${BASE_URL}/api/post/${this.$route.params.id}`;
+                const params = {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
-                        "Authorization": document.cookie.split('session_token=')[1]	
+                        "Authorization": document.cookie.split('session_token=')[1]
                     }
                 }
-            )
-            if(!response)
-            {
-                this.status_error = "Ошибка"
-                this.title_error = "Запрос не прошел"
-                this.isInfo = true
-                this.isError = true
-                return
+
+                response = await MakeRequest(url, params);
+
+            //обработка ошибок
+            }catch(err){
+                this.title_error = err.message;
+                this.status_error = err.status;
+                this.isInfo = true;
+                this.isError = true;
+                return;
             }
-            const data = await response.json()
-            data.post.imageData = `${process.env.VUE_APP_BASE_URL}/${data.post.imageData}`
-            data.post.user_data.persPhotoData = `${process.env.VUE_APP_BASE_URL}/${data.post.user_data.persPhotoData}`
+            const data = response;
+            data.post.imageData = `${BASE_URL}/api/${data.post.imageData}`
+            data.post.user_data.persPhotoData = `${BASE_URL}/api/${data.post.user_data.persPhotoData}`
             this.post = data.post
             this.date = this.post.createdAt
-            console.log(this.post)
             this.user_data = this.post.user_data
             this.userIcon = this.post.user_data.persPhotoData //QW
         },
@@ -124,24 +130,29 @@ export default {
         async getStartComments()
         {
             this.loadMore = true
-            const response = await fetch(`${process.env.VUE_APP_BASE_URL}/api/comments/${this.$route.params.id}?limit=3&page=${this.page}&orderByDate=${this.filter}`,
-                {
+            let response;
+            try{
+                const url = `${BASE_URL}/api/comments/${this.$route.params.id}?limit=10&page=${this.page}&orderByDate=${this.filter}`;
+                const params = {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
-                        "Authorization": document.cookie.split('session_token=')[1]	
+                        "Authorization": document.cookie.split('session_token=')[1]
                     }
-                })
-            if(!response)
-            {
-                this.status_error = "Ошибка"
-                this.title_error = "Запрос не прошел"
-                this.isInfo = true
-                this.isError = true
-                return
+                }
+
+                response = await MakeRequest(url, params);
+
+            //обработка ошибок
+            }catch(err){
+                this.title_error = err.message;
+                this.status_error = err.status;
+                this.isInfo = true;
+                this.isError = true;
+                return;
             }
             this.page+=1;
-            const data = await response.json()
+            const data = response;
             this.totalComments = data.totalComments
             this.comments = data.comments
             this.loadMore = false
@@ -150,29 +161,33 @@ export default {
         async getNewComments()
         {
             this.loadMore = true
-            if(Math.ceil(this.totalComments / 3) >= this.page)
+            if(Math.ceil(this.totalComments / 10) >= this.page)
             {
-                const response = await fetch(`${process.env.VUE_APP_BASE_URL}/api/comments/${this.$route.params.id}?limit=3&page=${this.page}&orderByDate=${this.filter}`,
-                {
+                let response;
+                try{
+                    const url = `${BASE_URL}/api/comments/${this.$route.params.id}?limit=10&page=${this.page}&orderByDate=${this.filter}`;
+                    const params = {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
-                        "Authorization": document.cookie.split('session_token=')[1]	
+                        "Authorization": document.cookie.split('session_token=')[1]
                     }
-                })
+                }
+                    response = await MakeRequest(url, params);
+
+                //обработка ошибок
+                }catch(err){
+                    this.title_error = err.message;
+                    this.status_error = err.status;
+                    this.isInfo = true;
+                    this.isError = true;
+                    return;
+                }
                 this.page+=1
-                const data = await response.json()
+                const data = response;
                 data.comments.forEach( post => {
                     this.comments.push(post)
                 })
-                if(!response)
-                {
-                    this.status_error = "Ошибка"
-                    this.title_error = "Запрос не прошел"
-                    this.isInfo = true
-                    this.isError = true
-                    return
-                }
                 if(data.status)
                 {
                     this.loadMore = false
@@ -190,54 +205,69 @@ export default {
 
         async getOneComments()
         {
-            const response = await fetch(`${process.env.VUE_APP_BASE_URL}/api/comments/${this.$route.params.id}?limit=1`,
-            {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    "Authorization": document.cookie.split('session_token=')[1]	
+            let response;
+            try{
+                const url = `${BASE_URL}/api/comments/${this.$route.params.id}?limit=1`;
+                const params = {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        "Authorization": document.cookie.split('session_token=')[1]
+                    }
                 }
-            })
-            if(!response)
-            {
-                this.status_error = "Ошибка"
-                this.title_error = "Запрос не прошел"
-                this.isInfo = true
-                this.isError = true
-                return
+
+                response = await MakeRequest(url, params);
+
+            //обработка ошибок
+            }catch(err){
+                this.title_error = err.message;
+                this.status_error = err.status;
+                this.isInfo = true;
+                this.isError = true;
+                return;
             }
-            const data = await response.json()
+            const data = response;
             data.comments.forEach( post => {
                 this.comments.unshift(post)
             })
         },
 
+        errorComment(status, msg)
+        {
+            this.status_error = status
+            this.title_error = msg
+            this.isInfo = true
+            this.isError = true
+        },
+
         async addComment()
         {
-            const response = await fetch(`${process.env.VUE_APP_BASE_URL}/api/add_comment/${this.$route.params.id}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    "Authorization": document.cookie.split('session_token=')[1]	
-                },
-                body: JSON.stringify({
-                    content: this.commentContent
-                })
-            })
-            if(!response)
-            {
-                this.status_error = "Ошибка"
-                this.title_error = "Запрос не прошел"
-                this.isInfo = true
-                this.isError = true
-                return
+            try{
+                const url = `${BASE_URL}/api/add_comment/${this.$route.params.id}`;
+                const params = {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        "Authorization": document.cookie.split('session_token=')[1]
+                    },
+                    body: JSON.stringify({
+                        content: this.commentContent
+                    })
+                }
+
+                await MakeRequest(url, params);
+
+            //обработка ошибок
+            }catch(err){
+                this.title_error = err.message;
+                this.status_error = err.status;
+                this.isInfo = true;
+                this.isError = true;
+                return;
             }
-            const data = await response.json()
-            if(/2../.test(String(data.status)))
-            {
-                this.commentContent = ""
-                this.getOneComments()
-            }
+
+            this.commentContent = ""
+            this.getOneComments()
         },
 
         removeComment(comment)
@@ -261,74 +291,161 @@ export default {
 
         async like()
         {
-            const response = await fetch(`${process.env.VUE_APP_BASE_URL}/api/rate/${this.$route.params.id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    "Authorization": document.cookie.split('session_token=')[1]
-                },
-                body: JSON.stringify({
-                    action: "like"
-                })
-            })
-            if(!response)
-            {
-                this.status_error = "Ошибка"
-                this.title_error = "Запрос не прошел"
-                this.isInfo = true
-                this.isError = true
+            //нечего не оценено
+            if(this.post.reaction === "like"){
+                try{
+                    const url = `${BASE_URL}/api/rate/${this.$route.params.id}`;
+                    const params = {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            "Authorization": document.cookie.split('session_token=')[1]
+                        },
+                        body: JSON.stringify({
+                            action: "none"
+                        })
+                    }
+
+                    await MakeRequest(url, params);
+
+                //обработка ошибок
+                }catch(err){
+                    this.title_error = err.message;
+                    this.status_error = err.status;
+                    this.isInfo = true;
+                    this.isError = true;
+                    return;
+                }
+
+                this.getRates()
                 return
             }
-            const data = await response.json()
-            if(/2../.test(String(data.status)))
-            {
-                this.getRates()
+            //оценка лайк
+            try{
+                const url = `${BASE_URL}/api/rate/${this.$route.params.id}`;
+                const params = {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        "Authorization": document.cookie.split('session_token=')[1]
+                    },
+                    body: JSON.stringify({
+                        action: "like"
+                    })
+                }
+
+                await MakeRequest(url, params);
+
+            //обработка ошибок
+            }catch(err){
+                this.title_error = err.message;
+                this.status_error = err.status;
+                this.isInfo = true;
+                this.isError = true;
+                return;
             }
+
+            this.$refs.anim.goToAndPlay(0, 60)
+            this.getRates()
         },
 
         async dislike()
         {
-            const response = await fetch(`${process.env.VUE_APP_BASE_URL}/api/rate/${this.$route.params.id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    "Authorization": document.cookie.split('session_token=')[1]	
-                },
-                body: JSON.stringify({
-                    action: "dislike"
-                })
-            })
-            if(!response)
+            //если ничего
+            if(this.post.reaction === "dislike")
             {
-                this.status_error = "Ошибка"
-                this.title_error = "Запрос не прошел"
-                this.isInfo = true
-                this.isError = true
+                try{
+                    const url = `${BASE_URL}/api/rate/${this.$route.params.id}`;
+                    const params = {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            "Authorization": document.cookie.split('session_token=')[1]
+                        },
+                        body: JSON.stringify({
+                            action: "none"
+                        })
+                    }
+
+                    await MakeRequest(url, params);
+
+                //обработка ошибок
+                }catch(err){
+                    this.title_error = err.message;
+                    this.status_error = err.status;
+                    this.isInfo = true;
+                    this.isError = true;
+                    return;
+                }
+
+                this.getRates()
                 return
             }
-            const data = await response.json()
-            if(/2../.test(String(data.status)))
-            {
-                this.getRates()
+
+            //если дизлайк
+            try{
+                const url = `${BASE_URL}/api/rate/${this.$route.params.id}`;
+                const params = {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        "Authorization": document.cookie.split('session_token=')[1]
+                    },
+                    body: JSON.stringify({
+                        action: "dislike"
+                    })
+                }
+
+                await MakeRequest(url, params);
+
+            //обработка ошибок
+            }catch(err){
+                this.title_error = err.message;
+                this.status_error = err.status;
+                this.isInfo = true;
+                this.isError = true;
+                return;
             }
+
+            this.getRates()
         },
 
         async getRates()
         {
-            const response = await fetch(`${process.env.VUE_APP_BASE_URL}/api/get_rates/${this.$route.params.id}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    "Authorization": document.cookie.split('session_token=')[1]
+            let response;
+            try{
+                const url = `${BASE_URL}/api/get_rates/${this.$route.params.id}`;
+                const params = {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        "Authorization": document.cookie.split('session_token=')[1]
+                    }
                 }
-            })
-            const data = await response.json()
-            if(/2../.test(String(data.status)))
-            {
-                this.post.likesCount = data.likes_count
-                this.post.dislikesCount = data.dislikes_count
-                this.post.reaction = data.reaction
+
+                response = await MakeRequest(url, params);
+
+            //обработка ошибок
+            }catch(err){
+                this.title_error = err.message;
+                this.status_error = err.status;
+                this.isInfo = true;
+                this.isError = true;
+                return;
             }
+
+            const data = response;
+            this.post.likesCount = data.likes_count
+            this.post.dislikesCount = data.dislikes_count
+            this.post.reaction = data.reaction
+        },
+
+        errorOperation(status, message)
+        {
+            this.status_error = status
+            this.title_error = message
+            this.isInfo = true
+            this.isError = true
         }
     },
 
@@ -336,7 +453,7 @@ export default {
     {
         this.getPostInfo()
         this.getStartComments()
-    }   
+    }
 }
 </script>
 
@@ -405,17 +522,21 @@ export default {
         color: #7C7C7C;
     }
 
-    .pictures > img {
-        width: 100%;
-        border-radius: 5%;
-    }
-
     .pictures
     {
         width: 85%;
+        max-height: 80vh;
         margin-top: 40px;
         border-radius: 50px;
-        background-color: #f5f5f5;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .pictures > img {
+        max-width: 100%;
+        max-height: 80vh;
+        border-radius: 50px;
     }
 
     .content
@@ -464,7 +585,6 @@ export default {
    {
         background-size: 200%;
         background-image: url('@/assets/post/like_before.svg'); /* Путь к изображению */
-        position: relative;
         top: -6px;
    }
 
@@ -476,14 +596,36 @@ export default {
    .info__icon_char_like_action
    {
         background-size: 200%;
-        background-image: url('@/assets/post/like_after.svg'); /* Путь к изображению */
-        position: relative;
+        background-image:""; /* Путь к изображению */
         top: -6px;
    }
 
    .info__icon_char_dislike_action
    {
         background-image: url('@/assets/post/dislike_after.svg'); /* Путь к изображению */
+   }
+
+   .like_anim
+   {
+        width: 120px;
+        height: 120px;
+        display: none;
+   }
+
+   .like_anim_action
+   {
+        width: 120px;
+        height: 120px;
+        display: block;
+        position: absolute;
+        top: calc(50% - 60px);
+        left: calc(50% - 60px);
+   }
+
+   .lottie-animation-container > g
+   {
+    width: 60px;
+    height: 60px;
    }
 
    .sort

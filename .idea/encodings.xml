@@ -2,6 +2,20 @@
 <project version="4">
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$/Vue" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Vue/Vue" charset="windows-1251" />
+    <file url="file://$PROJECT_DIR$/Vue/Vue/node_modules/@vue/component-compiler-utils/node_modules/hash-sum/.jshintignore" charset="windows-1251" />
+    <file url="file://$PROJECT_DIR$/Vue/Vue/node_modules/@vue/component-compiler-utils/node_modules/hash-sum/changelog.markdown" charset="windows-1251" />
+    <file url="file://$PROJECT_DIR$/Vue/Vue/node_modules/@vue/vue-loader-v15/node_modules/hash-sum/.jshintignore" charset="windows-1251" />
+    <file url="file://$PROJECT_DIR$/Vue/Vue/node_modules/@vue/vue-loader-v15/node_modules/hash-sum/changelog.markdown" charset="windows-1251" />
+    <file url="file://$PROJECT_DIR$/Vue/Vue/node_modules/hash-sum/.jshintignore" charset="windows-1251" />
+    <file url="file://$PROJECT_DIR$/Vue/Vue/node_modules/hash-sum/changelog.markdown" charset="windows-1251" />
+    <file url="file://$PROJECT_DIR$/Vue/Vue/node_modules/is-arrayish/.istanbul.yml" charset="windows-1251" />
+    <file url="file://$PROJECT_DIR$/Vue/Vue/node_modules/object.assign/hasSymbols.js" charset="windows-1251" />
+    <file url="file://$PROJECT_DIR$/Vue/Vue/node_modules/object.assign/implementation.js" charset="windows-1251" />
+    <file url="file://$PROJECT_DIR$/Vue/Vue/node_modules/resolve/readme.markdown" charset="windows-1251" />
+    <file url="file://$PROJECT_DIR$/Vue/Vue/node_modules/side-channel/tsconfig.json" charset="windows-1251" />
+    <file url="file://$PROJECT_DIR$/Vue/Vue/node_modules/vue-style-loader/node_modules/hash-sum/.jshintignore" charset="windows-1251" />
+    <file url="file://$PROJECT_DIR$/Vue/Vue/node_modules/vue-style-loader/node_modules/hash-sum/changelog.markdown" charset="windows-1251" />
     <file url="file://$PROJECT_DIR$/nginx.conf" charset="UTF-8" />
     <file url="PROJECT" charset="windows-1251" />
   </component>

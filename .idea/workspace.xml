@@ -4,32 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="313496f0-9e1b-4b22-820e-d983be4c79e6" name="Changes" comment="release version (edit_user update)">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/database.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/routes.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/server_exception.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/server_exception.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/initDatabase/init.sql" beforeDir="false" afterPath="$PROJECT_DIR$/initDatabase/init.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/logs.txt" beforeDir="false" afterPath="$PROJECT_DIR$/logs.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/run.py" beforeDir="false" afterPath="$PROJECT_DIR$/run.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sources/userPostImages/40c89736-4788-4c48-9463-b897b857990c.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/sources/userPostImages/fb88f64b-8909-4ff0-8a97-b6514ae43573.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/sources/userProfileIcons/2540cc91-b804-4e52-a7a9-5a6d11719d31.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/sources/userProfileIcons/dima-image.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/sources/userProfileIcons/stepa-image.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/sources/userProfileIcons/ye-image.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/unitTests/comment-create.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/unitTests/comments-update.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/unitTests/handle-comments.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/unitTests/handle-posts(home).txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/unitTests/post-create.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/unitTests/post-update.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/unitTests/postId-comments.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/unitTests/postId-rate" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/unitTests/postId-rate.sql" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/unitTests/studposts.sql" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/unitTests/user-create(auth).txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/unitTests/user-edit.txt" beforeDir="false" />
+    <list default="true" id="313496f0-9e1b-4b22-820e-d983be4c79e6" name="Changes" comment="release">
+      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -212,7 +188,7 @@
       <workItem from="1722452582511" duration="13319000" />
       <workItem from="1722491104583" duration="527000" />
       <workItem from="1722500963141" duration="12202000" />
-      <workItem from="1722526141756" duration="12705000" />
+      <workItem from="1722526141756" duration="12977000" />
     </task>
     <task id="LOCAL-00001" summary="second commit">
       <option name="closed" value="true" />
@@ -446,7 +422,15 @@
       <option name="project" value="LOCAL" />
       <updated>1722412319370</updated>
     </task>
-    <option name="localTasksCounter" value="30" />
+    <task id="LOCAL-00030" summary="release">
+      <option name="closed" value="true" />
+      <created>1722539111684</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1722539111684</updated>
+    </task>
+    <option name="localTasksCounter" value="31" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -488,12 +472,12 @@
     <MESSAGE value="release (with bugs..)" />
     <MESSAGE value="mda" />
     <MESSAGE value="third stable version" />
-    <MESSAGE value="release" />
     <MESSAGE value="update post_update (image bug)" />
     <MESSAGE value="update post_create (image default)" />
     <MESSAGE value="release version (I hope)" />
     <MESSAGE value="release version (edit_user update)" />
-    <option name="LAST_COMMIT_MESSAGE" value="release version (edit_user update)" />
+    <MESSAGE value="release" />
+    <option name="LAST_COMMIT_MESSAGE" value="release" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/studposts_server$generate_token.coverage" NAME="generate_token Coverage Results" MODIFIED="1721410314757" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />

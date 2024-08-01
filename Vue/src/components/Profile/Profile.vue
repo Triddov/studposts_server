@@ -7,44 +7,44 @@
         <div class="params">
             <div class="photoAndAbout">
                 <div class="picture">
-                    <div class="title"> 
-                        Изображение профиля <my-question>Покажите себя</my-question>
+                    <div class="title">
+                        Изображение профиля <my-question>Покажите себя миру!</my-question>
                     </div>
                     <div class="input-picture-container">
                         <AddPhoto v-model="userPhoto" v-show="!userPhoto" :isProfile="true"></AddPhoto>
                         <Photo v-show="userPhoto" :picture="userPhoto" @deletePhoto="userPhoto = $event" @changePhoto="userPhoto = $event"></Photo>
                     </div>
-                </div> 
+                </div>
                 <div class="common">
                     <div class="about">
-                        <div class="title"> 
-                            Обо мне <my-question>Ограничение 50 символов</my-question>
+                        <div class="title">
+                            Обо мне <my-question>Ограничение на поле 50 символов</my-question>
                         </div>
                         <div class="input_block"><span class="symbol_input symbol_input__user"></span><my-input placeholder="Имя" class="input-profile" v-model="first_name"></my-input></div>
                         <div class="input_block"><span class="symbol_input symbol_input__user"></span><my-input placeholder="Фамилия" class="input-profile" v-model="sur_name"></my-input></div>
                         <div class="input_block"><span class="symbol_input symbol_input__user"></span><my-input placeholder="Отчество" class="input-profile" v-model="middle_name"></my-input></div>
                     </div>
                     <div class="pass">
-                        <div class="title"> 
-                            Введите пароль для любых изменений <my-question> Введите пароль для любых изменений</my-question>
+                        <div class="title">
+                            Введите пароль для любых изменений <my-question> Введите новый пароль для любых изменений</my-question>
                         </div>
                         <div class="input_block"><span class="symbol_input symbol_input__redpass"></span><my-input placeholder="Старый пароль" class="input-profile" v-model="oldPassword"></my-input></div>
-                    </div>    
-                </div> 
+                    </div>
+                </div>
             </div>
             <div class="mailAndPassword">
                 <div class="mailAndPassword_block">
-                    <div class="title"> 
+                    <div class="title">
                         Связь со мной (не обязательно) <my-question>Только российские номера</my-question>
                     </div>
                     <div class="input_block"><span class="symbol_input symbol_input__mail"></span><my-input placeholder="email" class="input-profile" v-model="email"></my-input></div>
                     <div class="input_block"><span class="symbol_input symbol_input__phone"></span><my-input placeholder="Номер телефона" class="input-profile" v-model="phone"></my-input></div>
                 </div>
                 <div class="mailAndPassword_block">
-                    <div class="title"> 
+                    <div class="title">
                         Параметры входа <my-question>Введите пароль, если хотите изменить его</my-question>
                     </div>
-                    <div class="input_block"><span class="symbol_input symbol_input__password"></span><my-input placeholder="Пароль" class="input-profile" v-model="password"></my-input></div>
+                    <div class="input_block"><span class="symbol_input symbol_input__password"></span><my-input placeholder="Пароль (не менее 8 симв)" class="input-profile" v-model="password"></my-input></div>
                     <div class="input_block"><span class="symbol_input symbol_input__password"></span><my-input placeholder="Повторить пароль" class="input-profile" v-model="password_rep"></my-input></div>
                 </div>
             </div>
@@ -62,6 +62,8 @@ import Footer from '../Parts/Footer.vue';
 import Photo from '../Parts/Photo.vue';
 import AddPhoto from '../Parts/AddPhoto.vue';
 import Info from '../Info/Info.vue';
+import MakeRequest from '../../API/Request.js';
+import { BASE_URL } from '../../BaseURL.js'
 
 export default {
     name: "profile-block",
@@ -98,31 +100,36 @@ export default {
         {
             if(document.cookie.split('session_token=')[1])
             {
-                const response = await fetch(`${process.env.VUE_APP_BASE_URL}/api/get_user`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    "Authorization": document.cookie.split('session_token=')[1]	
+                let response;
+                try{
+                    const url = `${BASE_URL}/api/get_user`;
+                    const params = {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            "Authorization": document.cookie.split('session_token=')[1]
+                        }
+                    }
+
+                    response = await MakeRequest(url, params);
+
+                //обработка ошибок
+                }catch(err){
+                    this.title_error = err.message;
+                    this.status_error = err.status;
+                    this.isInfo = true;
+                    this.isError = true;
+                    return;
                 }
-                })
-                if(!response)
-                {
-                    this.status_error = "Ошибка"
-                    this.title_error = "Запрос не прошел"
-                    this.isInfo = true
-                    this.isError = true
-                }
-                const data = await response.json()
-                if(/2../.test(String(data.status)))
-                {
-                    this.user = data.user_data
-                    this.userPhoto = `${process.env.VUE_APP_BASE_URL}/${data.user_data.persPhotodata}` //QW
-                    this.first_name = this.user.firstName || ""
-                    this.sur_name = this.user.surName || ""
-                    this.middle_name = this.user.middleName || ""
-                    this.email = this.user.email || ""
-                    this.phone = this.user.phoneNumber || ""
-                }
+
+                const data = response;
+                this.user = data.user_data
+                this.userPhoto = `${BASE_URL}/api/${data.user_data.persPhotodata}` //QW
+                this.first_name = this.user.firstName || ""
+                this.sur_name = this.user.surName || ""
+                this.middle_name = this.user.middleName || ""
+                this.email = this.user.email || ""
+                this.phone = this.user.phoneNumber || ""
             }
             else
             {
@@ -175,8 +182,6 @@ export default {
                     return
                 }
             }
-
-           
             let data = {
                 first_name: this.first_name,
                 sur_name: this.sur_name,
@@ -187,6 +192,10 @@ export default {
                 pers_photo_data: this.userPhoto || null,
                 current_password: this.oldPassword
             }
+            if(/sources/.test(this.userPhoto))
+            {
+                data.pers_photo_data = "alreadyExist"
+            }
             for(let key in data)
             {
                 if(data[key] == '' || data[key] == null)
@@ -194,34 +203,35 @@ export default {
                     delete data [key]
                 }
             }
-            const response = await fetch(`${process.env.VUE_APP_BASE_URL}/api/edit_user`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    "Authorization": document.cookie.split('session_token=')[1]
-                },
-                body: JSON.stringify(data)
-            })
-            if(!response)
-            {
-                this.status_error = "Ошибка"
-                this.title_error = "Запрос не прошел"
-                this.isInfo = true
-                this.isError = true
-                return
+            try{
+                const url = `${BASE_URL}/api/edit_user`;
+                const params = {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        "Authorization": document.cookie.split('session_token=')[1]
+                    },
+                    body: JSON.stringify(data)
+                }
+
+                await MakeRequest(url, params);
+
+            //обработка ошибок
+            }catch(err){
+                this.title_error = err.message;
+                this.status_error = err.status;
+                this.isInfo = true;
+                this.isError = true;
+                return;
             }
-            if(/2../.test(String(response.status)))
-            {
-                document.cookie = `session_token=Bearer ${document.cookie.split(/Bearer /)[1]}; path=/; expires=${new Date(Date.now() - 1000).toUTCString()}`
-                this.$router.push('/auth')
-            }
-            else
-            {
-                this.title_error = "Введены некорректные данные"
-                this.status_error = "Ошибка"
-                this.isInfo = true
-                this.isError = true
-            }
+
+          if(this.password)
+          {
+            document.cookie = `session_token=Bearer ${document.cookie.split(/Bearer /)[1]}; path=/; expires=${new Date(Date.now() - 1000).toUTCString()}`
+            this.$router.push('/auth')
+          }
+
+          this.$router.push('/home')
         }
     },
 
