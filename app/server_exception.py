@@ -3,7 +3,7 @@ from datetime import datetime
 
 
 def log_status(error, module_name):
-    with open('../logs/logs.txt', 'a') as log_file:
+    with open('./logs/logs.txt', 'a') as log_file:
         log_file.write(f"{datetime.now().strftime('date:%m/%d/%y time:%H:%M:%S')}"
                        f" | error message: {error} | in module: {module_name}\n")
 
